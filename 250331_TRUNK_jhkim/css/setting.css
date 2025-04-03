@@ -1,0 +1,39 @@
+/* setting.css */
+
+/* 사용자 추가에서 User일 때 모달 크기 수정 */
+#powerplant-group-container.large {
+  width: 80%; /* 모달의 너비를 늘립니다 */
+}
+
+#powerplant-group-container {
+  /* display: flex; *//* 2025 03 05 1957 주석처리*/
+  /* justify-content: space-around; *//* 2025 03 05 1957 주석처리*/
+  
+  .item-group {
+    .table-responsive {
+      height: calc(100% - 3rem); /* 테이블의 높이를 조정합니다 */
+      table {
+       height: 100%;
+       tbody {
+         height: 100%;
+       }
+      } 
+    }
+  }
+}
+
+#powerplant-container,
+#fuelcell-group-container {
+  width: 48%; /* 두 개의 목록이 나란히 배치될 수 있도록 */
+
+  .table-responsive {
+    max-height: 300px; /* 필요에 따라 테이블의 최대 높이를 설정합니다 */
+    overflow-y: auto;
+  }
+}
+
+.readonly-input {
+  background-color: #f0f0f0;
+  color: #666;
+  cursor: not-allowed;
+}

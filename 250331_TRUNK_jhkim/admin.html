@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ko">
+<!-- mjkoo -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/common.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet">
+  <link href="css/setting.css" rel="stylesheet">
+  <link href="./css/multi-select.css" rel="stylesheet" type="text/css"> <!--멀티 셀렉션-->
+  <!-- <link href="css/diagram.css" rel="stylesheet"> -->
+   <!-- 외부 라이브러리 -->
+   <script src="./js/bootstrap.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+   <!-- 내부 모듈 -->
+  <script type="module" src="./js/setting/setting_common.js"></script> <!--공통 모듈-->
+  <script type="module" src="./js/setting/setting_user.js"></script> <!--사용자 관리-->
+  <script type="module" src="./js/setting/setting_powerplant.js"></script> <!--발전소 관리-->
+  <script type="module" src="./js/setting/setting_group.js"></script> <!--연료전지 그룹 관리, 연료전지/그룹 연결 관리-->
+  <script type="module" src="./js/setting/setting_fuelcell.js"></script> <!--연료전지 관리-->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>FuelCellDR. : 스택진단</title>
+
+</head>
+
+<body>
+  <!-- modal start  -->
+  <div class="modal-outer">
+
+  <!-- 사용자 추가/수정 모달 -->
+    <dialog id="user-modal">
+      <div class="dialog-container">
+        <div class="modal-header">
+          <h5 class="modal-title"  id="user-modal-title">사용자 추가</h5>
+          <button class="close" type="button" onclick="modalSW('#user-modal', 'close')" title="닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="item-group-outer">
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">사용자ID</h3>
+              <input type="text" name="account_id">
+              <hr>
+              <h3 class="d-inline-block text-end">이름</h3>
+              <input type="text" name="user_name">
+              <hr>
+              <h3 class="d-inline-block text-end">패스워드</h3>
+              <input type="passward" name="passward">
+              <hr>
+              <h3 class="d-inline-block text-end">패스워드 확인</h3>
+              <input type="passward" name="passward-check">
+              <hr>
+              <h3 class="d-inline-block text-end">이메일</h3>
+              <input type="text" name="email">
+              <hr>
+              <h3 class="d-inline-block text-end">휴대전화번호</h3>
+              <input type="text" name="phone">
+              <hr>
+              <h3 class="d-inline-block text-end">활성화 여부</h3>
+              <input type="checkbox" name="activation_status">
+              <hr>
+              <h3 class="d-inline-block text-end">사용자권한</h3>
+              <select name="role" id="role">
+                <option value="LocalAdmin">Local Admin</option>
+                <option value="User">User</option>
+              </select>
+            </div>
+            <!-- <div class="item-group" id="powerplant-group-container"> --><!-- 2025 03 05 1946 주석처리-->
+            <div class="item-group" id="powerplant-group-container"><!-- 2025 03 05 1946 수정-->
+              <h3 class="d-inline-block text-center">관리 발전소</h3>
+              <hr>
+              <div class="table-responsive">
+                <table class="table table-fixed table-striped table-hover">
+                  <tbody class="scrollmini overflow-auto" id="powerplant-table-list">
+                    <!-- 발전소 목록이 여기 들어감 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="item-group" id="group-container">
+              <h3 class="d-inline-block text-center">관리 연료전지 그룹</h3>
+              <hr>
+              <div class="table-responsive">
+                <table class="table table-fixed table-striped table-hover">
+                  <tbody class="scrollmini overflow-auto" id="group-table-list">
+                    <!-- 연료전지 그룹 목록이 여기 들어감 -->
+                  </tbody>
+                </table>
+              </div>
+            <!-- </div> --><!-- 2025 03 05 1946 주석처리-->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-of w-24 mx-1" id="user-modal-confirm-btn">확인</button>
+          <button class="btn-of w-24" onclick="modalSW('#user-modal', 'close')">취소</button>
+        </div>
+      </div>
+    </dialog>
+
+  <!-- 로그인 보안 설정 모달-->
+    <dialog id="security-modal">
+      <div class="dialog-container">
+        <div class="modal-header">
+          <h5 class="modal-title">로그인 보안 설정</h5>
+          <button class="close" type="button" onclick="modalSW('#security-modal', 'close')" title="닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="item-group-outer">
+            <div class="item-group">
+
+              <h3 class="d-inline-block text-end">로그인 보안 실행설정</h3>
+              <label for="run"><input type="radio" id="run" name="sw">실행</label>
+              <label for="stop"><input type="radio" id="stop" name="sw">실행안함</label>
+              <hr>
+              <h3 class="d-inline-block text-end">로그인 시도 횟수</h3>
+              <input type="number" min="3" max="10" value="3"> (3 ~ 10회)
+              <hr>
+              <h3 class="d-inline-block text-end">로그인 실패(회) 대기시간</h3>
+              <input type="number" min="5" max="60" value="5"> (5 ~ 60분)
+              <hr>
+              <h3 class="d-inline-block text-end">비밀번호 유지시간</h3>
+              <input type="number" min="30" max="100" value="30"> (30 ~ 100일)
+
+            </div>
+
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-of w-24 mx-1" id="user-modal-confirm-btn">확인</button>
+          <button class="btn-of w-24" onclick="modalSW('#security-modal', 'close')">취소</button>
+        </div>
+      </div>
+    </dialog>
+
+  <!-- 발전소 추가/수정 모달 -->
+    <dialog id="powerplant-modal">
+    <div class="dialog-container">
+        <div class="modal-header">
+          <h5 class="modal-title" id="powerplant-modal-title">발전소 추가</h5>
+          <button class="close" type="button" onclick="modalSW('#powerplant-modal', 'close')" title="닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="item-group-outer">
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">발전소 ID</h3>
+              <input type="text" name="powerplant_id">
+              <hr>
+              <h3 class="d-inline-block text-end">발전소 이름</h3>
+              <input type="text" name="powerplant_name">
+              <hr>
+              <h3 class="d-inline-block text-end">등록일</h3>
+              <input type="date" name="reg_date">
+            </div>
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">주소</h3>
+              <input type="text" name="address_main" placeholder="주소를 입력하세요">
+              <hr>
+              <h3 class="d-inline-block text-end">상세주소</h3>
+              <input type="text" name="address_detail" placeholder="상세주소를 입력하세요">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <!-- <button class="btn-of w-24 mx-1 add-powerplant-btn">확인</button> -->
+          <button class="btn-of w-24 mx-1" id="powerplant-modal-confirm-btn">확인</button>
+          <button class="btn-of w-24" onclick="modalSW('#powerplant-modal', 'close')">취소</button>
+        </div>
+    </dialog>
+        
+  <!-- 연료전지 추가/수정 모달 -->
+    <dialog id="fuelcell-modal">
+      <div class="dialog-container">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fuelcell-modal-title">연료전지 추가</h5>
+          <button class="close" type="button" onclick="modalSW('#fuelcell-modal', 'close')" title="닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="item-group-outer">
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">연료전지 ID</h3>
+              <input type="text" name="fuelcell_id">
+              <hr>
+              <h3 class="d-inline-block text-end">연료전지 이름</h3>
+              <input type="text" name="fuelcell_name">
+              <hr>
+              <h3 class="d-inline-block text-end">설치일</h3>
+              <input type="date" name="install_date">
+              <hr>
+              <h3 class="d-inline-block text-end">등록일</h3>
+              <input type="date" name="reg_date">
+            </div>
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">발전소</h3>
+              <select class="powerplant-select">
+                <!-- <option value="">서울타운</option> -->
+              </select>
+              <hr>
+              <h3 class="d-inline-block text-end">전기발전량</h3>
+              <input type="number" name="e_capacity"> kW
+              <hr>
+              <h3 class="d-inline-block text-end">열발전량</h3>
+              <input type="number" name="t_capacity"> kW
+            </div>
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">주소</h3>
+              <input type="text" name="address_main" placeholder="주소를 입력하세요">
+              <hr>
+              <h3 class="d-inline-block text-end">상세주소</h3>
+              <input type="text" name="address_detail" placeholder="상세주소를 입력하세요">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <!-- <button class="btn-of w-24 mx-1 add-fuelcell-btn">확인</button> -->
+          <button class="btn-of w-24 mx-1"  id="fuelcell-modal-confirm-btn">확인</button>
+          <button class="btn-of w-24" onclick="modalSW('#fuelcell-modal', 'close')">취소</button>
+        </div>
+      </div>
+    </dialog>
+ 
+  <!-- 연료전지 그룹 추가/수정 모달 -->
+    <dialog id="group-fuelcell-modal">
+      <div class="dialog-container">
+          <div class="modal-header">
+            <h5 class="modal-title" id="group-fuelcell-modal-title">연료전지 그룹 연결</h5>
+            <button class="close" type="button" onclick="modalSW('#group-fuelcell-modal', 'close')" title="닫기">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="item-group-outer">
+              <div class="item-group">
+                <h3>그룹 목록 - 이름[ID]</h3>
+                <div class="group-list scrollmini" id="group-list">
+                  <label>
+                    <input type="radio" name="group" value="1" checked> 그룹이름 <span>그룹ID</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="group" value="2"> 그룹이름 <span>그룹ID</span>
+                  </label>
+                  <label>
+                    <input type="radio" name="group" value="3"> 그룹이름 <span>그룹ID</span>
+                  </label>
+                </div>
+
+                <select name="" id="">
+                  <option value="">ID</option>
+                  <option value="">이름</option>
+                </select>
+                <input type="text" name="" id="">
+                <button class="btn-of" id="">검색</button>
+               
+              </div>
+              <div class="item-group">
+                <h3>연료전지 목록 - 이름[ID]</h3>
+                <div class="fuelcell-list scrollmini" id="fuelcell-list">
+                  <label>
+                    <input type="checkbox" name="group" value="1" checked> 연료전지이름 <span>연료전지ID</span>
+                  </label>
+                  <label>
+                    <input type="checkbox" name="group" value="2" checked> 연료전지이름 <span>연료전지ID</span>
+                  </label>
+                </div>
+
+                <select name="" id="">
+                  <option value="">ID</option>
+                  <option value="">이름</option>
+                </select>
+                <input type="text" name="" id="">
+                <button class="btn-of" id="">검색</button>
+
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-of w-24 mx-1 add-group-btn" id="connect-group-fuelcell-btn">적용</button>
+            <button class="btn-of w-24 mx-1" id="group-fuelcell-modal-confirm-btn">확인</button>
+            <button class="btn-of w-24" onclick="modalSW('#group-fuelcell-modal', 'close')">취소</button>
+          </div>
+      </div>
+    </dialog>
+    
+  <!-- 그룹 추가/수정 모달 -->
+  <dialog id="group-modal">
+    <div class="dialog-container">
+        <div class="modal-header">
+          <h5 class="modal-title" id="group-modal-title">그룹 추가</h5>
+          <button class="close" type="button" onclick="modalSW('#group-modal', 'close')" title="닫기">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- <div class="item-group-outer"> -->
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">그룹 ID</h3>
+              <input type="text" name="group_id">
+              <hr>
+              <h3 class="d-inline-block text-end">그룹 이름</h3>
+              <input type="text" name="group_name">
+              <hr>
+              <h3 class="d-inline-block text-end">등록일</h3>
+              <input type="date" name="reg_date">
+              <hr>
+              <h3 class="d-inline-block text-end">내용</h3>
+              <textarea name="description" style="height: 90px;"></textarea>
+            </div>
+            <!--
+            <div class="item-group">
+              <h3 class="d-inline-block text-end">주소</h3>
+              <input type="text" name="address_main" placeholder="주소를 입력하세요">
+              <hr>
+              <h3 class="d-inline-block text-end">상세주소</h3>
+              <input type="text" name="address_detail" placeholder="상세주소를 입력하세요">
+            </div>
+            -->
+          <!-- </div> -->
+        </div>
+        <div class="modal-footer">
+          <!-- <button class="btn-of w-24 mx-1 add-powerplant-btn">확인</button> -->
+          <button class="btn-of w-24 mx-1"  id="group-modal-confirm-btn">확인</button>
+          <button class="btn-of w-24" onclick="modalSW('#group-modal', 'close')">취소</button>
+        </div>
+    </div>
+  </dialog>  
+
+  <!-- 삭제 모달 -->
+    <dialog id="delete-modal">
+    <div class="dialog-container">
+        <div class="modal-header" style="background: #d00; color: #fff">
+          <h5 class="modal-title">삭제</h5>
+          <button class="close" type="button" onclick="modalSW('#delete-modal', 'close')" title="닫기">
+            <span aria-hidden="true" style="color: #fff">×</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <h4>항목을 삭제하시겠습니까?</h4>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-of w-24 mx-1" id="confirm-delete">삭제</button>
+          <button class="btn-of w-24" onclick="modalSW('#delete-modal', 'close')">취소</button>
+        </div>
+    </div>
+    </dialog>
+
+  </div>
+
+  <script>
+    // modal 보이기/숨기기(setting_common.js에 넣음)
+    // const modalSW = (e, doing) => {
+    //     const modal = document.querySelector(e)
+    //     if (doing === 'open') modal.showModal()
+    //     if (doing === 'close') modal.close()
+    //     modal.addEventListener('click', (e) => {if(e.target === e.currentTarget) modal.close();}) // 검은 부분 입력시 닫는 코드
+    // }
+  </script>
+
+  <!-- modal end -->
+
+  <header>
+    <!-- <nav include-html="./components/nav.html"></nav>  -->
+    <?php include('primary_navbar.php'); ?>
+
+  </header>
+
+  <main class="setting">
+
+    <div class="row">
+      <div class="col-xxl-7 col-12 setting-column-right">
+        <div class="row">
+
+          <div class="col-xxl-12 col-12">
+            <div class="widget setting-user-manager">
+              <div class="widget-head">
+                
+                <span data-i18n="admin.user_management">
+                    <!-- 사용자 관리 -->
+                    <!-- User Management -->
+                </span>
+                <div class="widget-head-gadget">
+                    <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>사용자ID</th><!--account_id-->
+                        <th>활성화</th>
+                        <th>사용자권한</th>
+                        <th>관리 발전소 / 연료전지그룹</th>
+                        <th>최그 로그인 시간</th>
+                        <th>등록일</th>
+                      </tr>
+                    </thead>
+                    <tbody class="scrollmini overflow-auto min-width users-table">
+                      <!-- 
+                        <tr>
+                        <td><input type="checkbox"></td>
+                        <td>admin</td>
+                        <td><input type="checkbox" disabled></td>
+                        <td>Admin</td>
+                        <td>서울타운<span class="device"></span>대전타운<span class="device"></span>부안타운<span class="device"></span>분당타운<span class="device"></span>인천타운</td>
+                        <td>2024.08.23 11:50:40</td>
+                        <td>2024.08.23</td>
+                      </tr>
+                     -->
+                    </tbody>
+                  </table>                
+                </div>
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <button class="btn-of" onclick="modalSW('#user-modal', 'open')">추가</button>
+                      <button class="btn-of" id="update-user-btn">수정</button>
+                      <button class="btn-of delete-btn" data-delete="users">삭제</button>
+                      <button class="btn-of" onclick="modalSW('#security-modal', 'open')">로그인 보안 설정</button>
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">2</a></li> -->
+                            <!-- <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> -->
+
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select class="items-per-page" id="user-pagination">
+                          <option value="all-data">전체</option>
+                          <option value="500">500개</option>
+                          <option value="200">200개</option>
+                          <option value="20">20개</option>
+                          <option value="10" selected>10개</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="user-search">
+                      <select name="user" id="user-select" class="select-item">
+                        <option value="ID">사용자ID</option>
+                        <option value="authority">사용자권한</option>
+                      </select>
+
+                      <input type="text" class="text-input user_id" id="account-id-input"><!--사용자ID 선택시-->
+                      <select name="filter-authority"  class="for-authority" id="filter-authority" style="display:none;"><!--선택권한 선택시-->
+                        <option value="Admin">Admin</option>
+                        <option value="LocalAdmin">Local Admin</option>
+                        <option value="User">User</option>
+                      </select>
+                      <button class="btn-of" id="user-search-btn">검색</button>
+                      <button class="btn-of" id="user-search-reset">검색초기화</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-12 col-12">
+            <div class="widget setting-powerplan-manager">
+              <div class="widget-head">
+                <span data-i18n="admin.powerplant_management">
+                    <!-- 발전소 관리 -->
+                    <!-- Powerplant Management -->
+                </span>
+                <div class="widget-head-gadget">
+                    <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>발전소ID</th>
+                        <th>발전소</th>
+                        <th>주소</th>
+                        <th>등록일</th>
+                        <th>연료전지수</th>
+                        <th>총전기발전량</th>
+                        <th>총열발전량</th>
+                      </tr>
+                    </thead>
+                    <tbody class="scrollmini overflow-auto min-width powerplants_table">
+                      <!-- <tr>
+                        <td><input type="checkbox"></td>
+                        <td>Seoul01</td>
+                        <td>서울타운</td>
+                        <td>서울시 강남구 대치동 은마아파트</td>
+                        <td>2024.08.23</td>
+                        <td>70</td>
+                        <td>350kW</td>
+                        <td>350kW</td>
+                      </tr> -->
+                    </tbody>
+                  </table>                
+                </div>
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <button class="btn-of" onclick="modalSW('#powerplant-modal', 'open')">추가</button>
+                      <button class="btn-of"  id="update-powerplant-btn">수정</button>
+                      <!-- <button class="btn-of" onclick="modalSW('#delete-modal', 'open')">삭제</button> -->
+                      <button class="btn-of delete-btn" data-delete="powerplants">삭제</button>
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> -->
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select class="items-per-page" id="powerplant-pagination">
+                          <option value="all-data" selected>전체</option>
+                          <!-- <option value="500">500개</option>
+                          <option value="200">200개</option>
+                          <option value="100" selected>100개</option>
+                          <option value="50">50개</option> -->
+                        </select>
+                      </div>
+                    </div>
+                    <div id="powerplant-search">
+                      <select name="powerplant" id="powerplant-search-select" class="select-item">
+                        <option value="powerplant_id">발전소 ID</option>
+                        <option value="powerplant_name">발전소 이름</option>
+                        <option value="address">주소</option>
+                      </select>
+                      <input type="text" id="powerplant-search-input">
+                      <!-- <select name="" id="" class="for-authority">
+                        <option value="Admin">Admin</option>
+                        <option value="LocalAdmin">Local Admin</option>
+                        <option value="LocalUser">Local User</option>
+                      </select> -->
+                      <button class="btn-of" id="powerplant-search-button">검색</button>
+                      <button class="btn-of" id="powerplant-search-reset">검색초기화</button>
+                    </div>
+                  </div>
+                  <!-- 콤보박스 선택 : 전체, 50개, 100개(default), 200개, 500개 -->                    
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <div class="col-xxl-12 col-12">
+
+            <div class="widget setting-fuelcell-manager">
+              <div class="widget-head">
+                <span data-i18n="admin.fuelcell_management">
+                    <!-- 연료전지 관리 -->
+                    <!-- Fuelcell Management -->
+                </span>
+                <div class="widget-head-gadget">
+                    <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>전지ID</th>
+                        <th>연료전지</th>
+                        <th>발전소</th>
+                        <th>그룹</th>
+                        <th>주소</th>
+                        <th>설치일</th>
+                        <th>등록일</th>
+                        <th>전기발전량</th>
+                        <th>열발전량</th>
+                      </tr>
+                    </thead>                
+                    <tbody class="scrollmini overflow-auto min-width fuelcell_table">
+                      <!-- <tr>
+                        <td><input type="checkbox"></td>
+                        <td>F001</td>
+                        <td>서울1</td>
+                        <td>서울타운</td>
+                        <td>1호</td>
+                        <td>서울시 강남구 대치동 은마아파트</td>
+                        <td>2024.08.23</td>
+                        <td>2024.08.23</td>
+                        <td>5kW</td>
+                        <td>5kW</td>
+                      </tr> -->
+                    </tbody>
+                  </table>
+                </div>  
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <button class="btn-of" onclick="modalSW('#fuelcell-modal', 'open')">추가</button>
+                      <button class="btn-of"  id="update-fuelcell-btn">수정</button>
+                      <!-- <button class="btn-of" onclick="modalSW('#delete-modal', 'open')">삭제</button> -->
+                      <button class="btn-of delete-btn" data-delete="fuelcells">삭제</button>
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">2</a></li> -->
+                            <!-- <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> --> 
+
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select class="items-per-page" id="fuelcell-pagination">
+                          <option value="all-data">전체</option>
+                          <option value="100">100개</option>
+                          <option value="50">50개</option>
+                          <option value="20" selected>20개</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="fuelcell-search">
+                      <select name="fuelcell" id="fuelcell-search-select" class="select-item">
+                        <option value="fuelcell_id">연료전지 ID</option>
+                        <option value="fuelcell_name">연료전지 이름</option>
+                        <option value="address">주소</option>
+                      </select>
+                      <input type="text" name="fuelcell-search-input" id="fuelcell-search-input">
+                      <button class="btn-of" id="fuelcell-search-button">검색</button>
+                      <button class="btn-of" id="fuelcell-search-reset">검색초기화</button>
+                    </div>
+                  </div>
+                </div>                
+              </div>
+            </div>            
+          </div>
+
+
+        </div>
+      </div>
+
+      <div class="col-xxl-5 col-12 setting-column-left">
+        <div class="row">
+
+          <div class="col-xxl-12">
+
+            <div class="widget setting-group-manager">
+              <div class="widget-head">
+                <!-- <span data-i18n="admin.powerplant_management"> -->
+                  그룹 관리
+                    <!-- 그룹 관리 -->
+                    <!-- Group Management -->
+                </span>
+                <div class="widget-head-gadget">
+                    <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>그룹ID</th>
+                        <th>그룹 이름</th>
+                        <th>등록일</th>
+                        <th>연료전지수</th>
+                        <th>총전기발전량</th>
+                        <th>총열발전량</th>
+                        <th>내용</th>
+                      </tr>
+                    </thead>
+                    <tbody class="scrollmini overflow-auto min-width group_manage_table" id="group_manage_table">
+                      <!-- <tr>
+                        <td><input type="checkbox"></td>
+                        <td>G-01</td>
+                        <td>그룹-01</td>
+                        <td>2024.08.23</td>
+                        <td>1</td>
+                        <td>350kW</td>
+                        <td>350kW</td>
+                        <td>내용</td>
+                      </tr> -->
+                    </tbody>
+                  </table>                
+                </div>
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <button class="btn-of" onclick="modalSW('#group-modal', 'open')">추가</button>
+                      <button class="btn-of"  id="update-group-btn">수정</button>
+                      <button class="btn-of delete-btn" data-delete="groups">삭제</button>
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> -->
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select class="items-per-page" id="powerplant-pagination">
+                          <option value="all-data" selected>전체</option>
+                          <!-- <option value="500">500개</option>
+                          <option value="200">200개</option>
+                          <option value="100" selected>100개</option>
+                          <option value="50">50개</option> -->
+                        </select>
+                      </div>
+                    </div>
+                    <div id="group-search-field">
+                      <select name="group" id="group-search-select" class="select-item">
+                        <option value="group_id">그룹 ID</option>
+                        <option value="group_name">그룹 이름</option>
+                        <option value="address">주소</option>
+                      </select>
+                      <input type="text" id="group-search-input">
+                      <button class="btn-of" id="group-search-button">검색</button>
+                      <button class="btn-of" id="group-search-reset">검색초기화</button>
+                    </div>
+                  </div>
+                  <!-- 콤보박스 선택 : 전체, 50개, 100개(default), 200개, 500개 -->                    
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+
+
+
+
+
+
+
+
+          <div class="col-xxl-12 col-12">
+            <div class="widget setting-fuelcell-group-manager">
+              <div class="widget-head">
+                <!-- <span data-i18n="admin.fuelcell_group_management"> -->
+                <span>
+                    연료전지/그룹 연결 관리
+                    <!-- 연료전지 그룹 관리 -->
+                    <!-- Fuelcell Group Management -->
+                </span>
+                <div class="widget-head-gadget">
+                  <div class="widget-head-gadget">
+                    <div class="widget-head-gadget">
+                      <!-- <span class="icon-arrow-right2"></span> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>그룹ID</th>
+                        <th>발전소</th>
+                        <th>그룹</th>
+                        <th>연료전지</th>
+                        <!-- <th>관리자</th> -->
+                        <th>등록일</th>
+                        <th>총전기발전량</th>
+                        <th>총열발전량</th>
+                      </tr>
+                    </thead>
+                    <tbody class="scrollmini overflow-auto min-width fuelcell_groups_table">
+                      <!-- <tr>
+                        <td><input type="checkbox"></td>
+                        <td>G001</td>
+                        <td>서울타운</td>
+                        <td>1호</td>
+                        <td title="서울1, 서울2, 서울3, 서울4, 서울5, 서울6, 서울7, 서울8, 서울9, 서울10">서울<span class="device"></span>서울2<span class="device"></span>서울3<span class="device"></span>서울4<span class="device"></span>서울5<span class="device"></span>서울6<span class="device"></span>서울7<span class="device"></span>서울8<span class="device"></span>서울9<span class="device"></span>서울10</td>
+                        <td>2024.08.23 11:50:40</td>
+                        <td>2024.08.23</td>
+                        <td>350kW</td>
+                        <td>350kW</td>
+                      </tr> -->
+                    </tbody>
+                  </table>                
+                </div>
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <button class="btn-of" onclick="modalSW('#group-fuelcell-modal', 'open')">연결설정</button>
+                      <!-- <button class="btn-of"  id="update-group-btn">수정</button> -->
+                      <!-- <button class="btn-of" onclick="modalSW('#delete-modal', 'open')">삭제</button> -->
+                      <!-- <button class="btn-of delete-btn" data-delete="fuelcell_groups">삭제</button> -->
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">«</a></li>
+
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> -->
+
+                            <li class="page-item"><a class="page-link" href="#">»</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select class="items-per-page" id="group-search-pagination">
+                          <option value="all-data" selected>전체</option>
+                          <option value="500">500개</option>
+                          <option value="200">200개</option>
+                          <option value="50">50개</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div id="group-fuelcell-search">
+                      <select id="group-fuelcell-search-select" class="select-item">
+                        <option value="group_id">그룹 ID</option>
+                        <option value="powerplant_name">발전소 이름</option>
+                        <option value="group_name">그룹 이름</option>
+                        <option value="fuelcell_name">연료전지 이름</option>
+                      </select>
+                      <input type="text" id="group-fuelcell-search-input">
+                      <button class="btn-of" id="group-fuelcell-search-button">검색</button>
+                      <button class="btn-of" id="group-fuelcell-search-reset">검색초기화</button>
+                    </div>
+                  </div>
+                </div>                                              
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // resize 함수 정의
+    function resize() {
+      // resize 함수의 구현 내용을 여기에 추가합니다.
+      // console.log('resize 함수가 호출되었습니다.');
+    }
+
+    // resize 함수 호출
+    resize();
+    // 제목 드롭다운
+    const contentDivs = document.querySelectorAll('.stack-state-graph .content-section');
+    const showHide = (e) => contentDivs.forEach((contentDiv, index) => { (index === e.selectedIndex) ? contentDiv.style.display = 'block' : contentDiv.style.display = 'none' })
+    
+    // 체크박스 스타일 라디오 버튼 스크립트
+    document.querySelectorAll('.scrollmini-none input[type="radio"]').forEach(function (radio) {
+      radio.addEventListener('click', function () {
+        let inp = this
+          if (inp.classList.contains('checked')) {
+            inp.checked = false
+            inp.classList.remove('checked')
+          } else {
+            document.querySelectorAll(`.scrollmini-none input[type="radio"][name=${inp.name}].checked`).forEach((radioOther) => radioOther.classList.remove('checked'))
+            inp.classList.add('checked')
+          }
+        }
+      )
+    })
+
+    // 상세검색 업다운 스크립트
+    const scrollMiniNone = document.querySelector('.result-list .scrollmini-none')
+    const filterResult = document.querySelector('.result-list .scrollmini')
+    const toggleClass = (x) => {
+      scrollMiniNone.classList.toggle('to80px')
+      filterResult.classList.toggle(x)
+    }
+    const swFilterPanel = () => window.innerWidth < 3840 ? toggleClass('to210px') : toggleClass('to1200px')
+    window.addEventListener(resize, () => swFilterPanel())
+
+    // 라벨 스크립트
+    const mainDivs = document.querySelectorAll('.hashtag')
+    const mainBtns = document.querySelectorAll('.hashtag > button.main')
+    const btnDels = document.querySelectorAll('.hashtag > button.del')
+    const btnFinishs = document.querySelectorAll('.hashtag > button.finish')
+    mainBtns.forEach(e => e.addEventListener('click', function () { this.classList.toggle('active') }))
+    btnDels.forEach((e, i) => e.addEventListener('click', function () {
+      if (this.classList.contains('active')) {
+        this.classList.remove('active')
+        this.textContent = '×'
+        this.title = '삭제'
+      } else {
+        this.classList.add('active')
+        this.textContent = 'ഠ'
+        this.title = '삭제취소'
+      }
+    }))
+    btnFinishs.forEach((e, i) => e.addEventListener('click', function () { mainDivs[i].remove() }))
+  </script>
+  <!-- <script src="js/main.js"></script>
+  <script src="js/imp.js"></script> -->
+</body>
+
+</html>

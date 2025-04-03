@@ -1,0 +1,119 @@
+@startuml
+title 발전소(index-mid.html) 인터페이스
+
+' Navagation Section
+package "네비게이션섹션" as NavigationSection {
+    rectangle Logo as "로고"
+    rectangle UserInfo as "사용자 정보(로그인/로그아웃 버튼)"
+    package "상단 메뉴 (Top Menu)" as TopMenu {
+        rectangle Dashboard as "대시보드"
+        rectangle DeviceManagement as "기기관리"
+        rectangle Settings as "설정"
+    }
+    package "발전소 선택 (Select Power Plant)" as PowerPlantSelection {
+        rectangle PowerPlant1 as "부안발전소"
+        rectangle PowerPlant2 as "부안연료전지 1호기"
+        rectangle PowerPlant3 as "부안연료전지 2호기"
+        rectangle PowerPlant4 as "부안연료전지 3호기"
+        rectangle PowerPlant5 as "부안연료전지 4호기"
+        rectangle PowerPlant6 as "부안연료전지 5호기"
+    }
+}
+
+' 발전소 선택 옵션에서 대시보드로의 관계 표현
+PowerPlantSelection --> Dashboard : 선택 시 해당 연료전지 대시보드로 이동
+
+' Header Section
+package "헤더섹션" as HeaderSection {
+    package "전체발전현황" as TotalStatus{
+        rectangle "발전효율"
+        rectangle "발전소"
+    }
+    
+}
+
+' Left Section
+package "좌측 섹션" as LeftSection {
+    package "전기 생산량" as PowerProductionSection {
+        rectangle RealTimePowerProduction as "실시간 전기 생산량"
+        rectangle DailyPowerProduction as "일별 전기 생산량"
+        rectangle MonthlyPowerProduction as "월별 전기 생산량"
+    }
+
+    package "열 생산량" as HeatProductionSection {
+        rectangle RealTimeHeatProduction as "실시간 열 생산량"
+        rectangle DailyHeatProduction as "일별 열 생산량"
+        rectangle MonthlyHeatProduction as "월별 열 생산량"
+    }
+}
+
+' Main Content Section
+package "중앙 섹션" as MainContentSection {
+    package "상태/현황 섹션" as StatusSection {
+        rectangle TotalCapacity as "총 대수"
+        rectangle TotalCapacity as "총 설비용량"
+        rectangle StatusSummary as "정상, 경고, 정지 상태 요약"
+        rectangle AddressInfo as "주소 정보"
+        rectangle ParticleTypeCountInfo as "입자, 타입, 기기수 정보"
+    }
+    package "발전 현황(발전기 변호별)" as GeneratorStatusTable {
+        rectangle GeneratorNumber as "발전기 번호"
+        rectangle GeneratorStatus as "상태"
+        rectangle Capacity as "용량"
+        rectangle PowerProduction as "전력생산량"
+        rectangle PowerEfficiency as "전력생산효율"
+        rectangle HeatProduction as "열생산"
+        rectangle HeatEfficiency as "열생산효율"
+    }
+    ' 지역별 발전현황 추가
+    package "발전현황(지역별)" as RegionalStatusSection {
+        rectangle Region1 as "지역 1 발전량"
+        rectangle Region2 as "지역 2 발전량"
+        rectangle Region3 as "지역 3 발전량"
+    }
+}
+
+' Right Section
+package "우측 섹션" as RightSection {
+    package "에너지원별 현황" as GroupStatusSection {
+        rectangle StatusSummary2 as "정상, 미작동, 준비중, 경고, 고장 상태 요약"
+        
+          package "공기공급계" as Air {
+            rectangle AirCurrentOutput as "현재출력"
+            rectangle AirCapacity as "설비용량"
+            rectangle AirDailyProduction as "금일발전량"
+            rectangle AirCO2Reduction as "금일CO2저감량"
+            rectangle AirUtilization as "이용률"
+        }
+        package "물관리계" as Water {
+            rectangle WaterCurrentOutput as "현재출력"
+            rectangle WaterCapacity as "설비용량"
+            rectangle WaterDailyProduction as "금일발전량"
+            rectangle WaterCO2Reduction as "금일CO2저감량"
+            rectangle WaterUtilization as "이용률"
+        }
+        package "열관리계" as Heat {
+            rectangle HeatCurrentOutput as "현재출력"
+            rectangle HeatCapacity as "설비용량"
+            rectangle HeatDailyProduction as "금일발전량"
+            rectangle HeatCO2Reduction as "금일CO2저감량"
+            rectangle HeatUtilization as "이용률"
+        }
+    }
+      package "알람로그 섹션" as AlarmLogSection {
+        rectangle Time as "시간"
+        rectangle FuelCell as "연료전지"
+        rectangle AlarmStatus as "상태"
+        rectangle Content as "내용"
+    }
+   
+}
+
+' Layout the sections
+NavigationSection -down-> HeaderSection
+HeaderSection  -down-> MainContentSection
+LeftSection -down-> MainContentSection
+MainContentSection -down-> RightSection
+StatusSection-down->  GeneratorStatusTable
+GroupStatusSection -down-> AlarmLogSection
+@enduml

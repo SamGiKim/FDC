@@ -1,0 +1,35 @@
+@startuml
+left to right direction
+
+' Actors
+actor "관리자" as Admin
+actor "발전소 담당자" as PlantManager
+actor "일반 사용자" as User
+
+' Use Cases
+usecase "소모품 마스터 관리" as ManageConsumables
+usecase "발전소별 소모품 현황 관리" as ManagePlantConsumables
+usecase "소모품 교체 이력 관리" as ManageReplacementHistory
+usecase "소모품 정보 조회" as ViewConsumablesInfo
+usecase "소모품 교체 요청" as RequestReplacement
+usecase "보고서 생성" as GenerateReports
+
+' Relationships
+Admin --> ManageConsumables
+Admin --> ManagePlantConsumables
+Admin --> ManageReplacementHistory
+Admin --> GenerateReports
+
+PlantManager --> ManagePlantConsumables
+PlantManager --> ManageReplacementHistory
+PlantManager --> RequestReplacement
+PlantManager --> ViewConsumablesInfo
+
+User --> ViewConsumablesInfo
+User --> RequestReplacement
+
+' Hierarchical Relationships
+Admin --|> PlantManager
+PlantManager --|> User
+
+@enduml

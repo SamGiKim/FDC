@@ -1,0 +1,58 @@
+
+## << data.js 의 channel 메시지 정의 >> 24.08.28
+    |     data.js SIDE      |                          MEMO                          |                              argv                              |
+    | --------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
+    | CH1/(1)DASHBOARD_INIT |                                                        | url:String                                                     |
+    | CH1/(2)GET_DIR        |                                                        | response:String; url:String                                    |
+    | CH1/(3)BOP_INIT       |                                                        | url:String                                                     |
+    | CH1/(4)BOP_DATA_FETCH | Fetch and Preprocessing both BOP and IMP data at once. | url:String; imp_url:String; window_size:Number; is_result:Bool |
+    | CH1/(5)RAW_DATA_FETCH | Fetch and Preprocessing BOP data only.                 | url:String; response:String; column:Array                      |
+    | --------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
+    | CH2/(1)EVENT_CSV      |                                                        |                                                                |
+
+
+## << main.js 의 window 메시지 정의 >> 24.08.27
+    |        MSG_NAME         |          CONTENTS           |               MEMO                |
+    | ----------------------- | --------------------------- | --------------------------------- |
+    | DASHBOARD/LISTEN_RESULT | { detail : { result : Int } | 대시보드의 BOP 그래프 클릭시 발행 |
+
+
+## << main.js 의 channel 메시지 정의 >> 24.08.27
+    |       main.js SIDE       |                          MEMO                          |
+    | ------------------------ | ------------------------------------------------------ |
+    | CH1/(a)DASHBOARD_DATA    | Init calendex & init graph at Dashboard page only.     |
+    | CH1/(b)YEARLY_REFRESH    | Init yearly <select> box.                              |
+    | CH1/(c)MONTHLY_REFRESH   | Init monthly <select> box.                             |
+    | CH1/(d)DAILY_REFRESH     | Init daily <select> box.                               |
+    | CH1/(e)TIMELY_REFRESH    | Init timely <select> box.                              |
+    | CH1/(f)BOP_DATA          | Init calendex % init graph at BOP page only.           |
+    | CH1/(g)BOP_SOFT_FLOTDATA | Init soft sensor graph at BOP page only.               |
+    | CH1/(h)BOP_HARD_FLOTDATA | Init hard sensor graph at both Dashboard and BOP page. |
+    | CH1/(i)BOP_BARDATA       | Init bop barchart at BOP page only.                    |
+    | CH1/(j)STACK_BARDATA     | Init bop barchart at BOP page only.                    |
+    | CH1/(k)DRAW_FLOT_IN_AI   |                                                        |
+    | ------------------------ | ------------------------------------------------------ |
+    | CH2/(a)SENSOR_LABEL      |                                                        |
+    | CH2/(b)SENSOR_TABLE      |                                                        |
+    | CH2/(c)NORMAL_LABEL      |                                                        |
+    | ------------------------ | ------------------------------------------------------ |
+    | CH3/(a)MONTHLY_LIST      |                                                        |
+    | CH3/(b)DAILY_LIST        |                                                        |
+    | CH3/(c)TIMELY_LIST       |                                                        |
+
+
+## << 메시지 호출 상호 도식 >> 24.08.27
+    CH1/(1)DASHBOARD_INIT ---> CH1/(a)DASHBOARD_DATA
+
+    CH1/(2)GET_DIR ----> CH1/(b)YEARLY_REFRESH
+                    |--> CH1/(c)MONTHLY_REFRESH
+                    |--> CH1/(d)DAILY_REFRESH
+                    `--> CH1/(e)TIMELY_REFRESH
+
+    CH1/(3)BOP_INIT ---> CH1/(f)BOP_DATA ---> CH1/(4)BOP_DATA_FETCH ---> CH1/(g)BOP_SOFT_FLOTDATA
+                                                                    |--> CH1/(h)BOP_HARD_FLOTDATA
+                                                                    |--> CH1/(i)BOP_BARDATA
+                                                                    `--> CH1/(j)STACK_BARDATA
+
+    CH2/(1)EVENT_CSV --<cmd=SEARCH>--> CH2/(a)SENSOR_LABEL --<status:SUCCESS_SEARCH>--> 
+        --> CH1/(4)BOP_DATA_FETCH

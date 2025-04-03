@@ -1,0 +1,277 @@
+{
+  "system": {
+    "type": "PEMFC",
+    "capacity": "1KW",
+    "place": "Buan",
+    "date": "2023-12-20"
+  },
+  "status": {
+    "connection": "good",
+    "time": "2024-08-06 14:25:56"
+  },
+  "qoe": {
+    "qoe": 10
+  },
+  "realtime_production": {
+    "e_realtime_production": 964.24,
+    "t_realtime_production": 1108.28
+  },
+  "real_per_production": {
+    "e_real_per_production": 96.42,
+    "t_real_per_production": 53.47
+  },
+  "event": {
+    "A-current": "green",
+    "V-volt": "green",
+    "T_A_B_in": "green",
+    "P_A_B_in": "green",
+    "P_A_m_out": "green",
+    "MFM-Air": "green",
+    "Pump-Air": "green",
+    "T_A_S_out": "green",
+    "T_A_S_in": "green",
+    "P_A_S_in": "green",
+    "T_A_vent": "green",
+    "T_DI_S_in": "green",
+    "MFM-DI": "green",
+    "Pump-DI": "green",
+    "T_DI_S_out": "green",
+    "T_DI_h_out": "green",
+    "MFM-Water": "green",
+    "Pump-Water": "green",
+    "T_w_h_out": "green"
+  },
+  "result_event": {
+    "After_MFM": "green",
+    "Before_MFM": "green",
+    "Blower": "green",
+    "Flow_Meter": "green",
+    "Pressure_sensor": "green",
+    "Humidifier": "green",
+    "Stack_in_Water": "red",
+    "Stack_out_Water": "green",
+    "Heat_Exchanger": "green",
+    "DI_Pump": "green",
+    "Water_Pump": "green",
+    "Stack_in_Heat": "green",
+    "Stack_out_Heat": "green",
+    "Heat_Exchanger_out": "green"
+  },
+  "e_total": {
+    "e_production": 941722.99
+  },
+  "e_year": {
+    "e_production_2024": 920415.99
+  },
+  "e_month": {
+    "e_production_01": 38968.40,
+    "e_production_02": 120023.47,
+    "e_production_03": 62996.38,
+    "e_production_04": 142364.51,
+    "e_production_05": 125034.76,
+    "e_production_06": 224557.58,
+    "e_production_07": 166449.55,
+    "e_production_08": 40021.34,
+    "e_production_09": 0.00,
+    "e_production_10": 0.00,
+    "e_production_11": 0.00,
+    "e_production_12": 0.00
+  },
+  "e_day": {
+    "e_production_01": 13920.55,
+    "e_production_02": 0.00,
+    "e_production_03": 0.00,
+    "e_production_04": 0.00,
+    "e_production_05": 18121.93,
+    "e_production_06": 7978.86,
+    "e_production_07": 0.00,
+    "e_production_08": 0.00,
+    "e_production_09": 0.00,
+    "e_production_10": 0.00,
+    "e_production_11": 0.00,
+    "e_production_12": 0.00,
+    "e_production_13": 0.00,
+    "e_production_14": 0.00,
+    "e_production_15": 0.00,
+    "e_production_16": 0.00,
+    "e_production_17": 0.00,
+    "e_production_18": 0.00,
+    "e_production_19": 0.00,
+    "e_production_20": 0.00,
+    "e_production_21": 0.00,
+    "e_production_22": 0.00,
+    "e_production_23": 0.00,
+    "e_production_24": 0.00,
+    "e_production_25": 0.00,
+    "e_production_26": 0.00,
+    "e_production_27": 0.00,
+    "e_production_28": 0.00,
+    "e_production_29": 0.00,
+    "e_production_30": 0.00,
+    "e_production_31": 0.00
+  },
+  "e_hour": {
+    "e_production_00": 0.00,
+    "e_production_01": 0.00,
+    "e_production_02": 0.00,
+    "e_production_03": 0.00,
+    "e_production_04": 0.00,
+    "e_production_05": 0.00,
+    "e_production_06": 0.00,
+    "e_production_07": 0.00,
+    "e_production_08": 0.00,
+    "e_production_09": 0.00,
+    "e_production_10": 1382.66,
+    "e_production_11": 1921.41,
+    "e_production_12": 1926.39,
+    "e_production_13": 1922.36,
+    "e_production_14": 826.04,
+    "e_production_15": 0.00,
+    "e_production_16": 0.00,
+    "e_production_17": 0.00,
+    "e_production_18": 0.00,
+    "e_production_19": 0.00,
+    "e_production_20": 0.00,
+    "e_production_21": 0.00,
+    "e_production_22": 0.00,
+    "e_production_23": 0.00
+  },
+  "t_total": {
+    "t_production": 1009120.62
+  },
+  "t_year": {
+    "t_production_2024": 990907.62
+  },
+  "t_month": {
+    "t_production_01": 40928.39,
+    "t_production_02": 126342.61,
+    "t_production_03": 66369.69,
+    "t_production_04": 152218.47,
+    "t_production_05": 133139.01,
+    "t_production_06": 243193.33,
+    "t_production_07": 183129.69,
+    "t_production_08": 45586.43,
+    "t_production_09": 0.00,
+    "t_production_10": 0.00,
+    "t_production_11": 0.00,
+    "t_production_12": 0.00
+  },
+  "t_day": {
+    "t_production_01": 15754.44,
+    "t_production_02": 0.00,
+    "t_production_03": 0.00,
+    "t_production_04": 0.00,
+    "t_production_05": 20623.75,
+    "t_production_06": 9208.24,
+    "t_production_07": 0.00,
+    "t_production_08": 0.00,
+    "t_production_09": 0.00,
+    "t_production_10": 0.00,
+    "t_production_11": 0.00,
+    "t_production_12": 0.00,
+    "t_production_13": 0.00,
+    "t_production_14": 0.00,
+    "t_production_15": 0.00,
+    "t_production_16": 0.00,
+    "t_production_17": 0.00,
+    "t_production_18": 0.00,
+    "t_production_19": 0.00,
+    "t_production_20": 0.00,
+    "t_production_21": 0.00,
+    "t_production_22": 0.00,
+    "t_production_23": 0.00,
+    "t_production_24": 0.00,
+    "t_production_25": 0.00,
+    "t_production_26": 0.00,
+    "t_production_27": 0.00,
+    "t_production_28": 0.00,
+    "t_production_29": 0.00,
+    "t_production_30": 0.00,
+    "t_production_31": 0.00
+  },
+  "t_hour": {
+    "t_production_00": 0.00,
+    "t_production_01": 0.00,
+    "t_production_02": 0.00,
+    "t_production_03": 0.00,
+    "t_production_04": 0.00,
+    "t_production_05": 0.00,
+    "t_production_06": 0.00,
+    "t_production_07": 0.00,
+    "t_production_08": 0.00,
+    "t_production_09": 0.00,
+    "t_production_10": 1582.47,
+    "t_production_11": 2224.20,
+    "t_production_12": 2213.66,
+    "t_production_13": 2223.22,
+    "t_production_14": 964.69,
+    "t_production_15": 0.00,
+    "t_production_16": 0.00,
+    "t_production_17": 0.00,
+    "t_production_18": 0.00,
+    "t_production_19": 0.00,
+    "t_production_20": 0.00,
+    "t_production_21": 0.00,
+    "t_production_22": 0.00,
+    "t_production_23": 0.00
+  },
+  "e_year_operation": {
+    "e_production_stacked": 920415.99
+  },
+  "e_month_operation": {
+    "e_production_stacked": 40021.34
+  },
+  "e_day_operation": {
+    "e_production_stacked": 7978.86
+  },
+  "e_total_capacity": {
+    "e_production_capacity": 5534432.22
+  },
+  "e_year_capacity": {
+    "e_production_capacity": 5246432.22
+  },
+  "e_month_capacity": {
+    "e_production_capacity": 134432.22
+  },
+  "e_day_capacity": {
+    "e_production_capacity": 14432.22
+  },
+  "alarm": [
+    {
+      "time": "2024-06-05 13:42:00",
+      "comment": "(물)스택출구 확인이 필요합니다.",
+      "status": "경고"
+    },
+    {
+      "time": "2024-06-04 18:02:00",
+      "comment": "(물)스택출구 확인이 필요합니다.",
+      "status": "경고"
+    },
+    {
+      "time": "2024-06-04 15:17:00",
+      "comment": "스택 측정을 시작했습니다.",
+      "status": "정상"
+    }
+  ],
+  "BOP": {
+    "A-current": 40.01,
+    "V-volt": 24.10,
+    "T_A_B_in": 26.86,
+    "P_A_B_in": -1.01,
+    "P_A_m_out": 5.47,
+    "MFM-Air": 46.95,
+    "Pump-Air": 45.77,
+    "T_A_S_out": 55.46,
+    "T_A_S_in": 45.06,
+    "P_A_S_in": 4.37,
+    "T_A_vent": 37.84,
+    "T_DI_S_in": 52.81,
+    "MFM-DI": 1.94,
+    "Pump-DI": 82.02,
+    "T_DI_S_out": 60.04,
+    "T_DI_h_out": 53.11,
+    "MFM-Water": 0.52,
+    "Pump-Water": 27.26,
+    "T_w_h_out": 58.65
+  }
+}

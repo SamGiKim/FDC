@@ -1,0 +1,56 @@
+plantuml
+코드 복사
+@startuml
+left to right direction
+
+' Admin, Local Admin, and User entities
+actor "Main Admin" as MainAdmin
+actor "Local Admin" as LocalAdmin
+actor User as User
+
+' Use Cases
+usecase "Insert Local Admin" as InsertLocalAdmin
+usecase "Update Local Admin" as UpdateLocalAdmin
+usecase "Delete Local Admin" as DeleteLocalAdmin
+usecase "View Authority of Local Admin" as ViewAuhorityOfLocalAdmin
+usecase "Insert User" as InsertUser
+usecase "Update User" as UpdateUser
+usecase "Delete User" as DeleteUser
+usecase "View Authority of User" as ViewAuthorityOfUser
+usecase "Manage Fuel Cell Group 1" as ManageFuelCellGroup1
+usecase "Manage Fuel Cell Group 2" as ManageFuelCellGroup2
+
+' Relationships
+MainAdmin --> InsertLocalAdmin : "manage"
+MainAdmin --> UpdateLocalAdmin : "manage"
+MainAdmin --> DeleteLocalAdmin : "manage"
+MainAdmin --> ViewAuhorityOfLocalAdmin : "manage"
+LocalAdmin --> InsertUser : "manage"
+LocalAdmin --> UpdateUser : "manage"
+LocalAdmin --> DeleteUser : "manage"
+LocalAdmin --> ViewAuthorityOfUser : "manage"
+User --> ManageFuelCellGroup1 : "manage"
+User --> ManageFuelCellGroup2 : "manage"
+
+' Hierarchical Relationships
+MainAdmin --|> LocalAdmin
+LocalAdmin --|> User
+
+' Fuel Cell Groups
+package "Fuel Cell Group 1" {
+  usecase "Fuel Cell 1" as FuelCell1
+  usecase "Fuel Cell 2" as FuelCell2
+  usecase "Fuel Cell 3" as FuelCell3
+}
+
+package "Fuel Cell Group 2" {
+  usecase "Fuel Cell 4" as FuelCell4
+  usecase "Fuel Cell 5" as FuelCell5
+  usecase "Fuel Cell 6" as FuelCell6
+}
+
+ManageFuelCellGroup1 --> "Fuel Cell Group 1"
+
+ManageFuelCellGroup2 --> "Fuel Cell Group 2"
+
+@enduml

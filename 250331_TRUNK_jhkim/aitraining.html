@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="css/aitraining.css" rel="stylesheet">
+  <link href="css/common.css" rel="stylesheet">
+  <link href="css/main.css" rel="stylesheet">
+  <!-- <link href="css/diagram.css" rel="stylesheet"> -->
+  <script src="js/bootstrap.js"></script>
+  <!-- <script src="js/include.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
+  <script type="module" src="js/config/fuelcellSelector.js"></script>
+  <script type="module" src="js/config/modelSelector.js"></script> <!--모델링 그룹 선택-->
+  <script type="module" src="js/aitraining/fault_label_list.js"></script> <!--학습모델 검증- 고장 라벨링 리스트-->
+  <script type="module" src="js/aitraining/sensorList.js"></script> <!--고장진단리스트, 소프트센서리스트-->
+  <script type="module" src="js/aitraining/hw_sensor_table_list.js"></script> <!--hw센서 테이블 리스트(우측하단)-->
+  <script type="module">
+  import { setupFuelcellSelector } from './js/config/fuelcellSelector.js';
+  import { setupFaultLabelTableEventListeners } from './js/aitraining/fault_label_list.js';
+  import { ModelGroupSelector } from './js/config/modelSelector.js';
+  import { initI18n, changeLanguage } from './js/config/i18n.js';
+
+  // setupFaultLabelTableEventListeners 함수를 전역으로 노출
+  window.setupFaultLabelTableEventListeners = setupFaultLabelTableEventListeners;
+
+  document.addEventListener('DOMContentLoaded', () => {
+      initI18n();
+      setupFuelcellSelector();
+
+      // Model Group Selector 설정
+      const modelGroupSelector = new ModelGroupSelector();
+      
+      // Fault Label Table 이벤트 리스너 설정
+      setupFaultLabelTableEventListeners();
+
+      
+      // 언어 변경 테스트용
+      const languageSelector = document.getElementById('language-selector');
+      if (languageSelector) {
+          languageSelector.addEventListener('change', (event) => {
+              changeLanguage(event.target.value);
+          });
+      }
+  });
+
+  // errCodeSelected 이벤트 리스너
+  document.addEventListener('errCodeSelected', (event) => {
+      const errCode = event.detail.errCode;
+      // console.log('Received errCode:', errCode);
+  });
+</script>
+ 
+  <title>FuelCellDR. : AI 학습</title>
+</head>
+
+<body>
+
+  <header>
+    <?php include('navbar.php'); ?>
+  </header>
+
+  <div class="modal-outer">
+
+    <dialog id="select-model-group-modal">
+      <div class="dialog-container">
+          <div class="modal-header">
+            <h5 class="modal-title">모델그룹 선택</h5>
+            <button class="close" type="button" onclick="modalSW('#select-model-group-modal', 'close')" title="닫기">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          <style>
+
+          </style>
+          <div class="modal-footer">
+            <button class="btn-of w-24 mx-1">확인</button>
+            <button class="btn-of w-24" onclick="modalSW('#select-model-group-modal', 'close')">취소</button>
+          </div>
+      </div>
+    </dialog>   
+
+    <dialog id="select-normal-data-modal">
+      <div class="dialog-container">
+          <div class="modal-header">
+            <h5 class="modal-title">정상 데이터 선택</h5>
+            <button class="close" type="button" onclick="modalSW('#select-normal-data-modal', 'close')" title="닫기">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+
+          </div>
+          <style>
+
+          </style>
+          <div class="modal-footer">
+            <button class="btn-of w-24 mx-1">확인</button>
+            <button class="btn-of w-24" onclick="modalSW('#select-normal-data-modal', 'close')">취소</button>
+          </div>
+      </div>
+    </dialog>
+    
+    <script>
+      // modal 보이기/숨긱기
+      const modalSW = (e, doing) => {
+          const modal = document.querySelector(e)
+          if (doing === 'open') modal.showModal()
+          if (doing === 'close') modal.close()
+          modal.addEventListener('click', (e) => {if(e.target === e.currentTarget) modal.close();}) // 검은 부분 입력시 닫는 코드
+      }
+    </script>
+
+  </div>
+
+
+
+  <main class="aitraining" style="height: calc(100vh - 52px);">
+
+    <div class="row">
+
+      <div class="col-xxl-2 col-12">
+        <div class="row">
+
+          <div class="col-xxl-12 col-12" style="min-width: 150px;">
+            <div class="widget modeling-group-selection" style="height: 79px;">
+              <div class="widget-head" data-i18n="aitraining.modeling_group_selection"><!--모델링 그룹선택--></div>
+              <div class="widget-body">
+                <div class="site-select w-100" style="position: relative;">
+                  <select id="model-group-select" class="" style="width: calc(100% - 75px); min-width: 210px;">
+                    <!-- modelSelector.js에 의해 동적으로 채워짐 -->
+                  </select>
+                  <span class="per-top" id="model-group-per">
+                    : 95%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xxl-12 col-12" style="min-width: 150px;">
+            <!-- <div class="widget soft-senser-list-menu" style="height: calc(100vh - 88px); min-height: 878px;"> -->
+            
+              <div class="widget fault-diagnosis-list" style="height: calc(49vh - 96px); min-height: 431px;">
+                <div class="widget-head">
+                  <span data-i18n="aitraining.fault_diagnosis_list" style="color:black"><!--고장 진단 리스트--></span>
+                </div>
+                <div class="widget-body">
+                  <div class="all-analyze">
+                    <span class="title action"  id="fault-diagnosis-list-all">ALL</span>
+                    <div class="per" id="fault-diagnosis-per"> : 85%</div>
+                  </div>
+                  <div class="tree-ui">
+                    <ul class="tree">
+                      <li>
+                        <span class="group-title">Air</span>
+                        <details open>
+                          <summary><span class="deco air square"></span></summary>
+                          <ul>
+                            <!-- <li><span class="deco air"><a href="#" class="active">MFM 전 누설</a><span class="per"> : </span></span></li> -->
+                            <li><span class="deco air"><a href="#">MFM Before Leak</a><span class="per"> : </span></span></li>
+                            <li><span class="deco air"><a href="#">MFM After Leak</a><span class="per"> : </span></span></li>
+                            <li><span class="deco air"><a href="#">Blower</a><span class="per"> : </span></span></li>
+                            <li><span class="deco air"><a href="#">Flow Sensor</a><span class="per"> : </span></span></li>
+                            <li><span class="deco air"><a href="#">Pressure Sensor</a><span class="per"> : </span></span></li>
+                          </ul>
+                        </details>
+                      </li>
+                      <li>
+                        <span class="group-title">Water</span>
+                        <details open>
+                          <summary><span class="deco water square"></span></summary>
+                          <ul>
+                            <li><span class="deco water"><a href="#">Humidifier</a><span class="per"> : </span></span></li>
+                            <li><span class="deco water"><a href="#">Stack In Temp. Sensor(W)</a><span class="per"> : </span></span></li>
+                            <li><span class="deco water"><a href="#">Stack Out Temp. Sensor(W)</a><span class="per"> : </span></span></li>
+                          </ul>
+                        </details>
+                      </li>
+                      <li>
+                        <span class="group-title">Heat</span>
+                        <details open>
+                          <summary><span class="deco heat square"></span></summary>
+                          <ul>
+                            <ul>
+                              <li><span class="deco heat"><a href="#">Heat Exchanger</a><span class="per"> : </span></span></li>
+                              <li><span class="deco heat"><a href="#">Stack In Temp. Sensor(H)</a><span class="per"> : </span></span></li>
+                              <li><span class="deco heat"><a href="#">Stack Out Temp. Sensor(H)</a><span class="per"> : </span></span></li>
+                              <li><span class="deco heat"><a href="#">Heat Exch. Out Temp. Sensor</a><span class="per"> : </span></span></li>
+                          </ul>
+                        </details>
+                      </li>
+                    </ul>
+                  </div>
+  
+                </div>
+              </div>
+
+          </div>    
+
+          <div class="col-xxl-12 col-12"  style="min-width: 150px;">
+            <!-- <div class="widget soft-senser-list-menu" style="height: calc(100vh - 88px); min-height: 878px;"> -->
+            
+              <div class="widget soft-senser-list"  id="soft-sensor-list" 
+            style="height: calc(41vh + 9px) !important; min-height: 452px;">
+              <div class="widget-head" data-i18n="aitraining.soft_sensor_list"><!--소프트 센서 리스트--></div>
+              <div class="widget-body">
+                <div class="all-analyze">
+                  <span class="title" data-i18n="aitraining.all"><!--전체--></span>
+                  <div class="per" id="soft-sensor-per"> : 85%</div>
+                </div>
+                <div class="tree-ui">
+                  <ul class="tree">
+                    <li>
+                      <span class="group-title" data-i18n="aitraining.air_supply"><!--공기 공급계--></span>
+                      <details open>
+                        <summary><span class="deco air square"></span></summary>
+                        <ul>
+                          <li><span class="deco air"><a href="#" class="active">DeltaP</a><span class="per"> : </span></span></li>
+                          <li><span class="deco air"><a href="#">Air-U</a><span class="per"> : </span></span></li>
+                          <li><span class="deco air"><a href="#">Air-P</a><span class="per"> : </span></span></li>
+                          <li><span class="deco air"><a href="#">Air-V</a><span class="per"> : </span></span></li>
+                        </ul>
+                      </details>
+                    </li>
+                    <li>
+                      <span class="group-title" data-i18n="aitraining.water_supply"><!--물 순환계--></span>
+                      <details open>
+                        <summary><span class="deco water square"></span></summary>
+                        <ul>
+                          <li><span class="deco water"><a href="">Water 1</a><span class="per"> : </span></span></li>
+                          <li><span class="deco water"><a href="">Water 2</a><span class="per"> : </span></span></li>
+                          <li><span class="deco water"><a href="">Water 3</a><span class="per"> : </span></span></li>
+                        </ul>
+                      </details>
+                    </li>
+                    <li>
+                      <span class="group-title" data-i18n="aitraining.heat_supply"><!--열 공급계--></span>
+                      <details open>
+                        <summary><span class="deco heat square"></span></summary>
+                        <ul>
+                          <li><span class="deco heat"><a href="">heat</a><span class="per"> : </span></span></li>
+                          <li><span class="deco heat"><a href="">Ms</a><span class="per"> : </span></span></li>
+                          <li><span class="deco heat"><a href="">Mr</a><span class="per"> : </span></span></li>
+                        </ul>
+                      </details>
+                    </li>
+                    <li>
+                      <span class="group-title" data-i18n="aitraining.etc"><!--기타--></span>
+                      <details open>
+                        <summary><span class="deco fuel square"></span></summary>
+                        <ul>
+                          <li><span class="deco fuel"><a href="" >DI</a><span class="per"> : </span></span></li>
+                          <li><span class="deco fuel"><a href="">WP</a><span class="per"> : </span></span></li>
+                        </ul>
+                      </details>
+                    </li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+         
+
+        </div>
+      </div>
+      <div class="col-xxl-10 col-12">
+        <div class="row">
+
+          <div class="col-xxl-5 col-12">
+            <!-- <div class="col-xxl-12 col-12 order-xxl-first"> -->
+              <!-- <div class="widget bop-senser-labeling-data model-validation"> -->
+              <div class="widget model-validation" style="height: calc(49vh - 2px); min-height: 527px;">
+                <div class="widget-head">
+                  <span data-i18n="aitraining.model_validation" style="color:black"><!--학습모델 검증--></span>
+                  <div class="widget-head-gadget">
+                  </div>
+                </div>
+                <div class="widget-body position-relative">
+                  
+
+                  <div class="progress-spin" style="display: none;">
+                  <!-- <div class="progress-spin"> -->
+                    <div>
+                        <div class="spin">
+                            <span class="icon-h2s-reflash"></span>
+                        </div>
+                    </div>
+                    <div class="text-waiting">
+                      검증요청중 (<span id="progress-done">0</span> / <span id="progress-total">0</span>) : <span id="progress-percent">0</span>%
+                      <span class="after">
+                          <span></span>
+                      </span>
+                      <div class="text-center">
+                          <button class="btn-of" style="font-size: 12px; margin-top: 10px" id="stop-verification">중지</button>
+                      </div>
+                    </div>
+                    <div class="d-inline-block" style="width: 85%; vertical-align: middle;">
+                      <span class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                          <div class="progress-bar" style="width: 0%;"></div>
+                      </span>
+                  </div>
+                    <!-- <div class="float-end text-left">0%</div> -->
+                </div>
+
+                  <div class="table-responsive">
+                    <!--<h2 data-i18n="aitraining.fault_labeling_list">--><!--고장 라벨링 리스트--><!--</h2>-->
+                    <table class="table table-fixed table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th><input type="checkbox"  id="fault-checkbox-all"></th>
+                          <th data-i18n="common.period"><!--기간--></th>
+                          <th data-i18n="common.labeling"><!--라벨링--></th>
+                          <th data-i18n="aitraining.history"><!--비고--></th>
+                          <th>SoH</th>
+                        </tr>
+                      </thead>
+                      <tbody class="scrollmini overflow-auto" id="fault-label-list-table" style="height: calc(54vh - 175px); min-height: 352px;">
+                        <!-- <tr>
+                          <td><input type="checkbox"></td>
+                          <td><span class="date-div">2024-07-30</span> 12:06:46~13:30:33</td>
+                          <td>#고장모사</td>
+                          <td>96</td>
+                        </tr> -->
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="d-grid">
+    
+                    <!-- <nav class="pagination-wrap">
+                      <ul class="pagination" id="bop-sensor-data-pagination">
+                        <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                        
+                        <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">4</a></li>
+                        <li class="page-item"><a class="page-link" href="#">5</a></li>
+                       
+                        <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                      </ul>
+                    </nav> -->
+    
+                    <div class="my-2">
+                      <div class="float-start">
+                        <!-- <button class="btn-of selected"></button> -->
+                        <button class="btn-of" id="err-verify" data-i18n="aitraining.model_validation"><!--학습 모델 검증--></button>
+                      </div>
+                      <div class="float-end">
+                        <div class="single-asking" data-i18n="common.content"><!--내용--></div>
+                        <input type="text" class="text-input">
+                        <button class="btn-of" data-i18n="common.search"><!--검색--></button>
+                      </div>
+                    </div>
+    
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="col-xxl-7 col-12">
+            <div class="row">
+              <div class="col-xxl-12 col-12">
+                <div class="widget HW-senser-list" style="height: calc(49vh - 2px); min-height: 527px;">
+                  <div class="widget-head">
+                    <!-- <span data-i18n="aitraining.SW_sensor>SW센서 리스트</span> -->
+                    <div class="widget-head-gadget">
+                    </div>
+                    <div class="sub-tab scrollmini">
+                      <ul>
+                        <li class="tab-item"><a class="active">deltaP</a></li>
+                        <li class="tab-item"><a>Air-U</a></li>
+                        <li class="tab-item"><a>DI</a></li>
+                     </div>
+                  </div>
+                  <div class="widget-body">
+                    <div class="side-card">
+                     <!-- <div> -->
+                        <!-- <dl>
+                          <dt><span class="max-arrow-svg svg-box mx-2"></span>상한</dt>
+                          <dd>1.2 x <input type="number" style="width: 35px;"></dd>
+                        </dl>
+                        <dl>
+                          <dt><span class="min-arrow-svg svg-box mx-2"></span>하한</dt>
+                          <dd>1.2 x <input type="number" style="width: 35px;"></dd>
+                        </dl>
+                        <dl>
+                          <dt>STD 편차</dt>
+                          <dd>0.34</dd>
+                        </dl>
+                        <dl>
+                          <dt>AVG 편차</dt>
+                          <dd> 1.5</dd>
+                        </dl>
+                        <button class="btn-of float-end">적용</button> -->
+                          
+                    </div>
+                    <div>
+                      <!-- <img src="img/131517.png" alt="" style="width: 100%;"> -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xxl-12 col-12 d-none">
+                <div class="widget soft-senser-min-max-input">
+                  <div class="widget-head">
+                    <span class="air">DeltaP</span>데이터 편차 조절
+                    <!-- <div class="widget-head-gadget"> -->
+                      <!-- <div class="widget-head-gadget"> -->
+                        <!-- <div class="widget-head-gadget"> -->
+                          <!-- <button class="mini">모두 선택</button> -->
+                          <!-- <button class="mini">선택 해제</button> -->
+                          <!-- <span class="icon-arrow-right2"></span> -->
+                        <!-- </div> -->
+                      <!-- </div>                   -->
+                    <!-- </div> -->
+                  </div>
+                  <div class="widget-body">
+                    <div class="d-flex">
+                      <div>
+                        <span class="max-arrow-svg svg-box mx-2"></span><strong>상한 1.2 x </strong><input type="number" style="width: 40px">
+                      </div>
+                      <div>
+                        <span class="min-arrow-svg svg-box mx-2"></span><strong>하한 1.2 x </strong><input type="number" style="width: 40px;">
+                      </div>                
+                      <div>
+                        <strong>STD 편차</strong><span class="px-3">0.34</span>
+                      </div>
+                      <div>
+                        <strong>AVG 편차</strong><span class="px-3">1.5</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>          
+              
+    
+            </div>
+          </div>
+    
+    
+    
+    
+          <div class="col-xxl-6 col-12">
+            <div class="widget soft-senser-graph" style="height: calc(41vh + 9px); min-height: 452px;">
+              <div class="widget-head">
+                <span data-i18n="aitraining.graph" style="color:black"><!--그래프--></span>
+                <span class="air softsensor-title">DeltaP</span>
+                <div class="widget-head-gadget">
+                </div>
+              </div>
+              <div class="widget-body">
+                <div>
+                  <!-- <img src="img/131805.png" alt="" style="width: 100%;"> -->
+                </div>
+              </div>
+             
+            </div>
+          </div>
+    
+          <div class="col-xxl-2 col-12 d-none" >
+            <div class="widget normal-data-training" style="height: calc(40vh - 37px)">
+              <div class="widget-head">
+                정상 데이터 학습
+                <div class="widget-head-gadget">
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body scrollmini scrollmini-noborder">
+                <div class="widget-body-inner">
+                  <div class="content-box text-center">
+                    <div class="content-title-head">모델그룹</div>
+                    <div style="" class="content-title-1">ABCDEF 컬렉션</div>
+                    <button class="btn-of" <button class="btn-of" onclick="modalSW('#select-model-group-modal', 'open')">다른 모델그룹 선택</button>
+                  </div>
+                  <!-- <h3>회귀 분석 알고리즘 선택</h3> -->
+                  <div class="mt-2">
+                    <div class="content-box">
+    
+                      <div class="content-title-head">모델그룹 생성</div>
+                      <div style="border-bottom: 1px solid #ccc;padding: 10px 0; margin-bottom: 5px;">
+                        <div style="font-size: 12.5px;font-weight: 500; padding: 5px 0;">회귀분석 알고리즘 선택</div>
+                        
+                          <select class="w-100">
+                            <option value="">서포트 벡터 머신</option>
+                          </select>
+                        
+                      </div>
+                      <dl>
+                        <dt>새 모델그룹</dt>
+                        <dd>
+                          <input type="text" placeholder="새 모델그룹 이름 입력" class="text-center">
+                        </dd>
+                      </dl>
+                      <dl>
+                        <dt>정상 데이터</dt>
+                        <dd>
+                          <input type="text" value="untitled" class="" disabled="disabled" style="width: calc(100% - 60px);">
+                          <button class="btn-of" onclick="modalSW('#select-normal-data-modal', 'open')">불러오기</button>
+                        </dd>
+                      </dl>
+    
+                      <button class="btn-of w-100 my-2">데이터 학습 시작</button>
+                      
+                      <div class="d-inline-block" style="width: 85%; vertical-align: middle;">
+                        <span class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
+                          <div class="progress-bar" style="width: 80%;"></div>
+                        </span>
+                      </div>
+                      <div class="float-end text-left">90%</div>
+                       
+                    </div>
+                  </div>
+    
+                  <!-- <div class="row box-grey smaller mt-3">
+                    <div>
+                      정상 데이터 선택
+                      <div class="float-end">
+                        
+                        <button class="btn-of">불러오기</button>
+                      </div>
+                    </div>
+                    <div class="col-6 ps-1">
+                    
+                        <button class="box half">
+                          <span class="icon-play3"></span>
+                          시작
+                        </button>
+                    
+                    </div>
+    
+                  </div> -->
+    
+    
+                  <!-- <hr> -->
+                  <!-- <div class="position-relative mt-2">
+                    <h3 class="d-inline">표준 편차 설정</h3>                
+                    <select name="" id="" class="float-end" style="z-index: 999">
+                      <option value="">서포트 벡터 머신</option>
+                    </select>
+                    <div class="deviation-base">
+                      <div class="deviation-base-inner">
+                        <div class="deviation-svg">
+                          <svg width="202" height="105" viewBox="0 0 202 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g id="SDG">
+                            <path id="Vector" d="M13 50.0004C13 50.0004 44.7143 52.914 62.2857 30.9338C84 0.50526 96.5 2.00025 96.5 2.00025" stroke="black" stroke-width="2"/>
+                            <path id="Vector_2" d="M179.286 50.0119C179.286 50.0119 147.571 52.9256 130 30.9453C108.286 0.516802 96.5 2.01197 96.5 2.01197" stroke="black" stroke-width="2"/>
+                            <path id="Arrow 2" d="M201.707 50.713C202.098 50.3224 202.098 49.6893 201.707 49.2988L195.343 42.9348C194.953 42.5443 194.319 42.5443 193.929 42.9348C193.538 43.3253 193.538 43.9585 193.929 44.349L199.586 50.0059L193.929 55.6627C193.538 56.0532 193.538 56.6864 193.929 57.0769C194.319 57.4675 194.953 57.4675 195.343 57.0769L201.707 50.713ZM0 51.0059H201V49.0059H0V51.0059Z" fill="black"/>
+                            <line id="Line 102" x1="68.5" y1="23.0059" x2="68.5" y2="73.0059" stroke="black"/>
+                            <line id="Line 103" x1="123.5" y1="23.0059" x2="123.5" y2="73.0059" stroke="black"/>
+                            <line id="Line 104" x1="150.5" y1="46.0059" x2="150.5" y2="89.0059" stroke="black"/>
+                            <line id="Line 105" x1="41.5" y1="46.0059" x2="41.5" y2="89.0059" stroke="black"/>
+                            <line id="Line 106" x1="14.5" y1="50.0059" x2="14.5" y2="105.006" stroke="black"/>
+                            <line id="Line 107" x1="177.5" y1="50.0059" x2="177.5" y2="105.006" stroke="black"/>
+                            <line id="Line 108" x1="96.5" y1="2.00586" x2="96.5" y2="50.0059" stroke="black" stroke-dasharray="2 2"/>
+                            <path id="Line 109" d="M69 70.0059L74 72.8926L74 67.1191L69 70.0059ZM123 70.0059L118 67.1191L118 72.8926L123 70.0059ZM73.5 70.5059L118.5 70.5059L118.5 69.5059L73.5 69.5059L73.5 70.5059Z" fill="black"/>
+                            <path id="Line 110" d="M42 86.0059L47 88.8926L47 83.1191L42 86.0059ZM150 86.0059L145 83.1191L145 88.8926L150 86.0059ZM46.5 86.5059L145.5 86.5059L145.5 85.5059L46.5 85.5059L46.5 86.5059Z" fill="black"/>
+                            <path id="Line 112" d="M15 102.006L20 104.893L20 99.1191L15 102.006ZM177 102.006L172 99.1191L172 104.893L177 102.006ZM19.5 102.506L172.5 102.506L172.5 101.506L19.5 101.506L19.5 102.506Z" fill="black"/>
+                            <g id="Group 169">
+                            <text id="10" fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans" font-size="8" letter-spacing="0em"><tspan x="22.6914" y="59.1235">10</tspan></text>
+                            <path id="Line 102_2" d="M15.7139 52.2461C15.7139 52.2461 17.7831 54.399 22.9857 54.4278" stroke="black"/>
+                            <path id="Line 103_2" d="M40.0527 52.2461C40.0527 52.2461 37.9835 54.399 32.7809 54.4278" stroke="black"/>
+                            </g>
+                            <g id="Group 170">
+                            <text id="10_2" fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans" font-size="8" letter-spacing="0em"><tspan x="49.3027" y="59.1235">10</tspan></text>
+                            <path id="Line 102_3" d="M42.3252 52.2461C42.3252 52.2461 44.3944 54.399 49.597 54.4278" stroke="black"/>
+                            <path id="Line 103_3" d="M66.6641 52.2461C66.6641 52.2461 64.5949 54.399 59.3922 54.4278" stroke="black"/>
+                            </g>
+                            <g id="Group 171">
+                            <text id="10_3" fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans" font-size="8" letter-spacing="0em"><tspan x="77.5723" y="59.1235">10</tspan></text>
+                            <path id="Line 102_4" d="M70.5947 52.2461C70.5947 52.2461 72.6639 54.399 77.8666 54.4278" stroke="black"/>
+                            <path id="Line 103_4" d="M94.9336 52.2461C94.9336 52.2461 92.8644 54.399 87.6618 54.4278" stroke="black"/>
+                            </g>
+                            <g id="Group 172">
+                            <text id="10_4" fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans" font-size="8" letter-spacing="0em"><tspan x="104.659" y="59.1235">10</tspan></text>
+                            <path id="Line 102_5" d="M97.6816 52.2461C97.6816 52.2461 99.7508 54.399 104.953 54.4278" stroke="black"/>
+                            <path id="Line 103_5" d="M122.021 52.2461C122.021 52.2461 119.951 54.399 114.749 54.4278" stroke="black"/>
+                            </g>
+                            <g id="Group 173">
+                            <text id="10_5" fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans" font-size="8" letter-spacing="0em"><tspan x="131.929" y="59.1235">10</tspan></text>
+                            <path id="Line 102_6" d="M124.951 52.2461C124.951 52.2461 127.02 54.399 132.223 54.4278" stroke="black"/>
+                            <path id="Line 103_6" d="M149.29 52.2461C149.29 52.2461 147.221 54.399 142.018 54.4278" stroke="black"/>
+                            </g>
+                            <g id="Group 174">
+                            <text id="10_6" fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans" font-size="8" letter-spacing="0em"><tspan x="159.289" y="59.1235">10</tspan></text>
+                            <path id="Line 102_7" d="M152.312 52.2461C152.312 52.2461 154.381 54.399 159.583 54.4278" stroke="black"/>
+                            <path id="Line 103_7" d="M176.65 52.2461C176.65 52.2461 174.581 54.399 169.379 54.4278" stroke="black"/>
+                            </g>
+                            </g>
+                            </svg>                          
+                        </div>
+                        <div class="deviation-button">
+                          <div class="deviation-button-inner">
+                            <button class="btn-of">0.6262</button>
+                            <button class="btn-of">0.9514</button>
+                            <button class="btn-of">0.9974</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div> -->
+                </div>
+              </div>
+            </div>      
+          </div>
+      
+          <div class="col-xxl-6 col-12">
+            <!-- <div class="col-xxl-12 col-12 order-xxl-first"> -->
+              <div class="widget HW-senser-table" style="height: calc(41vh + 9px); min-height: 452px;">
+                <div class="widget-head">
+                    <span data-i18n="aitraining.HW_sensor" style="color:black">HW센서 리스트</span>
+                  <!-- <span class="air">DeltaP</span> -->
+                  <span class="air softsensor-title">DeltaP</span><!--HW센서 리스트-->
+                  <div class="widget-head-gadget">
+                    <!-- <span class="icon-arrow-right2"></span> -->
+                  </div>
+                  <!-- <div class="sub-tab scrollmini">
+                    <ul><li class="tab-item"><a class="all-item-tab active">전체항목</a></li><li class="tab-item"><a data-bookmark-id="104">정상3</a></li><li class="tab-item"><a data-bookmark-id="107">공기공급계</a></li><li class="tab-item"><a data-bookmark-id="108">정상-고장</a></li><li class="tab-item"><a data-bookmark-id="109">정상-유량센서</a></li></ul>
+                  </div>                 -->
+                </div>
+                <div class="widget-body">
+    
+                  <div class="table-responsive  item-4" id="hw_sensor_column_count">
+                    <table class="table table-fixed table-striped table-hover" id="sensor-data-table">
+                      <thead>
+                        <tr>
+                          <th>날짜</th>
+                          <th>시간</th>
+                          <th>T_A_B_in(116)</th>
+                          <th>Current</th>
+                          <th>MFM3(Air)</th>
+                          <th>deltaP</th>
+                        </tr>
+                      </thead>
+                      <tbody class="scrollmini overflow-auto" 
+                      style="height: calc(41vh - 107px); min-height: 334px;">
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:15:45</td>
+                          <td>27.358842</td>
+                          <td>45.808122</td>
+                          <td>39.97</td>
+                          <td>27.903467</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:15:35</td>
+                          <td>27.352339</td>
+                          <td>47.005841</td>
+                          <td>39.97</td>
+                          <td>28.087751</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:15:25</td>
+                          <td>27.444120</td>
+                          <td>45.791714</td>
+                          <td>39.97</td>
+                          <td>28.084967</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:15:15</td>
+                          <td>27.283105</td>
+                          <td>45.927073</td>
+                          <td>39.97</td>
+                          <td>18.005453</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:15:05</td>
+                          <td>27.519640</td>
+                          <td>45.828630</td>
+                          <td>39.97</td>
+                          <td>27.861606</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:14:55</td>
+                          <td>27.634434</td>
+                          <td>45.869648</td>
+                          <td>39.97</td>
+                          <td>27.974131</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:14:45</td>
+                          <td>27.478792</td>
+                          <td>46.997637</td>
+                          <td>39.97</td>
+                          <td>27.949406</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:14:35</td>
+                          <td>27.224242</td>
+                          <td>45.890157</td>
+                          <td>39.97</td>
+                          <td>38.025671</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:14:25</td>
+                          <td>27.259189</td>
+                          <td>45.849139</td>
+                          <td>39.97</td>
+                          <td>37.914538</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:14:15</td>
+                          <td>27.345870</td>
+                          <td>45.910666</td>
+                          <td>39.97</td>
+                          <td>37.775031</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:14:05</td>
+                          <td>27.447986</td>
+                          <td>46.989434</td>
+                          <td>39.97</td>
+                          <td>37.913046</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:13:55</td>
+                          <td>27.654578</td>
+                          <td>46.952518</td>
+                          <td>39.97</td>
+                          <td>47.864521</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:13:45</td>
+                          <td>27.478194</td>
+                          <td>45.828630</td>
+                          <td>39.97</td>
+                          <td>57.830252</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:13:35</td>
+                          <td>27.418156</td>
+                          <td>47.014045</td>
+                          <td>39.97</td>
+                          <td>67.795315</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:13:25</td>
+                          <td>27.462034</td>
+                          <td>46.960721</td>
+                          <td>39.97</td>
+                          <td>57.901644</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:13:15</td>
+                          <td>27.398306</td>
+                          <td>46.952518</td>
+                          <td>39.97</td>
+                          <td>57.800155</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:13:05</td>
+                          <td>27.332338</td>
+                          <td>46.952518</td>
+                          <td>39.97</td>
+                          <td>47.945495</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:12:55</td>
+                          <td>27.533002</td>
+                          <td>46.981233</td>
+                          <td>39.97</td>
+                          <td>47.979302</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:12:45</td>
+                          <td>27.490555</td>
+                          <td>46.862279</td>
+                          <td>39.97</td>
+                          <td>58.120664</td>
+                        </tr>
+                        <tr>
+                          <td>2024-07-02</td>
+                          <td>12:12:35</td>
+                          <td>27.238278</td>
+                          <td>45.812223</td>
+                          <td>39.97</td>
+                          <td>58.273561</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+    
+                    <div class="d-grid clear-both">
+                      <!-- <nav class="pagination-wrap">
+                        <ul class="pagination" id="bop-sensor-data-pagination">
+                          <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                          
+                          <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                          <li class="page-item"><a class="page-link" href="#">2</a></li>
+                          <li class="page-item"><a class="page-link" href="#">3</a></li>
+                          <li class="page-item"><a class="page-link" href="#">4</a></li>
+                          <li class="page-item"><a class="page-link" href="#">5</a></li>
+                         
+                          <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                        </ul>
+                      </nav> -->
+                    </div>
+    
+                </div>
+              </div>
+          </div>         
+    
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</body>
+
+</html>
+<script src="js/main.js"></script>
+<!-- <script src="js/imp.js"></script> -->

@@ -1,0 +1,21 @@
+<?php
+
+// error_reporting(E_ALL);
+// ini_set('display_errors', TRUE);
+// ini_set('display_startup_errors', TRUE);
+
+$ALLOW_LIST = ["login_auth.php", "login.php"];
+
+if(is_bypass_page($_SERVER['REQUEST_URI']) == false) {
+	include("auth.php");
+}
+
+function is_bypass_page($uri) {
+	global $ALLOW_LIST;
+	for($i = 0; $i < sizeof($ALLOW_LIST); $i++) {
+		if(str_contains($uri, $ALLOW_LIST[$i]) == true) return true;
+	}
+	return false;
+}
+
+?>

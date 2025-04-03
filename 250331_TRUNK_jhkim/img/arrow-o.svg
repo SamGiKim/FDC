@@ -1,0 +1,161 @@
+    <svg width="300" height="152" viewBox="0 0 300 152" fill="none" xmlns="http://www.w3.org/2000/svg" class="filter-color">
+        <rect width="100%" height="100%" fill="white"/>
+        <use href="#arrow-o" filter="url(#colorMeGreen)"/>
+        <g  style="mix-blend-mode:color-burn">
+            <use href="#flow">
+                <animateTransform attributeName="transform" type="translate" from="-149 0" to="300 0" dur="3s" repeatCount="indefinite" />  
+            </use>
+            <use href="#flow">
+                <animateTransform attributeName="transform" type="translate" from="-149 0" to="300 0" dur="3s" begin="1s" repeatCount="indefinite" />  
+            </use>
+            <use href="#flow">
+                <animateTransform attributeName="transform" type="translate" from="-149 0" to="300 0" dur="3s" begin="2s" repeatCount="indefinite" />  
+            </use>
+        </g>
+        <defs>
+            <g id="arrow-o">
+                <use href="#Ci" x="12" y="98"/>
+                <use href="#Ci" x="12" y="84"/>
+                <use href="#Ci" x="12" y="70"/>
+                <use href="#Ci" x="12" y="56"/>
+                <use href="#Ci" x="12" y="42"/>
+        
+                <use href="#Ci" x="29" y="98"/>
+                <use href="#Ci" x="29" y="84"/>
+                <use href="#Ci" x="29" y="70"/>
+                <use href="#Ci" x="29" y="56"/>
+                <use href="#Ci" x="29" y="42"/>
+        
+                <use href="#Ci" x="46" y="98"/>
+                <use href="#Ci" x="46" y="84"/>
+                <use href="#Ci" x="46" y="70"/>
+                <use href="#Ci" x="46" y="56"/>
+                <use href="#Ci" x="46" y="42"/>
+        
+                <use href="#Ci" x="63" y="98"/>
+                <use href="#Ci" x="63" y="84"/>
+                <use href="#Ci" x="63" y="70"/>
+                <use href="#Ci" x="63" y="56"/>
+                <use href="#Ci" x="63" y="42"/>
+        
+                <use href="#Ci" x="80" y="98"/>
+                <use href="#Ci" x="80" y="84"/>
+                <use href="#Ci" x="80" y="70"/>
+                <use href="#Ci" x="80" y="56"/>
+                <use href="#Ci" x="80" y="42"/>
+        
+                <use href="#Ci" x="97" y="98"/>
+                <use href="#Ci" x="97" y="84"/>
+                <use href="#Ci" x="97" y="70"/>
+                <use href="#Ci" x="97" y="56"/>
+                <use href="#Ci" x="97" y="42"/>
+        
+                <use href="#Ci" x="114" y="98"/>
+                <use href="#Ci" x="114" y="84"/>
+                <use href="#Ci" x="114" y="70"/>
+                <use href="#Ci" x="114" y="56"/>
+                <use href="#Ci" x="114" y="42"/>
+        
+                <use href="#Ci" x="131" y="98"/>
+                <use href="#Ci" x="131" y="84"/>
+                <use href="#Ci" x="131" y="70"/>
+                <use href="#Ci" x="131" y="56"/>
+                <use href="#Ci" x="131" y="42"/>
+        
+                <use href="#Ci" x="148" y="98"/>
+                <use href="#Ci" x="148" y="84"/>
+                <use href="#Ci" x="148" y="70"/>
+                <use href="#Ci" x="148" y="56"/>
+                <use href="#Ci" x="148" y="42"/>
+        
+                <use href="#Ci" x="165" y="98"/>
+                <use href="#Ci" x="165" y="84"/>
+                <use href="#Ci" x="165" y="70"/>
+                <use href="#Ci" x="165" y="56"/>
+                <use href="#Ci" x="165" y="42"/>
+        
+                <use href="#Ci" x="182" y="98"/>
+                <use href="#Ci" x="182" y="84"/>
+                <use href="#Ci" x="182" y="70"/>
+                <use href="#Ci" x="182" y="56"/>
+                <use href="#Ci" x="182" y="42"/>
+        
+                <use href="#Ci" x="199" y="140"/>
+                <use href="#Ci" x="199" y="126"/>
+                <use href="#Ci" x="199" y="112"/>
+                <use href="#Ci" x="199" y="98"/>
+                <use href="#Ci" x="199" y="84"/>
+                <use href="#Ci" x="199" y="70"/>
+                <use href="#Ci" x="199" y="56"/>
+                <use href="#Ci" x="199" y="42"/>
+                <use href="#Ci" x="199" y="28"/>
+                <use href="#Ci" x="199" y="14"/>
+                <use href="#Ci" x="199" y="0"/>
+        
+                <use href="#Ci" x="216" y="126"/>
+                <use href="#Ci" x="216" y="112"/>
+                <use href="#Ci" x="216" y="98"/>
+                <use href="#Ci" x="216" y="84"/>
+                <use href="#Ci" x="216" y="70"/>
+                <use href="#Ci" x="216" y="56"/>
+                <use href="#Ci" x="216" y="42"/>
+                <use href="#Ci" x="216" y="28"/>
+                <use href="#Ci" x="216" y="14"/>
+        
+                <use href="#Ci" x="233" y="112"/>
+                <use href="#Ci" x="233" y="98"/>
+                <use href="#Ci" x="233" y="84"/>
+                <use href="#Ci" x="233" y="70"/>
+                <use href="#Ci" x="233" y="56"/>
+                <use href="#Ci" x="233" y="42"/>
+                <use href="#Ci" x="233" y="28"/>
+        
+                <use href="#Ci" x="250" y="98"/>
+                <use href="#Ci" x="250" y="84"/>
+                <use href="#Ci" x="250" y="70"/>
+                <use href="#Ci" x="250" y="56"/>
+                <use href="#Ci" x="250" y="42"/>
+        
+                <use href="#Ci" x="267" y="84"/>
+                <use href="#Ci" x="267" y="70"/>
+                <use href="#Ci" x="267" y="56"/>
+        
+                <use href="#Ci" x="284" y="70"/>
+            </g>
+            <g id="flow" clip-path="url(#flow-clip)">
+                <!-- <rect width="149" height="152" fill="white"/>
+                <rect x="-165" width="406" height="152" fill="white"/> -->
+                <path d="M112 0H149L241 76L149 152H112L204 76L112 0Z" fill="black"/>
+                <path d="M-37 0H0L92 76L0 152H-37L55 76L-37 0Z" fill="black"/>
+                <path d="M75 0H112L204 76L112 152H75L167 76L75 0Z" fill="#333333"/>
+                <path d="M-74 0H-37L55 76L-37 152H-74L18 76L-74 0Z" fill="#333333"/>
+                <path d="M38 0H75L167 76L75 152H38L130 76L38 0Z" fill="#555555"/>
+                <path d="M-111 0H-74L18 76L-74 152H-111L-19 76L-111 0Z" fill="#555555"/>
+            </g>
+            <clipPath id="flow-clip">
+                <rect width="149" height="152" fill="white"/>
+            </clipPath>
+            <circle  id="Ci" cx="6" cy="6" r="6" fill="url(#Grad)"/>
+            <radialGradient id="Grad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(6 6) rotate(90) scale(6)">
+                <stop offset="0.0" stop-color="#000000"/>
+                <stop offset="0.5" stop-color="#DDDDDD"/>
+                <stop offset="1.0" stop-color="#FFFFFF"/>
+            </radialGradient>
+            <filter id="colorMeGreen">
+                <feColorMatrix
+                in="SourceGraphic"
+                type="matrix"
+                values="1     0    0     0     0
+                        0     1    0     1     0
+                        0     0    1     0     0
+                        0     0    0     1     0" />
+                <!-- <feColorMatrix type="hueRotate" values="-43deg"/> -->
+                
+            </filter>
+            <style>
+                .filter-color {
+                    filter: hue-rotate(-43deg);
+                }
+            </style>
+        </defs>
+    </svg>

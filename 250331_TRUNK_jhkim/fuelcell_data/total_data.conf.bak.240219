@@ -1,0 +1,300 @@
+[system]
+type=PEMFC
+capacity=1KW
+place=Buan
+date=2023-12-20
+
+[status]
+connection=good
+time=2024-02-19 10:58:29
+
+[qoe]
+qoe=8
+
+[realtime_production]
+e_realtime_production=1005.60
+t_realtime_production=1066.40
+
+[real_per_production]
+e_real_per_production=100.56
+t_real_per_production=51.47
+
+[event]
+P_A_m_out(102)=yellow
+P_A_B_in(105)=green
+Air(%)=yellow
+MFM3(Air)=yellow
+T_A_S_in(113)=green
+T_A_S_out(109)=green
+T_A_vent(115)=green
+DI(%)=green
+Water(%)=green
+T_w_h_in(104)=green
+T_A_B_in(116)=green
+Current=green
+Voltage=red
+T_DI_S_out(108)=green
+T_DI_h_out(107)=green
+T_w_t_in(101)=green
+T_w_t_out(102)=green
+
+[e_total]
+e_production=92432.65
+
+[e_year]
+e_production_2024=92432.65
+
+[e_month]
+e_production_01=38968.40
+e_production_02=53464.25
+e_production_03=0.00
+e_production_04=0.00
+e_production_05=0.00
+e_production_06=0.00
+e_production_07=0.00
+e_production_08=0.00
+e_production_09=0.00
+e_production_10=0.00
+e_production_11=0.00
+e_production_12=0.00
+
+[e_day]
+e_production_01=7461.77
+e_production_02=0.00
+e_production_03=0.00
+e_production_04=0.00
+e_production_05=8734.25
+e_production_06=8677.20
+e_production_07=8677.78
+e_production_08=0.00
+e_production_09=0.00
+e_production_10=0.00
+e_production_11=0.00
+e_production_12=0.00
+e_production_13=0.00
+e_production_14=9565.48
+e_production_15=9525.16
+e_production_16=0.00
+e_production_17=0.00
+e_production_18=0.00
+e_production_19=822.61
+e_production_20=0.00
+e_production_21=0.00
+e_production_22=0.00
+e_production_23=0.00
+e_production_24=0.00
+e_production_25=0.00
+e_production_26=0.00
+e_production_27=0.00
+e_production_28=0.00
+e_production_29=0.00
+e_production_30=0.00
+e_production_31=0.00
+
+[e_hour]
+e_production_00=0.00
+e_production_01=0.00
+e_production_02=0.00
+e_production_03=0.00
+e_production_04=0.00
+e_production_05=0.00
+e_production_06=0.00
+e_production_07=0.00
+e_production_08=0.00
+e_production_09=0.00
+e_production_10=822.61
+e_production_11=0.00
+e_production_12=0.00
+e_production_13=0.00
+e_production_14=0.00
+e_production_15=0.00
+e_production_16=0.00
+e_production_17=0.00
+e_production_18=0.00
+e_production_19=0.00
+e_production_20=0.00
+e_production_21=0.00
+e_production_22=0.00
+e_production_23=0.00
+
+[t_total]
+t_production=97372.83
+
+[t_year]
+t_production_2024=97372.83
+
+[t_month]
+t_production_01=40928.39
+t_production_02=56444.44
+t_production_03=0.00
+t_production_04=0.00
+t_production_05=0.00
+t_production_06=0.00
+t_production_07=0.00
+t_production_08=0.00
+t_production_09=0.00
+t_production_10=0.00
+t_production_11=0.00
+t_production_12=0.00
+
+[t_day]
+t_production_01=7849.93
+t_production_02=0.00
+t_production_03=0.00
+t_production_04=0.00
+t_production_05=9275.99
+t_production_06=9107.18
+t_production_07=9122.33
+t_production_08=0.00
+t_production_09=0.00
+t_production_10=0.00
+t_production_11=0.00
+t_production_12=0.00
+t_production_13=0.00
+t_production_14=10164.26
+t_production_15=10049.91
+t_production_16=0.00
+t_production_17=0.00
+t_production_18=0.00
+t_production_19=874.84
+t_production_20=0.00
+t_production_21=0.00
+t_production_22=0.00
+t_production_23=0.00
+t_production_24=0.00
+t_production_25=0.00
+t_production_26=0.00
+t_production_27=0.00
+t_production_28=0.00
+t_production_29=0.00
+t_production_30=0.00
+t_production_31=0.00
+
+[t_hour]
+t_production_00=0.00
+t_production_01=0.00
+t_production_02=0.00
+t_production_03=0.00
+t_production_04=0.00
+t_production_05=0.00
+t_production_06=0.00
+t_production_07=0.00
+t_production_08=0.00
+t_production_09=0.00
+t_production_10=874.84
+t_production_11=0.00
+t_production_12=0.00
+t_production_13=0.00
+t_production_14=0.00
+t_production_15=0.00
+t_production_16=0.00
+t_production_17=0.00
+t_production_18=0.00
+t_production_19=0.00
+t_production_20=0.00
+t_production_21=0.00
+t_production_22=0.00
+t_production_23=0.00
+
+[e_year_operation]
+e_production_stacked=92432.65
+
+[e_month_operation]
+e_production_stacked=53464.25
+
+[e_day_operation]
+e_production_stacked=822.61
+
+
+#총량설정(capacity)[발전량/가동률]
+[e_total_capacity]
+e_production_capacity=1474974.72
+
+[e_year_capacity]
+e_production_capacity=1186974.72
+
+[e_month_capacity]
+e_production_capacity=442974.72
+
+[e_day_capacity]
+e_production_capacity=10974.72
+
+[alarm]
+time^_^comment^_^status
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 17:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-15 17:45:00^_^스택 측정을 완료했습니다. 전압이 너무 낮습니다.^_^비상
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 17:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-15 17:45:00^_^스택 측정을 완료했습니다. 전압이 너무 낮습니다.^_^비상
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 17:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-15 17:45:00^_^스택 측정을 완료했습니다. 전압이 너무 낮습니다.^_^비상
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 17:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-15 17:45:00^_^스택 측정을 완료했습니다. 전압이 너무 낮습니다.^_^비상
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 17:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-15 17:45:00^_^스택 측정을 완료했습니다. 전압이 너무 낮습니다.^_^비상
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 17:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-15 17:45:00^_^스택 측정을 완료했습니다. 전압이 너무 낮습니다.^_^비상
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+2023-11-14 16:00:00^_^스택 측정을 시작했습니다.^_^정상
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:27:00^_^"MFM 후단 누설" 확인이 필요합니다.^_^점검요망
+2023-11-14 16:45:00^_^스택 측정을 완료했습니다. 공기량을 확인해 주십시오.^_^경고
+
+[BOP]
+#스택모듈
+A-current=40.00
+V-volt=25.14
+#공기공급계
+T_A_B_in=25.29
+P_A_B_in=-0.64
+P_A_m_out=6.62
+MFM-Air=45.69
+Pump-Air=45.62
+#물관리계
+T_A_S_out=56.37
+T_A_S_in=49.82
+P_A_S_in=6.35
+T_A_vent=38.16
+#열관리계
+T_DI_S_in=52.53
+MFM-DI=1.67
+Pump-DI=34.88
+T_DI_S_out=59.94
+T_DI_h_out=52.89
+MFM-Water=0.41
+Pump-Water=13.05
+T_w_h_out=58.78

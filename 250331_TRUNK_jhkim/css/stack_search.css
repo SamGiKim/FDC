@@ -1,0 +1,8 @@
+/* stack_search.css */
+.hashtag.drag-over-left {
+  border-left: 4px solid #26355D; /* 왼쪽에 선을 표시 */
+}
+
+.hashtag.drag-over-right {
+  border-right: 4px solid #26355D /* 오른쪽에 선을 표시 */
+}

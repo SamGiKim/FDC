@@ -1,0 +1,90 @@
+@startuml
+!define ENTITY_COLOR #E0FFFF
+!define RELATIONSHIP_COLOR #A9A9A9
+
+skinparam class {
+    BackgroundColor ENTITY_COLOR
+    ArrowColor RELATIONSHIP_COLOR
+    BorderColor Gray
+}
+
+skinparam note {
+    BackgroundColor LightYellow
+    BorderColor Gray
+}
+
+' Top level
+entity "powerplants" as P {
+    * powerplant_id : VARCHAR(10) <<PK>>
+    --
+    powerplant_name : VARCHAR(100)
+    address : VARCHAR(255)
+    reg_date : DATE
+    fuelcell_count : INT
+    total_e_capacity : VARCHAR(50)
+    total_t_capacity : VARCHAR(50)
+}
+
+' Middle level
+entity "fuelcell_groups" as FG {
+    * group_id : VARCHAR(10) <<PK>>
+    --
+    group_name : VARCHAR(100)
+    reg_date : DATE
+    e_group_capacity : FLOAT
+    t_group_capacity : FLOAT
+}
+
+' Bottom level
+entity "fuelcells" as F {
+    * fuelcell_id : VARCHAR(10) <<PK>>
+    --
+    group_id : VARCHAR(10) <<FK>>
+    fuelcell_name : VARCHAR(100)
+    powerplant_id : VARCHAR(10) <<FK>>
+    address : VARCHAR(255)
+    install_date : DATE
+    reg_date : DATE
+    e_capacity : FLOAT
+    t_capacity : FLOAT
+}
+
+' User related entities (grouped on the right)
+entity "users" as U {
+    * user_id : INT <<PK>>
+    --
+    account_id : VARCHAR(50) <<UNI>>
+    user_name : VARCHAR(50)
+    password : VARCHAR(255)
+    role : ENUM('Admin', 'LocalAdmin', 'User')
+    activation_status : BOOLEAN
+    login_attempts : INT
+    last_login : TIMESTAMP
+    reg_date : DATE
+    email : VARCHAR(255)
+    phone : VARCHAR(20)
+}
+
+entity "user_groups" as UG {
+    * account_id : VARCHAR(50) <<FK>>
+    * group_id : VARCHAR(10) <<FK>>
+}
+
+entity "user_powerplants" as UP {
+    * account_id : VARCHAR(50) <<FK>>
+    * powerplant_id : VARCHAR(10) <<FK>>
+}
+
+' Relationships
+P "1" -- "N" FG : contains
+FG "1" -- "N" F : contains
+U "1" -- "N" UG : has
+U "1" -- "N" UP : has
+FG "1" -- "N" UG : associated with
+P "1" -- "N" UP : associated with
+
+note bottom of F : e_capacity, t_capacity\n => group capacities
+note bottom of FG : e_group_capacity, t_group_capacity\n => powerplant total capacities
+note bottom of P : total_e_capacity,total_t_capacity\n => sum of group capacities
+
+@enduml

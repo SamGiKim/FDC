@@ -1,0 +1,1401 @@
+<?php 
+    include_once("./login_module/auth.php");
+?>
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./../css/common.css" rel="stylesheet">
+  <link href="./../css/main.css" rel="stylesheet">
+  <!-- <link href="./css/diagram.css" rel="stylesheet"> -->
+  <link href="./../css/index-mid.css" rel="stylesheet">
+
+  <script src="./../js/bootstrap.js"></script>
+  <!-- <script src="js/include.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- <script type="module" src="./js/control_system/parent_dataManager.js"></script> 관제 시스템 데이터 매니징 -->
+  <!-- <script type="module" src="./js/control_system/parent_bar.js"></script> 관제 시스템 페이지 바 그래프 -->
+  <!-- <script type="module" src="./js/control_system/parent_realTime.js"></script> 관제 시스템 페이지 도넛, 가로막대 그래프 -->
+  <!-- <script type="module" src="./js/control_system/parent_eventManager.js"></script> 관제 시스템 페이지 이벤트 -->
+  <title>FuelCellDR. : Dashboard</title>
+
+</head>
+
+<body>
+  <header>
+    <!-- <nav include-html="./components/nav.html"></nav>  -->
+    <nav class="navbar navbar-expand-xxl bg-body-tertiary">
+      <div class="container-fluid">
+        <div class="logo-container">
+          <a href="./index.html">
+            <div class="logo"></div>
+          </a>
+        </div>
+        <h2 class="header-title">
+          <!-- 부안발전소 연료전지 관제 시스템&ZeroWidthSpace; -->
+          <!-- Buan Power Station&ZeroWidthSpace; -->
+        </h2>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler"
+          aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarToggler">
+          <ul class="navbar-nav">
+            <li><a href="./" class="active-link"><span class="icon-dashboard-04"></span>Dashboard</a></li>
+            <li><a href="./expendables.html"><span class="icon-machine-manage"></span>Expendables</a></li>
+            <li><a href="./setting.html"><span class="icon-device-manage"></span>Setting</a></li>
+            <!-- <li><a href="analyze.html"><span class="icon-h2s-realtime-chart"></span>분석</a></li> -->
+            <!-- <li><a href="#"><span class="icon-device-manage"></span>장치관리</a></li> -->
+          </ul>
+          <div class="login">
+            <div class="site-select">
+              <select id="site-select" onchange='location.href = this.value;'>
+                <option value="" selected>Buan PS</option>
+                <option value="./../index.html?selected=1">Buan#1</option>
+                <option value="./../index.html?selected=2">Buan#2</option>
+                <select>
+            </div>
+            <button class="btn btn-primary float-end"><span class="icon-exit"></span><span
+                class="xxl-only">Logout</span></button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main class="front">
+    <div class="row">
+      <div class="col-xxl-4 col-12">
+        <div class="row">
+          <div class="col-xxl-12 col-12">
+            <div class="widget front-realtime-EG wh--2">
+              <div class="widget-head">
+                Real Time Production / Operating Rate
+                <div class="widget-head-gadget">
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                 <div style="height: 50%">
+
+                    <div class="graph">
+
+                      <div id="current">
+                          <div style="" class="input-part">
+                              <!-- <input class="input-percent" type="number" placeholder="percent" value="88" min="0" max="100" onchange="gaugeChart('#current')" style="display: none;"> -->
+                              <input class="input-percent" type="number" placeholder="percent" value="80" min="0" max="100"  style="display: none;">
+                              <!-- <input class="input-kW" type="number" placeholder="kW" value="110" min="0" onchange="gaugeChart('#current')" style="display: none;"> -->
+                              <input class="input-kW" type="number" placeholder="kW" value="23" min="0"  style="display: none;">
+                          </div>
+                          <div class="percent-circle" id="heat-graph">
+                              <svg class="svg-part">
+                                  <circle class="back" cx="100" cy="100" r="91"/>
+                                  <circle class="percent" cx="100" cy="100" r="0" stroke="#C90000"/>
+                              </svg>
+                              <div class="text-part">
+                                  <div>
+                                      <div class="current-svg"></div>
+                                      <span class="text-kW">110</span><sup>kW</sup>
+                                      <hr>
+                                      <span class="text-percent">88</span><sup>%</sup>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  
+                      <div id="heat">
+                          <div class="input-part">
+                              <!-- <input class="input-percent" type="number" placeholder="percent" value="88" min="0" max="100" onchange="gaugeChart('#heat')" style="display: none;"> -->
+                              <input class="input-percent" type="number" placeholder="percent" value="80" min="0" max="100" style="display: none;">
+                              <!-- <input class="input-kW" type="number" placeholder="kW" value="110" min="0" onchange="gaugeChart('#heat')" style="display: none;"> -->
+                              <input class="input-kW" type="number" placeholder="kW" value="23" min="0" style="display: none;">
+                          </div>
+                          <div class="percent-circle" id="heat-graph">
+                              <svg class="svg-part">
+                                  <circle class="back" cx="100" cy="100" r="91"/>
+                                  <circle class="percent" cx="100" cy="100" r="0" stroke=""/>
+                              </svg>
+                              <div class="text-part">
+                                  <div>
+                                      <div class="heat-svg"></div>
+                                      <span class="text-kW">110</span><sup>kW</sup>
+                                      <hr>
+                                      <span class="text-percent">88</span><sup>%</sup>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  <script>
+
+                    const gaugeChart = (kind) => {
+                        const input = document.querySelector(kind + ' .input-percent')
+                        const inputkW = document.querySelector(kind + ' .input-kW')
+                        const circle = document.querySelector(kind + ' .percent')
+                        const textkW = document.querySelector(kind + ' .text-kW')
+                        const textPercent = document.querySelector(kind + ' .text-percent');
+
+                        let angle = parseFloat(input.value) || 0
+                        const radius = 91
+                        const circumference = 2 * Math.PI * radius
+                        const strokeOffset = (1 / 4) * circumference
+                        const strokeDasharray = (angle / 100) * circumference
+                    
+                        circle.setAttribute('r', 91)
+                        circle.setAttribute('stroke-dasharray', [
+                          strokeDasharray,
+                          circumference - strokeDasharray
+                        ])
+                        circle.setAttribute('stroke-dashoffset', strokeOffset)
+                    
+                        textPercent.innerHTML = input.value
+                        textkW.innerHTML = inputkW.value
+                    }
+                    
+                    gaugeChart('#current')
+                    gaugeChart('#heat')
+                    
+                  </script>                    
+                </div>
+              
+                <div style="height: calc(50% - 10px); margin-top: 10px;">
+                  <!-- 실시간 전기/열 생산량 그래프 -->
+                  <canvas id="e_t_hour_1" height="100%"></canvas>
+                </div>
+                <script>
+                  document.addEventListener('DOMContentLoaded', function () {
+                      const ctx = document.getElementById('e_t_hour_1').getContext('2d');
+                      
+                      const hours = Array.from({length: 24}, (_, i) => i);
+                      
+                      // 부드러운 곡선을 위한 데이터 생성 함수
+                      function generateSmoothData(length, max, min) {
+    let data = [];
+    for (let i = 0; i < length; i++) {
+        let value = Math.sin((i / (length - 1)) * Math.PI) * ((max - min) / 2) + (max + min) / 2;
+        value = Math.round(value);
+        data.push(i < 19 ? value : null);
+    }
+    return data;
+}
+
+            const electricityData = generateSmoothData(24, 125, 95);
+            const heatData = generateSmoothData(24, 125, 95);
+
+            // 18시 데이터를 110으로 강제 설정
+            electricityData[18] = 110;
+            heatData[18] = 110;
+                  
+                      new Chart(ctx, {
+                          type: 'bar',
+                          data: {
+                              labels: hours.map(h => `${h}`),
+                              datasets: [
+                                  {
+                                      label: '전력생산량',
+                                      data: electricityData,
+                                      backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                      borderColor: 'rgba(0, 123, 255, 1)',
+                                      borderWidth: 1,
+                                      type: 'bar',
+                                      yAxisID: 'y-electricity',
+                                  },
+                                  {
+                                      label: '전력생산량',
+                                      data: electricityData,
+                                      borderColor: 'rgba(0, 123, 255, 1)',
+                                      borderWidth: 2,
+                                      type: 'line',
+                                      fill: false,
+                                      pointRadius: 0,
+                                      yAxisID: 'y-electricity',
+                                      tension: 0.4, // 곡선을 더 부드럽게
+                                  },
+                                  {
+                                      label: '열생산량',
+                                      data: heatData,
+                                      backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                                      borderColor: 'rgba(255, 0, 0, 1)',
+                                      borderWidth: 1,
+                                      type: 'bar',
+                                      yAxisID: 'y-heat',
+                                  },
+                                  {
+                                      label: '열생산량',
+                                      data: heatData,
+                                      borderColor: 'rgba(255, 0, 0, 1)',
+                                      borderWidth: 2,
+                                      type: 'line',
+                                      fill: false,
+                                      pointRadius: 0,
+                                      yAxisID: 'y-heat',
+                                      tension: 0.4, // 곡선을 더 부드럽게
+                                  }
+                              ]
+                          },
+                          options: {
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              scales: {
+                                  x: {
+                                      title: {
+                                          display: true,
+                                          text: '시간'
+                                      }
+                                  },
+                                  'y-electricity': {
+                                      type: 'linear',
+                                      position: 'left',
+                                      title: {
+                                          display: true,
+                                          text: '전력생산량 (kW)'
+                                      },
+                                      min: 0,
+                                      max: 150,
+                                  },
+                                  'y-heat': {
+                                      type: 'linear',
+                                      position: 'right',
+                                      title: {
+                                          display: true,
+                                          text: '열생산량 (kW)'
+                                      },
+                                      min: 0,
+                                      max: 150,
+                                      grid: {
+                                          drawOnChartArea: false,
+                                      },
+                                  }
+                              },
+                              plugins: {
+                                  legend: {
+                                      display: true,
+                                      position: 'top',
+                                      labels: {
+                                          filter: function(item, chart) {
+                                              return item.datasetIndex % 2 === 0;
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      });
+                  });
+                  </script>
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-12 col-12">
+            <div class="widget front-day-EG wh--1">
+              <div class="widget-head">
+                Daily Energy Generation
+                <div class="widget-head-gadget">
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div style="height: 200px; padding-bottom: 10px;">
+                  <canvas id="e_t_day_1"></canvas>
+              </div>
+              <script>
+              document.addEventListener('DOMContentLoaded', function () {
+                  const ctx = document.getElementById('e_t_day_1').getContext('2d');
+                  
+                  const days = Array.from({length: 31}, (_, i) => i + 1);
+                  const currentDay = 5; // 8월 5일까지의 데이터만 표시
+              
+                  function generateSmoothData(length, max, min, currentDay) {
+                      let data = [];
+                      for (let i = 0; i < length; i++) {
+                          if (i < currentDay) {
+                              let value = Math.sin(i / (currentDay / 2) * Math.PI) * ((max - min) / 2) + (max + min) / 2;
+                              value = Math.round(value * 10) / 10; // 소수점 첫째자리까지 반올림
+                              data.push(value);
+                          } else {
+                              data.push(null);
+                          }
+                      }
+                      return data;
+                  }
+              
+                  const electricityData = generateSmoothData(31, 3000, 1000, currentDay);
+                  const heatData = generateSmoothData(31, 2800, 1200, currentDay);
+              
+                  new Chart(ctx, {
+                      type: 'bar',
+                      data: {
+                          labels: days.map(d => `${d}`),
+                          datasets: [
+                              {
+                                  label: '전력생산량',
+                                  data: electricityData,
+                                  backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                  borderColor: 'rgba(0, 123, 255, 1)',
+                                  borderWidth: 1,
+                                  type: 'bar',
+                                  yAxisID: 'y-electricity',
+                              },
+                              {
+                                  label: '전력생산량',
+                                  data: electricityData,
+                                  borderColor: 'rgba(0, 123, 255, 1)',
+                                  borderWidth: 2,
+                                  type: 'line',
+                                  fill: false,
+                                  pointRadius: 0,
+                                  yAxisID: 'y-electricity',
+                                  tension: 0.4,
+                              },
+                              {
+                                  label: '열생산량',
+                                  data: heatData,
+                                  backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                                  borderColor: 'rgba(255, 0, 0, 1)',
+                                  borderWidth: 1,
+                                  type: 'bar',
+                                  yAxisID: 'y-heat',
+                              },
+                              {
+                                  label: '열생산량',
+                                  data: heatData,
+                                  borderColor: 'rgba(255, 0, 0, 1)',
+                                  borderWidth: 2,
+                                  type: 'line',
+                                  fill: false,
+                                  pointRadius: 0,
+                                  yAxisID: 'y-heat',
+                                  tension: 0.4,
+                              }
+                          ]
+                      },
+                      options: {
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          scales: {
+                              x: {
+                                  title: {
+                                      display: true,
+                                      text: '일'
+                                  }
+                              },
+                              'y-electricity': {
+                                  type: 'linear',
+                                  position: 'left',
+                                  title: {
+                                      display: true,
+                                      text: '전력생산량 (kWh)'
+                                  },
+                                  min: 0,
+                                  max: 3500,
+                              },
+                              'y-heat': {
+                                  type: 'linear',
+                                  position: 'right',
+                                  title: {
+                                      display: true,
+                                      text: '열생산량 (kWh)'
+                                  },
+                                  min: 0,
+                                  max: 3500,
+                                  grid: {
+                                      drawOnChartArea: false,
+                                  },
+                              }
+                          },
+                          plugins: {
+                              legend: {
+                                  display: true,
+                                  position: 'top',
+                                  labels: {
+                                      filter: function(item, chart) {
+                                          return item.datasetIndex % 2 === 0;
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  });
+              });
+              </script>
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-12 col-12">
+            <div class="widget front-month-EG wh--1">
+              <div class="widget-head">
+                Monhtly Energy Generation
+                <div class="widget-head-gadget">
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div style="height: 200px; padding-bottom: 10px;">
+                  <canvas id="e_t_month_1"></canvas>
+              </div>
+              <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+              <script>
+              document.addEventListener('DOMContentLoaded', function () {
+                  const ctx = document.getElementById('e_t_month_1').getContext('2d');
+                  
+                  const months = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+                  const currentMonth = 7; // 8월(인덱스는 0부터 시작하므로 7)
+              
+                  function generateSmoothData(length, max, min, currentMonth) {
+                      let data = [];
+                      for (let i = 0; i < length; i++) {
+                          if (i <= currentMonth) {
+                              let value = Math.sin(i / (currentMonth / 2) * Math.PI) * ((max - min) / 2) + (max + min) / 2;
+                              value = Math.round(value * 10) / 10; // 소수점 첫째자리까지 반올림
+                              data.push(value);
+                          } else {
+                              data.push(null);
+                          }
+                      }
+                      return data;
+                  }
+              
+                  const electricityData = generateSmoothData(12, 125, 35, currentMonth);
+                  const heatData = generateSmoothData(12, 115, 45, currentMonth);
+              
+                  new Chart(ctx, {
+                      type: 'bar',
+                      data: {
+                          labels: months,
+                          datasets: [
+                              {
+                                  label: '전력생산량',
+                                  data: electricityData,
+                                  backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                                  borderColor: 'rgba(0, 123, 255, 1)',
+                                  borderWidth: 1,
+                                  type: 'bar',
+                                  yAxisID: 'y-electricity',
+                              },
+                              {
+                                  label: '전력생산량',
+                                  data: electricityData,
+                                  borderColor: 'rgba(0, 123, 255, 1)',
+                                  borderWidth: 2,
+                                  type: 'line',
+                                  fill: false,
+                                  pointRadius: 0,
+                                  yAxisID: 'y-electricity',
+                                  tension: 0.4,
+                              },
+                              {
+                                  label: '열생산량',
+                                  data: heatData,
+                                  backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                                  borderColor: 'rgba(255, 0, 0, 1)',
+                                  borderWidth: 1,
+                                  type: 'bar',
+                                  yAxisID: 'y-heat',
+                              },
+                              {
+                                  label: '열생산량',
+                                  data: heatData,
+                                  borderColor: 'rgba(255, 0, 0, 1)',
+                                  borderWidth: 2,
+                                  type: 'line',
+                                  fill: false,
+                                  pointRadius: 0,
+                                  yAxisID: 'y-heat',
+                                  tension: 0.4,
+                              }
+                          ]
+                      },
+                      options: {
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          scales: {
+                              x: {
+                                  title: {
+                                      display: true,
+                                      text: '월'
+                                  }
+                              },
+                              'y-electricity': {
+                                  type: 'linear',
+                                  position: 'left',
+                                  title: {
+                                      display: true,
+                                      text: '전력생산량 (MWh)'
+                                  },
+                                  min: 0,
+                                  max: 150,
+                              },
+                              'y-heat': {
+                                  type: 'linear',
+                                  position: 'right',
+                                  title: {
+                                      display: true,
+                                      text: '열생산량 (MWh)'
+                                  },
+                                  min: 0,
+                                  max: 150,
+                                  grid: {
+                                      drawOnChartArea: false,
+                                  },
+                              }
+                          },
+                          plugins: {
+                              legend: {
+                                  display: true,
+                                  position: 'top',
+                                  labels: {
+                                      filter: function(item, chart) {
+                                          return item.datasetIndex % 2 === 0;
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  });
+              });
+              </script>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xxl-4 col-12">
+        <div class="row">
+          <div class="col-xxl-12 col-12">
+            <div class="widget front-system-state wh--2">
+              <div class="widget-head">
+                PS Status
+                <div class="widget-head-gadget">
+                  <span class="icon-arrow-right2"></span>
+                </div>
+              </div>
+              <div class="widget-body">
+                <div
+                  style="height: 120px;
+                  width: calc(100% + 20px);
+                  margin: -10px -10px 10px;
+                  position: relative;
+                  background-repeat: repeat-x;
+                  background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAB4BAMAAADBFoWzAAAAFVBMVEWZ7f+38v+x8f+m7/+f7v+t8P+r8P9HSMqoAAAAGUlEQVQI12MQwAoVoDCAIYHBAAodwHCIAwDCLgNhoRH99AAAAABJRU5ErkJggg==');">
+                  <div style="position: absolute;bottom: -5px;right: 0;">
+                    <img src="./../img/imageSVG-noCondo.svg" style="width: calc(100% + 6px);">
+                  </div>
+                  <h2 class="title"
+                  style="
+                    position: absolute;
+                    font-weight: bold;
+                    padding: 15px 10px;
+                  " 
+                  >Buan Power Station</h2>
+                </div>
+                <div class="contents-outer">
+                  <div class="row">
+                    <div class="col-10">
+                      <table class="top">
+                        <tbody>
+                          <tr>
+                            <th style="font-size: 13px;" title="Operation<">Operation</th>
+                            <th style="font-size: 13px;" title="Good<">Good</th>
+                            <th style="font-size: 13px;" title="Caution<">Caution</th>
+                            <th style="font-size: 13px;" title="Warning<">Warning</th>
+                            <th style="font-size: 13px;" title="Critical<">Critical</th>
+                            <th style="font-size: 13px;" title="Not Working<">Not <wbr>Working</th>
+
+                            <!-- <th style="font-size: 13px; min-width: 40px; overflow: hidden; text-overflow: ellipsis;" title="Operation<">Operation</th> -->
+                            <!-- <th style="font-size: 13px; min-width: 40px; overflow: hidden; text-overflow: ellipsis;" title="Good<">Good</th> -->
+                            <!-- <th style="font-size: 13px; min-width: 40px; overflow: hidden; text-overflow: ellipsis;" title="Caution<">Caution</th> -->
+                            <!-- <th style="font-size: 13px; min-width: 40px; overflow: hidden; text-overflow: ellipsis;" title="Warning<">Warning</th> -->
+                            <!-- <th style="font-size: 13px; min-width: 40px; overflow: hidden; text-overflow: ellipsis;" title="Critical<">Critical</th> -->
+                            <!-- <th style="font-size: 13px; min-width: 40px; overflow: hidden; text-overflow: ellipsis;" title="Not Working<">Not <wbr>Working</th> -->
+                             
+                          </tr>
+                          <tr>
+                            <td class="total-count">25</td>
+                            <td class="normal-C">23</td>
+                            <td class="watchout-C">0</td>
+                            <td class="warning-C">0</td>
+                            <td class="critical-C">0</td>
+                            <td>2</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div class="col-2">
+                      <table class="bottom">
+                        <tbody>
+                          <tr>
+                            <th style="font-size: 13px;">Operation<br>Rate</th>
+                          </tr>
+                          <tr>
+                            <td>80<sup>%</sup></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <table class="table table-striped etc-info" style="    width: 95%;
+                margin: auto;">
+                  <tr>
+                    <td>Address</td>
+                    <td>전라북도 부안군</td>
+                  </tr>
+                  <tr>
+                    <td>Date Duration</td>
+                    <td>218일(2024.08.05)</td>
+                  </tr>
+                  <tr>
+                    <td>Type</td>
+                    <td>PEM</td>
+                  </tr>
+                  <tr>
+                    <td>Quantity</td>
+                    <td>25</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-12 col-12">
+            <div class="widget front-alram-state wh--1">
+              <div class="widget-head">
+                <!-- 알람 현황 -->
+                State Monitoring
+                <div class="widget-head-gadget widget-head-gadget-alarm">
+                  <!-- <button class="mini all-C">전항목</button>
+                  <div class="btn-wrapper">
+                    <button class="mini normal-C">정상</button>
+                    <button class="mini watchout-C">점검요망</button>
+                    <button class="mini warning-C">경고</button>
+                    <button class="mini critical-C">비상</button>
+                  </div>
+                  <select id="alarmCountSelect">
+                    <option value="전체" selected="selected">전체</option>
+                    <option value="10">10개</option>
+                    <option value="20">20개</option>
+                    <option value="30">30개</option>
+                    <option value="40">40개</option>
+                  </select>
+                  <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="normal-state">
+                  <div class="layout">
+                    <div class="animation">
+                      <img src="./../img/arrow-o.svg" alt="">
+                      <!-- <svg width="268" height="152" viewBox="0 0 268 152" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="arrow-o">
+                        <g id="Group 394">
+                        <circle id="Ellipse 205" cx="1" cy="104" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 206" cx="1" cy="90" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 207" cx="1" cy="76" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 208" cx="1" cy="62" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 209" cx="1" cy="48" r="1" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 395">
+                        <circle id="Ellipse 205_2" cx="17" cy="104" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 206_2" cx="17" cy="90" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 207_2" cx="17" cy="76" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 208_2" cx="17" cy="62" r="1" fill="#C9D816"/>
+                        <circle id="Ellipse 209_2" cx="17" cy="48" r="1" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 396">
+                        <circle id="Ellipse 205_3" cx="34" cy="104" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 206_3" cx="34" cy="90" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 207_3" cx="34" cy="76" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 208_3" cx="34" cy="62" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 209_3" cx="34" cy="48" r="2" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 397">
+                        <circle id="Ellipse 205_4" cx="50" cy="104" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 206_4" cx="50" cy="90" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 207_4" cx="50" cy="76" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 208_4" cx="50" cy="62" r="2" fill="#C9D816"/>
+                        <circle id="Ellipse 209_4" cx="50" cy="48" r="2" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 398">
+                        <circle id="Ellipse 205_5" cx="67" cy="104" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 206_5" cx="67" cy="90" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 207_5" cx="67" cy="76" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 208_5" cx="67" cy="62" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 209_5" cx="67" cy="48" r="3" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 399">
+                        <circle id="Ellipse 205_6" cx="83" cy="104" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 206_6" cx="83" cy="90" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 207_6" cx="83" cy="76" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 208_6" cx="83" cy="62" r="3" fill="#C9D816"/>
+                        <circle id="Ellipse 209_6" cx="83" cy="48" r="3" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 400">
+                        <circle id="Ellipse 205_7" cx="100" cy="104" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 206_7" cx="100" cy="90" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 207_7" cx="100" cy="76" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 208_7" cx="100" cy="62" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 209_7" cx="100" cy="48" r="4" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 401">
+                        <circle id="Ellipse 205_8" cx="116" cy="104" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 206_8" cx="116" cy="90" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 207_8" cx="116" cy="76" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 208_8" cx="116" cy="62" r="4" fill="#C9D816"/>
+                        <circle id="Ellipse 209_8" cx="116" cy="48" r="4" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 402">
+                        <circle id="Ellipse 205_9" cx="133" cy="104" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 206_9" cx="133" cy="90" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 207_9" cx="133" cy="76" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 208_9" cx="133" cy="62" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 209_9" cx="133" cy="48" r="5" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 403">
+                        <circle id="Ellipse 205_10" cx="149" cy="104" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 206_10" cx="149" cy="90" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 207_10" cx="149" cy="76" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 208_10" cx="149" cy="62" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 209_10" cx="149" cy="48" r="5" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 404">
+                        <circle id="Ellipse 205_11" cx="166" cy="104" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 206_11" cx="166" cy="90" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 207_11" cx="166" cy="76" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 208_11" cx="166" cy="62" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 209_11" cx="166" cy="48" r="6" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 405">
+                        <circle id="Ellipse 205_12" cx="182" cy="146" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 206_12" cx="182" cy="132" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 207_12" cx="182" cy="118" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 208_12" cx="182" cy="104" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 209_12" cx="182" cy="90" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 210" cx="182" cy="76" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 211" cx="182" cy="62" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 212" cx="182" cy="48" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 213" cx="182" cy="34" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 214" cx="182" cy="20" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 215" cx="182" cy="6" r="6" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 406">
+                        <circle id="Ellipse 205_13" cx="198" cy="132" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 206_13" cx="198" cy="118" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 207_13" cx="198" cy="104" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 208_13" cx="198" cy="90" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 209_13" cx="198" cy="76" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 210_2" cx="198" cy="62" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 211_2" cx="198" cy="48" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 212_2" cx="198" cy="34" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 213_2" cx="198" cy="20" r="6" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 407">
+                        <circle id="Ellipse 205_14" cx="214" cy="118" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 206_14" cx="214" cy="104" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 207_14" cx="214" cy="90" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 208_14" cx="214" cy="76" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 209_14" cx="214" cy="62" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 210_3" cx="214" cy="48" r="6" fill="#C9D816"/>
+                        <circle id="Ellipse 211_3" cx="214" cy="34" r="6" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 408">
+                        <circle id="Ellipse 207_15" cx="231" cy="104" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 208_15" cx="231" cy="90" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 209_15" cx="231" cy="76" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 210_4" cx="231" cy="62" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 211_4" cx="231" cy="48" r="5" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 409">
+                        <circle id="Ellipse 209_16" cx="247" cy="90" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 210_5" cx="247" cy="76" r="5" fill="#C9D816"/>
+                        <circle id="Ellipse 211_5" cx="247" cy="62" r="5" fill="#C9D816"/>
+                        </g>
+                        <g id="Group 410">
+                        <circle id="Ellipse 211_6" cx="264" cy="76" r="4" fill="#C9D816"/>
+                        </g>
+                        </g>
+                      </svg> -->
+                    </div>
+                    <div class="text-part">
+                      <div class="volt">551<sub>v</sub></div>
+                      <div class="ampere">40<sub>A</sub></div>
+                    </div>
+                    <h2>
+                      <!-- 현재 발견된 문제가 없습니다 -->
+                       No issues found
+                    </h2>
+                  </div>
+                </div>
+                <div class="warning-state" style="display: none;">
+                  <div class="numbering">
+                    <a href="#" class="">1</a>
+                    <a href="#" class="">2</a>
+                    <a href="#" class="active">3</a>
+                    <a href="#" class="">4</a>
+                    <a href="#" class="">5</a>
+                    <a href="#" class="">6</a>
+                  </div>
+                  <div class="vertical-div">
+                    <div class="switch">
+                      <a href="#">❮</a>
+                    </div>
+                    <div class="alert">
+                      <h4>부안 > 1호기</h4>
+                      <h1><a href="#">유압 센서(2) 고장</a></h1>
+                      <div class="time">
+                        2024.06.09
+                        <strong>11:24:30</strong>
+                        (<strong>20</strong>분전)
+                      </div>
+                    </div>
+                    <div class="switch">
+                      <a href="#">❯</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-12 col-12">
+            <div class="widget front-alram-log wh--1">
+              <div class="widget-head">
+                Event List
+                <div class="widget-head-gadget widget-head-gadget-alarm">
+                  <button class="mini all-C">All</button>
+                  <div class="btn-wrapper">
+                    <button class="mini normal-C">Good</button>
+                    <button class="mini watchout-C">Caution</button>
+                    <button class="mini warning-C">Warning</button>
+                    <button class="mini critical-C">Critical</button>
+                  </div>
+                  <select id="alarmCountSelect">
+                    <option value="전체" selected="selected">All</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                  </select>
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>시간</th>
+                        <th>그룹</th>
+                        <th>연료전지</th>
+                        <th>내용</th>
+                        <th>상태</th>
+                        <th>확인여부(자체시간)</th>
+                      </tr>
+                    </thead>
+                    <!-- <tbody class="scrollmini" id="alarm-log"> -->
+                      <tbody class="scrollmini overflow-y-scroll">
+                        <tr>
+                          <td>2024.08.05 10:00</td>
+                          <td>부안1호</td>
+                          <td>부안발전소</td>
+                          <td>스택 측정을 시작합니다</td>
+                          <td class="normal-C">정상</td>
+                          <td><button class="mini">미확인</button><span class="float-end">22.5시간</span></td>
+                        </tr>
+                        <tr>
+                          <td>2024.08.05 10:05</td>
+                          <td>부안2호</td>
+                          <td>부안발전소</td>
+                          <td>스택 측정을 시작합니다</td>
+                          <td class="normal-C">정상</td>
+                          <td><button class="mini" disabled="disabled">확인</button><span class="float-end">20.0시간</span></td>
+                        </tr>
+                        <tr>
+                          <td>2024.08.05 10:10</td>
+                          <td>부안3호</td>
+                          <td>부안발전소</td>
+                          <td>스택 측정을 시작합니다</td>
+                          <td class="watchout-C">주의</td>
+                          <td><button class="mini" disabled="disabled">확인</button><span class="float-end">18.5시간</span></td>
+                        </tr>
+                        <tr>
+                          <td>2024.08.05 10:15</td>
+                          <td>부안4호</td>
+                          <td>부안발전소</td>
+                          <td>스택 측정을 시작합니다</td>
+                          <td class="warning-C">경고</td>
+                          <td><button class="mini" disabled="disabled">확인</button><span class="float-end">15.0시간</span></td>
+                        </tr>
+                        <tr>
+                          <td>2024.08.05 10:20</td>
+                          <td>부안5호</td>
+                          <td>부안발전소</td>
+                          <td>스택 측정을 시작합니다</td>
+                          <td class="critical-C">심각</td>
+                          <td><button class="mini" disabled="disabled">확인</button><span class="float-end">12.5시간</span></td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </div>
+    
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xxl-4 col-12">
+        <div class="row">
+          <div class="col-xxl-12 col-12">
+            <!-- <div class="widget front-group-list wh--1-9"> -->
+            <div class="widget front-group-list wh--2">
+              <div class="widget-head">
+                <!-- 연료전지 그룹 리스트 -->
+                Fuelcell Group List
+                <div class="widget-head-gadget widget-head-gadget-alarm">
+                  <!-- <button class="mini all-C">전항목</button>
+                  <div class="btn-wrapper">
+                    <button class="mini normal-C">정상</button>
+                    <button class="mini watchout-C">주의</button>
+                    <button class="mini warning-C">경고</button>
+                    <button class="mini critical-C">심각</button>
+                  </div>
+                  <select id="alarmCountSelect">
+                    <option value="전체" selected="selected">전체</option>
+                    <option value="10">10개</option>
+                    <option value="20">20개</option>
+                    <option value="30">30개</option>
+                    <option value="40">40개</option>
+                  </select> -->
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>그룹</th>
+                        <th>가동 / 설비</th>
+                        <!-- <th>가동/설비 연료전지</th> -->
+                        <th>총 전력 현재/설비</th>
+                        <th>총 열 현재/설비</th>
+                        <th>정상</th>
+                        <th>주의</th>
+                        <th>경고</th>
+                        <th>심각</th>
+                        <th>가동율</th>
+                      </tr>
+                    </thead>
+                    <!-- <tbody class="scrollmini" id="alarm-log"> -->
+                      <tbody class="scrollmini overflow-y-scroll" style="height: 375px;">
+                        <tr>
+                          <td>부안그룹1</td>
+                          <td>3 / 5</td>
+                          <td>15kW / 25kW</td>
+                          <td>15kW / 25kW</td>
+                          <td class="normal-C">3</td>
+                          <td class="watchout-C">1</td>
+                          <td class="warning-C">0</td>
+                          <td class="critical-C">1</td>
+                          <td>60%</td>
+                      </tr>
+                      <tr>
+                          <td>부안그룹2</td>
+                          <td>4 / 5</td>
+                          <td>20kW / 25kW</td>
+                          <td>20kW / 25kW</td>
+                          <td class="normal-C">4</td>
+                          <td class="watchout-C">0</td>
+                          <td class="warning-C">1</td>
+                          <td class="critical-C">0</td>
+                          <td>80%</td>
+                      </tr>
+                      <tr>
+                          <td>부안그룹3</td>
+                          <td>5 / 5</td>
+                          <td>25kW / 25kW</td>
+                          <td>25kW / 25kW</td>
+                          <td class="normal-C">5</td>
+                          <td class="watchout-C">0</td>
+                          <td class="warning-C">0</td>
+                          <td class="critical-C">0</td>
+                          <td>100%</td>
+                      </tr>
+                      <tr>
+                        <td>부안그룹4</td>
+                        <td>5 / 5</td>
+                        <td>25kW / 25kW</td>
+                        <td>25kW / 25kW</td>
+                        <td class="normal-C">5</td>
+                        <td class="watchout-C">0</td>
+                        <td class="warning-C">0</td>
+                        <td class="critical-C">0</td>
+                        <td>100%</td>
+                    </tr>
+                    <tr>
+                      <td>부안그룹5</td>
+                      <td>5 / 5</td>
+                      <td>25kW / 25kW</td>
+                      <td>25kW / 25kW</td>
+                      <td class="normal-C">5</td>
+                      <td class="watchout-C">0</td>
+                      <td class="warning-C">0</td>
+                      <td class="critical-C">0</td>
+                      <td>100%</td>
+                  </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <!-- <button class="btn-of" onclick="modalSW('#user-modal', 'open')">추가</button>
+                      <button class="btn-of" onclick="modalSW('#user-modal', 'open')">수정</button>
+                      <button class="btn-of" onclick="modalSW('#delete-modal', 'open')">삭졔</button> -->
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap d-inline-block">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> -->
+                        
+
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select id="items-per-page">
+                          <option value="all-data" selected>All</option>
+                          <option value="500">500</option>
+                          <option value="200">200</option>
+                          <option value="100">100</option>
+                          <option value="50">50</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <!-- <select name="" id="" class="select-item">
+                        <option value="">그룹</option>
+                        <option value="">사용자권한</option>
+                      </select> -->
+                      그룹 | 
+                      <input type="text" class="text-input"><!--사용자ID 선택시-->
+
+                      <!--<select name="" id="" class="for-authority">--><!--선택권한 선택시-->
+                        <!-- <option value="LocalAdmin">Local Admin</option>
+                        <option value="LocalUser">Local User</option>
+                      </select> -->
+                      <button class="btn-of">검색</button>
+                    </div>
+                  </div>
+                </div>                      
+              </div>
+            </div>
+          </div>
+          <div class="col-xxl-12 col-12">
+            <!-- <div class="widget front-fuelcell-list wh--1-9"> -->
+            <div class="widget front-fuelcell-list wh--2" style="height: 484px;">
+              <div class="widget-head">
+                <!-- 연료전지 리스트 -->
+                Fuelcell List
+                <div class="widget-head-gadget widget-head-gadget-alarm">
+                  <button class="mini all-C">All</button>
+                  <div class="btn-wrapper">
+                    <button class="mini normal-C">Good</button>
+                    <button class="mini watchout-C">Caution</button>
+                    <button class="mini warning-C">Warning/button>
+                    <button class="mini critical-C">Critical</button>
+                  </div>
+                  <!-- <select id="alarmCountSelect">
+                    <option value="전체" selected="selected">전체</option>
+                    <option value="10">10개</option>
+                    <option value="20">20개</option>
+                    <option value="30">30개</option>
+                    <option value="40">40개</option>
+                  </select> -->
+                  <!-- <span class="icon-arrow-right2"></span> -->
+                </div>
+              </div>
+              <div class="widget-body">
+                <div class="table-responsive">
+                  <table class="table table-fixed table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>그룹</th>
+                        <th>연료전지</th>
+                        <th>총 전력 현재/설비</th>
+                        <th>총 열 현재/설비</th>
+                        <th>소모품 현황(지체시간)</th>
+                        <th>상태</th>
+                      </tr>
+                    </thead>
+                    <!-- <tbody class="scrollmini" id="alarm-log"> -->
+                      <tbody class="scrollmini overflow-y-scroll" style="height: 367px;">
+                        <tr>
+                          <td>부안1호</td>
+                          <td>부안그룹1</td>
+                          <td>3.5kW / 5kW</td>
+                          <td>3.5kW / 5kW</td>
+                          <td>유압필터B외 2개 <span class="normal-C">(4일 남음)</span></td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안2호</td>
+                          <td>부안그룹1</td>
+                          <td>3.2kW / 5kW</td>
+                          <td>3.2kW / 5kW</td>
+                          <td>유압필터B외 2개 <span class="critical-C">(22.5시간 지체)</span></td>
+                          <td class="warning-C">경고</td>
+                        </tr>
+                        <tr>
+                          <td>부안3호</td>
+                          <td>부안그룹1</td>
+                          <td>2.8kW / 5kW</td>
+                          <td>2.8kW / 5kW</td>
+                          <td>유압필터B외 2개 <span class="watchout-C">(1일 남음)</span></td>
+                          <td class="watchout-C">주의</td>
+                        </tr>
+                        <tr>
+                          <td>부안4호</td>
+                          <td>부안그룹1</td>
+                          <td>3.0kW / 5kW</td>
+                          <td>3.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안5호</td>
+                          <td>부안그룹1</td>
+                          <td>2.5kW / 5kW</td>
+                          <td>2.5kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="critical-C">심각</td>
+                        </tr>
+                        <tr>
+                          <td>부안6호</td>
+                          <td>부안그룹2</td>
+                          <td>4.2kW / 5kW</td>
+                          <td>4.2kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안7호</td>
+                          <td>부안그룹2</td>
+                          <td>4.0kW / 5kW</td>
+                          <td>4.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안8호</td>
+                          <td>부안그룹2</td>
+                          <td>3.8kW / 5kW</td>
+                          <td>3.8kW / 5kW</td>
+                          <td>유압필터A <span class="watchout-C">(2일 남음)</span></td>
+                          <td class="watchout-C">주의</td>
+                        </tr>
+                        <tr>
+                          <td>부안9호</td>
+                          <td>부안그룹2</td>
+                          <td>4.5kW / 5kW</td>
+                          <td>4.5kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안10호</td>
+                          <td>부안그룹2</td>
+                          <td>3.5kW / 5kW</td>
+                          <td>3.5kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안11호</td>
+                          <td>부안그룹3</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안12호</td>
+                          <td>부안그룹3</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안13호</td>
+                          <td>부안그룹3</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안14호</td>
+                          <td>부안그룹3</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안15호</td>
+                          <td>부안그룹3</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안16호</td>
+                          <td>부안그룹4</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안17호</td>
+                          <td>부안그룹4</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안18호</td>
+                          <td>부안그룹4</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안19호</td>
+                          <td>부안그룹4</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안20호</td>
+                          <td>부안그룹4</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안21호</td>
+                          <td>부안그룹5</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안22호</td>
+                          <td>부안그룹5</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안23호</td>
+                          <td>부안그룹5</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안24호</td>
+                          <td>부안그룹5</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                        <tr>
+                          <td>부안25호</td>
+                          <td>부안그룹5</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>5.0kW / 5kW</td>
+                          <td>-----</td>
+                          <td class="normal-C">정상</td>
+                        </tr>
+                      </tbody>
+                  </table>
+                </div>
+                <div class="pagination-with-etc">
+                  <div class="pagination-with-etc-inner">
+                    <div>
+                      <!-- <button class="btn-of" onclick="modalSW('#user-modal', 'open')">추가</button>
+                      <button class="btn-of" onclick="modalSW('#user-modal', 'open')">수정</button>
+                      <button class="btn-of" onclick="modalSW('#delete-modal', 'open')">삭졔</button> -->
+                    </div>
+                    <div>
+                      <div class="pagination-wrap-outer">
+                        <nav class="pagination-wrap">
+                          <ul class="pagination" id="stack-search-pagination">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+
+                            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <!-- <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li> -->
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                          </ul>
+                        </nav>
+                      </div>
+                      <div class="data-num-select">
+                        <select id="items-per-page">
+                          <option value="all-data">All</option>
+                          <option value="500">500</option>
+                          <option value="200">200</option>
+                          <option value="100">100</option>
+                          <option value="50">50</option>
+                          <option value="20" selected>20</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <select name="" id="" class="select-item">
+                        <option value="ID">Group</option>
+                        <option value="authority">Fuelcell</option>
+                      </select>
+
+                      <input type="text" class="text-input"><!--사용자ID 선택시-->
+
+                      <button class="btn-of">검색</button>
+                    </div>
+                  </div>
+                </div>                      
+              </div>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+<!-- <link href="./css/index-mid-on.css" rel="stylesheet"> -->
+</html>
+
+
+
+<!-- <script src="js/main.js?type=1&graph=.BOP-graph>.widget-body>div"></script> -->
+<!-- <script src="js/imp.js?folder=정상_데이터_폴더&el=.widget.stack-status>.widget-body>.row>.left-side>div"></script> -->
+<!-- <script src="js/bode.js?folder=최근_데이터_폴더&el=.widget.stack-status>.widget-body>.row>.right-side>div"></script> -->

@@ -1,0 +1,4 @@
+.hashtag.drag-over {
+    border-left: 4px solid #666; /* 드래그 오버 시 왼쪽에 선을 표시 */
+    padding-left: 4px; /* 패딩을 추가하여 텍스트와 선 사이 간격을 조정 */
+  }

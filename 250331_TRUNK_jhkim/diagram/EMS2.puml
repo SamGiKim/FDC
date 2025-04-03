@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+
+' Actors
+actor "Main Admin" as MainAdmin
+actor "Local Admin" as LocalAdmin
+actor User as User
+
+' Use Cases
+usecase "Manage Users" as ManageUsers
+usecase "Manage Power Plants" as ManagePowerPlants
+usecase "Manage Fuel Cells" as ManageFuelCells
+usecase "Manage Fuel Cell Groups" as ManageFuelCellGroups
+usecase "Set Security Settings" as SetSecuritySettings
+
+' Relationships
+MainAdmin --> ManageUsers : "manage"
+MainAdmin --> ManagePowerPlants : "manage"
+MainAdmin --> ManageFuelCells : "manage"
+MainAdmin --> ManageFuelCellGroups : "manage"
+MainAdmin --> SetSecuritySettings : "manage"
+LocalAdmin --> ManageUsers : "manage"
+LocalAdmin --> ManagePowerPlants : "manage"
+LocalAdmin --> ManageFuelCells : "manage"
+User --> ManageFuelCells : "manage"
+User --> ManageFuelCellGroups : "manage"
+
+' Hierarchical Relationships
+MainAdmin --|> LocalAdmin
+LocalAdmin --|> User
+
+@enduml
