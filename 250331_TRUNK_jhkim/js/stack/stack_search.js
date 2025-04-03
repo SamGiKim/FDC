@@ -434,18 +434,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     const tableBody = document.querySelector('#stack_search_table');
     const typeSelector = document.getElementById('sin-pulse-select');
 	// >>> 250327 hjkim - init_select_tag
-	function init_select_tag(el) {
-		let opts = el.querySelectorAll("option");
-		opts[1].textContent = opts[1].textContent.toUpperCase(); // 대문자로 정정
-		let new_opt = document.createElement("option");
-		new_opt.value = "NPULSE";
-		new_opt.setAttribute("data-i18n", "stack.npulse");
-		new_opt.textContent = "NPULSE";
-		el.append(new_opt);
-	}
-	init_select_tag(typeSelector);
-	// <<< 250327 hjkim - init_select_tag
-    type = typeSelector.value;  // 초기값 설정
+	// function init_select_tag(el) {
+	// 	let opts = el.querySelectorAll("option");
+	// 	opts[1].textContent = opts[1].textContent.toUpperCase(); // 대문자로 정정
+	// 	let new_opt = document.createElement("option");
+	// 	new_opt.value = "NPULSE";
+	// 	new_opt.setAttribute("data-i18n", "stack.npulse");
+	// 	new_opt.textContent = "NPULSEss";
+	// 	el.append(new_opt);
+	// }
+	// init_select_tag(typeSelector);
+	// // <<< 250327 hjkim - init_select_tag
+  //   type = typeSelector.value;  // 초기값 설정
 
     // 기본 설정 초기화
     await initializeDateSelection();
@@ -685,6 +685,7 @@ function updateSearchFields(type) {
   const commonFields = document.querySelectorAll('.common-field');
   const sinFields = document.querySelectorAll('.sin-field');
   const pulseFields = document.querySelectorAll('.pulse-field');
+  const npulseFields = document.querySelectorAll('.npluse-field');
 
   // 공통 필드는 항상 표시
   commonFields.forEach(field => field.style.display = '');
@@ -692,9 +693,15 @@ function updateSearchFields(type) {
   if (type === 'SIN') {
     sinFields.forEach(field => field.style.display = '');
     pulseFields.forEach(field => field.style.display = 'none');
+    npulseFields.forEach(field => field.style.display = 'none');
   } else if (type === 'PULSE') {
     sinFields.forEach(field => field.style.display = 'none');
     pulseFields.forEach(field => field.style.display = '');
+    npulseFields.forEach(field => field.style.display = 'none');
+  } else if (type === 'NPULSE') {
+    sinFields.forEach(field => field.style.display = 'none');
+    pulseFields.forEach(field => field.style.display = 'none');
+    npulseFields.forEach(field => field.style.display = '');
   }
 }
  
@@ -1636,7 +1643,19 @@ export function displayResults(results, currentPage, totalRows, type) {
            <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
-     
+      } else if (type === 'NPULSE') {
+        tr.innerHTML += `
+          <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
+          <td>${row.hzFROM || ""}</td>
+          <td>${row.hzTO || ""}</td>
+          <td>${row.d_voltage_diff || ""}</td>
+          <td>${row.u_voltage_diff || ""}</td>
+          <td>${row.overall_x_diff || ""}</td>
+           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
+          <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
+        `;
+      }
+
         // date-cell 클릭 이벤트 추가
         const dateCell = tr.querySelector('.date-cell');
         dateCell.addEventListener('click', async () => {
@@ -1664,7 +1683,6 @@ export function displayResults(results, currentPage, totalRows, type) {
             console.warn('init_pulse_graph 함수가 정의되지 않았거나 실행 중 오류가 발생했습니다.');
           }
         });
-      }
 
        // MERR 셀에 더블클릭 이벤트 추가 (SIN, PULSE 모두 적용)
        const merrCell = tr.querySelector('.merr-cell');
