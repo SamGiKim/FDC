@@ -56,13 +56,15 @@ try {
     $conditions[] = "search.fuelcell_id = :fuelcell_id";
     $params['fuelcell_id'] = $fuelcell_id;
 
-    // SIN, PULSE, NPULSE에 따라 조건 추가(search 테이블의 SIN 컬럼이 0이면 sin, 1이면 pulse, 2이면 npulse)
+    // SIN, PULSE, NPULSE, CALIB에 따라 조건 추가(search 테이블의 SIN 컬럼이 0이면 sin, 1이면 pulse, 2이면 npulse, 3이면 calib)
     if ($type === 'SIN') {
         $conditions[] = "search.SIN = 0";
     } else if ($type === 'PULSE') {
         $conditions[] = "search.SIN = 1";
     } else if ($type === 'NPULSE') {
         $conditions[] = "search.SIN = 2";
+    } else if ($type === 'CALIB') {
+        $conditions[] = "search.SIN = 3";
     }
 
     // 북마크 ID 처리 부분
@@ -185,6 +187,10 @@ try {
         $query = "SELECT DISTINCT search.DATE, search.hzFROM, search.hzTO, 
         search.d_voltage_diff, search.u_voltage_diff, search.overall_x_diff, 
         search.MERR, search.BIGO
+        FROM search";
+    } else if ($type === 'CALIB') {
+        $query = "SELECT DISTINCT search.DATE, search.hzFROM, search.hzTO, 
+        search.`M-L`, search.X1, search.X2, search.MERR, search.BIGO
         FROM search";
     }
     $query .= " LEFT JOIN bmk_sch ON search.NO = bmk_sch.sch_id";

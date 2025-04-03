@@ -440,7 +440,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 	// 	let new_opt = document.createElement("option");
 	// 	new_opt.value = "NPULSE";
 	// 	new_opt.setAttribute("data-i18n", "stack.npulse");
-	// 	new_opt.textContent = "NPULSEss";
+	// 	new_opt.textContent = "NPULSE";
 	// 	el.append(new_opt);
 	// }
 	// init_select_tag(typeSelector);
@@ -520,17 +520,16 @@ function initializeTypeSelector(typeSelector) {
 // Stack EIS Analysis 그래프 명 업데이트 함수
 function updateEisOptions(selectedType) {
   const eisSelector = document.getElementById('eis_select_title');
-  // >>> 250327 hjkim - Added NPULSE
-  if (selectedType === 'PULSE' || selectedType == 'NPULSE') {
-  // <<< 250327 hjkim - Added NPULSE
+  // >>> 250327 hjkim - Added NPULSE >>> 250403 jhkim - Added CALIB
+  if (selectedType === 'PULSE' || selectedType === 'NPULSE') {
     eisSelector.innerHTML = ` <option value="2" >Bode plot</option>
-    <option value="3" selected>PULSE</option>`
-    ;
-  } else {
+      <option value="3" selected>PULSE</option>`
+      ;
+  } else if (selectedType === 'SIN' || selectedType === 'CALIB'){
     eisSelector.innerHTML = `
-      <option value="1" selected data-i18n="stack.stack_state">스택상태</option>
-      <option value="2">Bode plot</option>
-    `;
+    <option value="1" selected data-i18n="stack.stack_state">스택상태</option>
+    <option value="2">Bode plot</option>
+  `;
   }
   
   // i18next 처리 수정
@@ -653,6 +652,22 @@ function updateTable(value) {
     `;
     // NPULSE 데이터 렌더링 로직 추가
     fetchDataAndRender('NPULSE');
+  } else if (value === 'CALIB') {
+    tableHead.innerHTML = `
+      <tr>
+        <th><input type="checkbox" id="search-all-checkbox"></th>
+        <th>시간</th>
+        <th>From</th>
+        <th>To</th>
+        <th>M-L</th>
+        <th>x1</th>
+        <th>x2</th>
+        <th>Err</th>
+        <th>Note</th>
+      </tr>
+    `;
+    // CALIB 데이터 렌더링 로직 추가
+    fetchDataAndRender('CALIB');
   }
 }
 
@@ -686,6 +701,8 @@ function updateSearchFields(type) {
   const sinFields = document.querySelectorAll('.sin-field');
   const pulseFields = document.querySelectorAll('.pulse-field');
   const npulseFields = document.querySelectorAll('.npluse-field');
+  const calibFields = document.querySelectorAll('.calib-field');
+
 
   // 공통 필드는 항상 표시
   commonFields.forEach(field => field.style.display = '');
@@ -694,14 +711,22 @@ function updateSearchFields(type) {
     sinFields.forEach(field => field.style.display = '');
     pulseFields.forEach(field => field.style.display = 'none');
     npulseFields.forEach(field => field.style.display = 'none');
+    calibFields.forEach(field => field.style.display = 'none');
   } else if (type === 'PULSE') {
     sinFields.forEach(field => field.style.display = 'none');
     pulseFields.forEach(field => field.style.display = '');
     npulseFields.forEach(field => field.style.display = 'none');
+    calibFields.forEach(field => field.style.display = 'none');
   } else if (type === 'NPULSE') {
     sinFields.forEach(field => field.style.display = 'none');
     pulseFields.forEach(field => field.style.display = 'none');
     npulseFields.forEach(field => field.style.display = '');
+    calibFields.forEach(field => field.style.display = 'none');
+  } else if (type === 'CALIB') {
+    sinFields.forEach(field => field.style.display = 'none');
+    pulseFields.forEach(field => field.style.display = 'none');
+    npulseFields.forEach(field => field.style.display = 'none');
+    calibFields.forEach(field => field.style.display = '');
   }
 }
  
@@ -1619,7 +1644,6 @@ export function displayResults(results, currentPage, totalRows, type) {
 
       // #stack_search_table 동적으로 변경
       if (type === 'SIN') {
-        
         tr.innerHTML += `
           <td class="date-cell" data-no="${row.NO}" data-err="${formatErrorCode(row.MERR)}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
@@ -1640,7 +1664,7 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td>${row.p_y2_y0_voltage || ""}</td>
           <td>${row.p_y4_y0_voltage || ""}</td>
           <td>${row.p_x || ""}</td>
-           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
+          <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
       } else if (type === 'NPULSE') {
@@ -1654,42 +1678,53 @@ export function displayResults(results, currentPage, totalRows, type) {
            <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
+      } else if (type === 'CALIB') {
+        tr.innerHTML += `
+          <td class="date-cell" data-no="${row.NO}" data-err="${formatErrorCode(row.MERR)}" style="cursor: pointer">${row.DATE || ""}</td>
+          <td>${row.hzFROM || ""}</td>
+          <td>${row.hzTO || ""}</td>
+          <td>${row["M-L"] || ""}</td>
+          <td>${row.x1 || ""}</td>
+          <td>${row.x2 || ""}</td>
+          <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
+          <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
+        `;
       }
 
-        // date-cell 클릭 이벤트 추가
-        const dateCell = tr.querySelector('.date-cell');
-        dateCell.addEventListener('click', async () => {
-          const no = dateCell.getAttribute('data-no');
-          console.log('Clicked cell NO:', no);
+      // date-cell 클릭 이벤트 추가
+      const dateCell = tr.querySelector('.date-cell');
+      dateCell.addEventListener('click', async () => {
+        const no = dateCell.getAttribute('data-no');
+        console.log('Clicked cell NO:', no);
+        
+        try {
+          const response = await fetch(`js/stack/get_pulse_name.php?no=${no}`);
+          if (!response.ok) throw new Error('Network response was not ok');
+          const data = await response.json();
+          const name = data.name;
           
-          try {
-            const response = await fetch(`js/stack/get_pulse_name.php?no=${no}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            const name = data.name;
-            
-            if (name) {
-              const graphElement = document.querySelector("pulse-graph-in-stack");
-              if (graphElement) {
-                console.log('Found graph element:', graphElement);
-                console.log('그래프 초기화 함수 호출: ', name);
-                window.init_pulse_graph(name);
-              } else {
-                console.error('pulse-graph-in-stack element not found in DOM');
-              }
+          if (name) {
+            const graphElement = document.querySelector("pulse-graph-in-stack");
+            if (graphElement) {
+              console.log('Found graph element:', graphElement);
+              console.log('그래프 초기화 함수 호출: ', name);
+              window.init_pulse_graph(name);
+            } else {
+              console.error('pulse-graph-in-stack element not found in DOM');
             }
-          } catch (error) {
-            console.error('Error:', error);
-            console.warn('init_pulse_graph 함수가 정의되지 않았거나 실행 중 오류가 발생했습니다.');
           }
-        });
+        } catch (error) {
+          console.error('Error:', error);
+          console.warn('init_pulse_graph 함수가 정의되지 않았거나 실행 중 오류가 발생했습니다.');
+        }
+      }); 
 
-       // MERR 셀에 더블클릭 이벤트 추가 (SIN, PULSE 모두 적용)
-       const merrCell = tr.querySelector('.merr-cell');
-       merrCell.addEventListener('dblclick', function() {
-         const currentValue = this.textContent.split('.')[0];
-         createErrorCodeSelect(this, currentValue);
-       });
+      // MERR 셀에 더블클릭 이벤트 추가 (SIN, PULSE 모두 적용)
+      const merrCell = tr.querySelector('.merr-cell');
+      merrCell.addEventListener('dblclick', function() {
+        const currentValue = this.textContent.split('.')[0];
+        createErrorCodeSelect(this, currentValue);
+      });
  
 
       // BIGO 필드 더블 클릭 이벤트 리스너 추가
@@ -1731,6 +1766,10 @@ export function displayResults(results, currentPage, totalRows, type) {
       countSelectedDiv.textContent = `SIN | ${totalRows}`;
     } else if (type === 'PULSE') {
       countSelectedDiv.textContent = `PULSE | ${totalRows}`;
+    } else if (type === 'NPULSE') {
+      countSelectedDiv.textContent = `NPULSE | ${totalRows}`;
+    } else if (type === 'CALIB') {
+      countSelectedDiv.textContent = `CALIB | ${totalRows}`;
     }
   }
 
