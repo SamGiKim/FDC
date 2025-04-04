@@ -694,7 +694,7 @@ function fetchDataAndRender(type) {
 }
 
 
-// sin, pulse 인지에 따라 상세검색 내용 변경
+// sin, pulse, npulse, calib 인지에 따라 상세검색 내용 변경
 function updateSearchFields(type) {
   console.log("updateSearchFields 호출됨 - 타입:", type);
   const commonFields = document.querySelectorAll('.common-field');
@@ -2515,6 +2515,7 @@ async function copyFilesForGraph(no, color, dateValue, fuelcell_id, powerplant_i
       throw new Error('발전소 ID와 연료전지 ID가 필요합니다.');
   }
 
+  const type = document.querySelector('#sin-pulse-select').value; 
   const sessionId = getSessionId();
   const defaultColor = color.toLowerCase() === '#ffffff' ? '' : encodeURIComponent(color);
   const isRawData = document.querySelector('#raw-data-checkbox')?.checked || false;
@@ -2522,6 +2523,7 @@ async function copyFilesForGraph(no, color, dateValue, fuelcell_id, powerplant_i
   // URL 파라미터 로깅
   console.log('파일 복사 요청 파라미터:', {
       no,
+      type,
       color: defaultColor,
       date: dateValue,
       fuelcell_id,
@@ -2530,7 +2532,7 @@ async function copyFilesForGraph(no, color, dateValue, fuelcell_id, powerplant_i
       sessionId
   });
   
-  const url = `js/stack/copyFileForGraph.php?no=${no}&color=${defaultColor}&date=${encodeURIComponent(dateValue)}&fuelcell_id=${encodeURIComponent(fuelcell_id)}&powerplant_id=${encodeURIComponent(powerplant_id)}&isRawData=${isRawData}&sessionId=${sessionId}`;
+  const url = `js/stack/copyFileForGraph.php?no=${no}&type=${type}&color=${defaultColor}&date=${encodeURIComponent(dateValue)}&fuelcell_id=${encodeURIComponent(fuelcell_id)}&powerplant_id=${encodeURIComponent(powerplant_id)}&isRawData=${isRawData}&sessionId=${sessionId}`;
   
   try {
       const response = await fetch(url);
@@ -2681,7 +2683,7 @@ export async function copySelectedFiles() {
 
 // 날짜 td 클릭 시 그래프 그리기 (개별)
 export function generateGraphFromDateCell(dataNo) {
-  if (type === 'SIN') {
+  if (type === 'SIN' || type === 'CALIB') {
       const dataNos = [dataNo];
       // date-cell에서 data-err 값을 가져옴
       const dateCell = document.querySelector(`.date-cell[data-no="${dataNo}"]`);
@@ -2725,7 +2727,7 @@ async function deleteSelectedFile(no) {
 async function handleDateCellClick(event) {
   const clickedElement = event.target;
 
-  if(type === 'SIN' && clickedElement.tagName === 'TD' && clickedElement.cellIndex === 1) {
+  if((type === 'SIN' || type === 'CALIB') && clickedElement.tagName === 'TD' && clickedElement.cellIndex === 1) {
       const row = clickedElement.closest('tr');
       const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
       const graphBtn = document.getElementById('graph-btn');

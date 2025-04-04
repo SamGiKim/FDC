@@ -11,6 +11,7 @@ try {
     $fuelcell_id = $_GET['fuelcell_id'];
     $isRawData = isset($_GET['isRawData']) && $_GET['isRawData'] === 'true';
     $color = str_replace("#", "", $color);
+    $type = $_GET['type'] ?? '';
 
     // DB에서 데이터 조회
     $stmt = $pdo->prepare("SELECT NAME, X1, X2, Y1, Y2, DATE FROM search WHERE NO = :no");
@@ -55,14 +56,21 @@ try {
     $year = date('Y', $dbDate);
     $month = date('m', $dbDate);
 
-    if ($isRawData) {
-        $sourcePath = "/home/nstek/h2_system/FDC/$powerplant_id/$fuelcell_id/EIS/$year/$month/" . $row['NAME'];
-        $alternativeSourcePath = "/home/nstek/h2_system/FDC/$fuelcell_id/EIS/$year/$month/" . $row['NAME'];
-    } else {
-        $sourcePath = "/home/nstek/h2_system/FDC/$powerplant_id/$fuelcell_id/EIS/$year/$month/post_data/" . $row['NAME'];
-        $alternativeSourcePath = "/home/nstek/h2_system/FDC/$fuelcell_id/EIS/$year/$month/post_data/" . $row['NAME'];
+    if($type ==='SIN'){
+        if ($isRawData) {
+            $sourcePath = "/home/nstek/h2_system/FDC/$powerplant_id/$fuelcell_id/EIS/$year/$month/" . $row['NAME'];
+            $alternativeSourcePath = "/home/nstek/h2_system/FDC/$fuelcell_id/EIS/$year/$month/" . $row['NAME'];
+        } else {
+            $sourcePath = "/home/nstek/h2_system/FDC/$powerplant_id/$fuelcell_id/EIS/$year/$month/post_data/" . $row['NAME'];
+            $alternativeSourcePath = "/home/nstek/h2_system/FDC/$fuelcell_id/EIS/$year/$month/post_data/" . $row['NAME'];
+        }
+    } else if ($type === 'CALIB'){
+        if ($isRawData) {
+            $sourcePath = "/data/$powerplant_id/$fuelcell_id/EIS/CALIBRATION/" . $row['NAME'];
+        } else {
+            $sourcePath = "/data/$powerplant_id/$fuelcell_id/EIS/CALIBRATION/post_data/" . $row['NAME'];
+        }
     }
-    
     // 파일 존재 및 권한 확인 로직 개선
     if (!is_readable($sourcePath) && !is_readable($alternativeSourcePath)) {
         // 파일이 존재하는지 먼저 확인
@@ -100,7 +108,8 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        $no
     ]);
 }
 ?>
