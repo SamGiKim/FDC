@@ -1755,8 +1755,8 @@ export function displayResults(results, currentPage, totalRows, type) {
         });
     });
       tbody.appendChild(tr);
-    });
-  }
+  });
+}
 
 
   // 항목갯수 동적으로 변경
@@ -2642,9 +2642,9 @@ export async function copySelectedFiles() {
   }
 
   // type 변수가 전역으로 정의되어 있는지 확인
-  const type = window.type || 'SIN'; // 기본값으로 'SIN' 설정
+  const type = document.querySelector('#sin-pulse-select')?.value || 'SIN'; // 기본값으로 'SIN' 설정
 
-  if (type === 'SIN') {
+  if (type === 'SIN' || type === 'CALIB') {
       const dataNos = Array.from(checkboxes).map(checkbox => checkbox.getAttribute("data-no"));
       
       try {
