@@ -14,11 +14,7 @@ try {
     $type = $_GET['type'] ?? '';
 
     // DB에서 데이터 조회
-    if ($type === 'SIN') {
-        $stmt = $pdo->prepare("SELECT NAME, X1, X2, Y1, Y2, DATE FROM search WHERE NO = :no AND SIN = 0");
-    } else if ($type === 'CALIB') {
-        $stmt = $pdo->prepare("SELECT NAME, X1, X2, Y1, Y2, DATE FROM search WHERE NO = :no AND SIN = 3");
-    }
+    $stmt = $pdo->prepare("SELECT NAME, X1, X2, Y1, Y2, DATE FROM search WHERE NO = :no");
     $stmt->execute([':no' => $no]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
