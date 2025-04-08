@@ -47,7 +47,6 @@ try {
 
     // URL 안전한 파일명으로 변환
     $fileName = urlencode($fileName);
-    $fileName = urldecode($fileName);
 
     $row['NAME'] = $fileName;
 

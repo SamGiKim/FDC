@@ -3,9 +3,9 @@ import { getCurrentConfig } from '../config/fuelcellSelector.js';
 
 // Chart.js는 이미 script 태그에서 로드되었으므로 별도의 등록이 필요 없습니다.
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // 초기 데이터 로드 및 주기적 업데이트 설정
-    fetchAndUpdateData();
+    await fetchAndUpdateData();
     const intervalId = setInterval(fetchAndUpdateData, 5000);
 
     // 설정 변경 시 데이터 업데이트
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function fetchAndUpdateData() {
     try{
-        const{ powerplant_id, fuelcell_id} = getCurrentConfig();
+        const{ powerplant_id, fuelcell_id} = await getCurrentConfig();
         const response = await fetch('js/stack/get_AVHA_value.php', {
             method:'POST',
             headers:{
@@ -37,7 +37,6 @@ async function fetchAndUpdateData() {
     }
 }
 
-
 function updateValues(data) {
     // DOM 요소 가져오기
     const ampereValueElement = document.getElementById('ampere-value');
@@ -48,11 +47,11 @@ function updateValues(data) {
     const stoiAirValueElement = document.getElementById('stoi-air-value');
 
     // 데이터가 있는 경우 각 요소에 값을 할당, 없으면 '-' 표시
-    if (ampereValueElement) ampereValueElement.textContent = data ? (data['Current'] || '-') : '-';
-    if (voltValueElement) voltValueElement.textContent = data ? (data['Voltage'] || '-') : '-';
-    if (hydroValueElement) hydroValueElement.textContent = data ? (data['MFC1(H2)'] || '-') : '-';
-    if (airValueElement) airValueElement.textContent = data ? (data['MFM3(Air)'] || '-') : '-';
-    if (stoiH2ValueElement) stoiH2ValueElement.textContent = data ? (data['Stoi(H2)'] || '-') : '-';
-    if (stoiAirValueElement) stoiAirValueElement.textContent = data ? (data['Stoi(Air)'] || '-') : '-';
+    ampereValueElement.textContent = data && data['Current'] !== undefined ? data['Current'] : '-';
+    voltValueElement.textContent = data && data['Voltage'] !== undefined ? data['Voltage'] : '-';
+    hydroValueElement.textContent = data && data['MFC1(H2)'] !== undefined ? data['MFC1(H2)'] : '-';
+    airValueElement.textContent = data && data['MFM3(Air)'] !== undefined ? data['MFM3(Air)'] : '-';
+    stoiH2ValueElement.textContent = data && data['Stoi(H2)'] !== undefined ? data['Stoi(H2)'] : '-';
+    stoiAirValueElement.textContent = data && data['Stoi(Air)'] !== undefined ? data['Stoi(Air)'] : '-';
 }
 
