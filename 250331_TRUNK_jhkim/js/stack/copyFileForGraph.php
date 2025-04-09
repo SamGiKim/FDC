@@ -65,11 +65,11 @@ try {
         }
     } else if ($type === 'CALIB') {
         if ($isRawData) {
-            $sourcePath = "/home/nstek/h2_system/RAW/$powerplant_id/$fuelcell_id/EIS/$year/$month/" . $row['NAME'];
-            $alternativeSourcePath = "/home/nstek/h2_system/RAW/$fuelcell_id/EIS/$year/$month/" . $row['NAME'];
+            $sourcePath = "/home/nstek/h2_system/FDC/$powerplant_id/$fuelcell_id/EIS/CALIBRATION/" . $row['NAME'];
+            $alternativeSourcePath = "/home/nstek/h2_system/FDC/$fuelcell_id/EIS/CALIBRATION/" . $row['NAME'];
         } else {
-            $sourcePath = "/home/nstek/h2_system/RAW/$powerplant_id/$fuelcell_id/EIS/$year/$month/post_data/" . $row['NAME'];
-            $alternativeSourcePath = "/home/nstek/h2_system/RAW/$fuelcell_id/EIS/$year/$month/post_data/" . $row['NAME'];
+            $sourcePath = "/home/nstek/h2_system/FDC/$powerplant_id/$fuelcell_id/EIS/CALIBRATION/post_data/" . $row['NAME'];
+            $alternativeSourcePath = "/home/nstek/h2_system/FDC/$fuelcell_id/EIS/CALIBRATION/post_data/" . $row['NAME'];
         }
     }
     
