@@ -575,7 +575,7 @@ main {
   .select-title {
     position: relative;
     bottom: 2px;
-    padding-right: 20px;
+    padding-right: 15px;
     font-size: 14px;
     font-weight: 500;
     color: rgb(33, 37, 41);
@@ -1330,7 +1330,7 @@ input[type='file'] {
       overflow-y: hidden;
       /* width: calc(100% - 115px); */
       top: -2px;
-      left: 120px;
+      left: 133px;
       height: 36px;
       border:none;
       width: calc(100% - 125px);

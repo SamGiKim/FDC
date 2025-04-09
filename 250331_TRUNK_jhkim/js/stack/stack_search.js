@@ -700,7 +700,7 @@ function updateSearchFields(type) {
   const commonFields = document.querySelectorAll('.common-field');
   const sinFields = document.querySelectorAll('.sin-field');
   const pulseFields = document.querySelectorAll('.pulse-field');
-  const npulseFields = document.querySelectorAll('.npluse-field');
+  const npulseFields = document.querySelectorAll('.npulse-field');
   const calibFields = document.querySelectorAll('.calib-field');
 
 
