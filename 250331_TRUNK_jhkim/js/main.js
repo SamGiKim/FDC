@@ -5816,7 +5816,9 @@ function parse_pulse_handler(txt) {
     let header = rows[0];
     let series_names = header.split(",");
     let r = new Array(series_names.length);
-    for(var ri = 0; ri < r.length; ri+= 1) { r[ri] = []; }
+    for(var ri = 0; ri < r.length; ri+= 1) { 
+        r[ri] = []; 
+    }
     for(var i = 1; i < rows.length; i+= 1) {
         var cols = rows[i].split(",");
         for(var j = 0; j < r.length; j+= 1) {
@@ -5893,12 +5895,13 @@ class PulseGraphInStack extends HTMLElement {
 
     init_data() {
         if(this.fullpath == "") return;
+        // CSV 데이터 불러오기 → 문자열 → 배열로 파싱 → 그래프에 표시
         fetch(`/data/${this.fullpath}/${this.DATA_FILENAME}`)
-        .then(res => res.text())
-        .then(parse_pulse_handler)
+        .then(res => res.text())              // ① 문자열로 변환
+        .then(parse_pulse_handler)            // ② 파싱 함수 거쳐 배열로
         .then(r => {
-            this.data = r;
-            this.uplot.setData(r);
+            this.data = r;                    // ③ 파싱된 데이터 저장
+            this.uplot.setData(r);            // ④ 그래프에 세팅
         });
 
         fetch(`/data/${this.fullpath}/${this.SUMMARY_FILENAME}`)
