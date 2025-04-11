@@ -1698,11 +1698,11 @@ export function displayResults(results, currentPage, totalRows, type) {
         console.log('Clicked cell NO:', no);
         
         try {
-          const response = await fetch(`js/stack/get_pulse_name.php?no=${no}`);
+          const response = await fetch(`js/stack/get_pulse_name.php?no=${no}&type=${type}`);
           if (!response.ok) throw new Error('Network response was not ok');
           const data = await response.json();
           const name = data.name;
-          
+                      
           if (name) {
             const graphElement = document.querySelector("pulse-graph-in-stack");
             if (graphElement) {
@@ -1725,7 +1725,6 @@ export function displayResults(results, currentPage, totalRows, type) {
         const currentValue = this.textContent.split('.')[0];
         createErrorCodeSelect(this, currentValue);
       });
- 
 
       // BIGO 필드 더블 클릭 이벤트 리스너 추가
       tr.querySelectorAll('.bigo-cell').forEach(cell => {
@@ -2494,13 +2493,8 @@ async function clearSelectedDirectory() {
 // 세션 ID 관리 함수
 function getSessionId() {
   let sessionId = document.cookie.split('; ')
-      .find(row => row.startsWith('graphSessionId='))
+      .find(row => row.startsWith('SESS_ID='))
       ?.split('=')[1];
-  
-  if (!sessionId) {
-      sessionId = 'session_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
-      document.cookie = `graphSessionId=${sessionId}; path=/; max-age=3600; SameSite=Strict`;
-  }
   
   return sessionId;
 }
@@ -2533,6 +2527,7 @@ async function copyFilesForGraph(no, color, dateValue, fuelcell_id, powerplant_i
   });
   
   const url = `js/stack/copyFileForGraph.php?no=${no}&type=${type}&color=${defaultColor}&date=${encodeURIComponent(dateValue)}&fuelcell_id=${encodeURIComponent(fuelcell_id)}&powerplant_id=${encodeURIComponent(powerplant_id)}&isRawData=${isRawData}&sessionId=${sessionId}`;
+  console.log(document.cookie)
   
   try {
       const response = await fetch(url);

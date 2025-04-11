@@ -12,6 +12,7 @@ try {
     $isRawData = isset($_GET['isRawData']) && $_GET['isRawData'] === 'true';
     $color = str_replace("#", "", $color);
     $type = $_GET['type'] ?? '';
+    $sessionId = $_GET['sessionId'] ?? null;
 
     // DB에서 데이터 조회
     $stmt = $pdo->prepare("SELECT NAME, X1, X2, Y1, Y2, DATE FROM search WHERE NO = :no");
@@ -37,7 +38,6 @@ try {
             $fileName = iconv($currentEncoding, 'UTF-8//IGNORE', $fileName);
         }
     }
-    
 
     // 현재 인코딩 확인 및 변환
     $currentEncoding = mb_detect_encoding($fileName, ['UTF-8', 'EUC-KR', 'ISO-8859-1'], true);
@@ -87,10 +87,18 @@ try {
         }
     }
 
-
     $actualPath = file_exists($sourcePath) ? $sourcePath : $alternativeSourcePath;
+    // 세션별 디렉토리 경로 구성
+    $baseDir = '/home/nstek/h2_system/FDC/SES/';
+    $sessionDir = $baseDir . $sessionId . '/selected';    
+
+    // 세션 디렉토리가 없으면 생성
+    if (!is_dir($sessionDir)) {
+        mkdir($sessionDir, 0755, true);
+    }
+
     $fileNameWithColor = $row['NAME'] . "{" . $color . "}";
-    $destinationPath = '/home/nstek/h2_system/patch_active/FDC/work/bjy/impedance/selected/' . $fileNameWithColor;
+    $destinationPath = $sessionDir . '/' . $fileNameWithColor;
 
     if (!copy($actualPath, $destinationPath)) {
         throw new Exception("파일 복사 실패: {$actualPath} -> {$destinationPath}");
