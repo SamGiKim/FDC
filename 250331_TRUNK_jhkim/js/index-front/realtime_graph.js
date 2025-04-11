@@ -630,7 +630,7 @@ static async updateAll() {
   static async initialize() {
       await this.updateAll();
       // 5초마다 모든 데이터 업데이트
-      setInterval(() => this.updateAll(), 50000);
+      setInterval(() => this.updateAll(), 5000);
   }
 }
 

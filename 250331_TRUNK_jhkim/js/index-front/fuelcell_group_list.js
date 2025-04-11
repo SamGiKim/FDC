@@ -42,12 +42,12 @@ class FuelcellGroupListManager {
                         <td>${data.group_name}</td>
                         <td>${data.e_prod_per_cap}</td>
                         <td>${data.t_prod_per_cap}</td>
-                        <td>${data.fuelcell_count || 0}</td>
-                        <td class="normal-C">0</td>
-                        <td class="watchout-C">0</td>
-                        <td class="warning-C">0</td>
-                        <td class="critical-C">0</td>
-                        <td class="stop-C">0</td>
+                        <td>${data.facilities.total}</td>
+                        <td class="normal-C">${data.facilities.norm}</td>
+                        <td class="watchout-C">${data.facilities.caut}</td>
+                        <td class="warning-C">${data.facilities.warn}</td>
+                        <td class="critical-C">${data.facilities.crit}</td>
+                        <td class="stop-C">${data.facilities.stop}</td>
                         <td>${data.group_rate}</td>
                     </tr>
                 `;
