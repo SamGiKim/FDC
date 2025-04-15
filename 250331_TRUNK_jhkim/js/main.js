@@ -5743,13 +5743,15 @@ var opts = () => {
         series: [
             {},
             { label: "Voltage", stroke: "#0000FF", scale: "V", width: 1, 
-                points : { space: 0, /*fill: "#0000FF"*/ }, /*paths: u=> null,*/
+                points : { space: 0, /*fill: "#0000FF"*/ show : false},/*paths: u=> null,*/
                 value: (self, rawValue) => rawValue + " V" },
             { label: "Current", stroke: "#008000", scale: "A", width: 1,
-                points : { space: 0, fill: "#008000" }, //paths: u=> null,
+                points : { space: 0, fill: "#008000", show : false }, //paths: u=> null,
                 value: (self, rawValue) => rawValue + " A" },
-            { label: "Voltage(MA)", stroke: "#FFA500", scale: "V", width: 3, },
-            { label: "Current(MA)", stroke: "#C1E715", scale: "A", width: 3, },
+            { label: "Voltage(MA)", stroke: "#FFA500", scale: "V", width: 3, 
+                points : {show : false}},
+            { label: "Current(MA)", stroke: "#C1E715", scale: "A", width: 3, 
+                points : {show : false}},
         ],
         axes: [
             {},
@@ -5896,12 +5898,12 @@ class PulseGraphInStack extends HTMLElement {
             if (!res.ok) {
                 throw new Error(`Network response was not ok. Status: ${res.status}`);
             }
-            console.log("✅ Response:", res);  // 응답 정보 로그
+            console.log("Response:", res);  // 응답 정보 로그
             const data = await res.json();  // JSON으로 변환 후 데이터 저장
             this.data = parse_pulse_handler(data);  // 파싱 후 저장
             this.uplot.setData(this.data);  // 그래프에 세팅
         } catch (error) {
-            console.error("❌ Error during fetch:", error);
+            console.error("Error during fetch:", error);
         }
     }
 }
@@ -5969,7 +5971,5 @@ if(is_title("스택진단")) {
         sel_el.dispatchEvent(event);
         /* -------------------------------- TEMP CODE ------------------------------- */
     });
-
-    
 }
 
