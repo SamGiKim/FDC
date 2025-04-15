@@ -177,21 +177,19 @@ try {
                   search.hzFROM, search.hzTO, search.MERR, search.LABEL, search.BIGO
                   FROM search";
     } else if ($type === 'PULSE') {
-        $query = "SELECT DISTINCT search.NO, search.DATE, search.E_DATE, 
-              search.hzFROM, search.hzTO, search.p_y0_voltage, 
-              search.p_y2, search.p_y2_y0_voltage, 
-              search.p_y4_y0_voltage, search.p_x, search.MERR, search.BIGO, 
-              search.fuelcell_id, search.SIN
-              FROM search";
+        $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
+                  search.x_diff_rbe, search.x_diff_rbk, search.y_diff_gpe, search.y_diff_rbe, 
+                  search.y_diff_rbk, search.MERR, search.BIGO
+                  FROM search";
     } else if ($type === 'NPULSE') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
-        search.x_diff_rbe, search.x_diff_rbk, search.y_diff_gpe, search.y_diff_rbe
-        , search.y_diff_rbk, search.MERR, search.BIGO
-        FROM search";
+                  search.x_diff_rbe, search.x_diff_rbk, search.y_diff_gpe, search.y_diff_rbe, 
+                  search.y_diff_rbk, search.MERR, search.BIGO
+                  FROM search";
     } else if ($type === 'CALIB') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
-        search.`M-L`, search.X1, search.X2, search.MERR, search.BIGO
-        FROM search";
+                  search.`M-L`, search.X1, search.X2, search.MERR, search.BIGO
+                  FROM search";
     }
     $query .= " LEFT JOIN bmk_sch ON search.NO = bmk_sch.sch_id";
     if (!empty($conditions)) {

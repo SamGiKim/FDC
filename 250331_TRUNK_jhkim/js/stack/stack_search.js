@@ -624,14 +624,14 @@ function updateTable(value) {
         <th><input type="checkbox" id="search-all-checkbox"></th>
         <th>시간</th>
         <th>Hz</th>
-        <th>mV</th>
-        <th>y0 voltage</th>
-        <th>y2</th>
-        <th>y2-y0 voltage</th>
-        <th>y4-y0 voltage​</th>
-        <th>x'​</th>
+        <th>peak</th>
+        <th>x_diff_rbe</th>
+        <th>x_diff_rbk</th>
+        <th>y_diff_gpe</th>
+        <th>y_diff_rbe</th>
+        <th>y_diff_rbk</th>
         <th>Err</th>
-        <th>BIGO</th>
+        <th>Note</th>
       </tr>
     `;
     // PULSE 데이터 렌더링 로직 추가
@@ -1661,11 +1661,11 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
           <td>${row.hzTO || ""}</td>
-          <td>${row.p_y0_voltage || ""}</td>
-          <td>${row.p_y2 || ""}</td>
-          <td>${row.p_y2_y0_voltage || ""}</td>
-          <td>${row.p_y4_y0_voltage || ""}</td>
-          <td>${row.p_x || ""}</td>
+          <td>${row.x_diff_rbe || ""}</td>
+          <td>${row.x_diff_rbk || ""}</td>
+          <td>${row.y_diff_gpe || ""}</td>
+          <td>${row.y_diff_rbe || ""}</td>
+          <td>${row.y_diff_rbk || ""}</td>
           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
