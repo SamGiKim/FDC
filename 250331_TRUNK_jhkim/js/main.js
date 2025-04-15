@@ -5762,7 +5762,7 @@ var opts = () => {
             "x": { time: false, distr: 2, },
             //"V": { range: [0.200, 0.204], },
             "V": { range: (u, min, max) => [ min, max ] },
-            "A": { range: [1.47, 1.51], },
+            "A": { range: (u, min, max) => [ min, max ] },
         },
         hooks: {
             drawSeries: [
@@ -5810,23 +5810,25 @@ var opts = () => {
 /* -------------------------------------------------------------------------- */
 /*                                FUNCTION SET                                */
 /* -------------------------------------------------------------------------- */
-function parse_pulse_handler(txt) {
-    // console.log("txt : ", txt);
-    let rows = txt.trim().split("\n");
-    let header = rows[0];
-    let series_names = header.split(",");
-    let r = new Array(series_names.length);
-    for(var ri = 0; ri < r.length; ri+= 1) { 
-        r[ri] = []; 
-    }
-    for(var i = 1; i < rows.length; i+= 1) {
-        var cols = rows[i].split(",");
-        for(var j = 0; j < r.length; j+= 1) {
-            r[j].push(cols[j]);
-        }
-    }
-    return r;
+function parse_pulse_handler(json) {
+    const raw = json.raw;
+    const ma = json.ma;
+
+    const time = raw.time;
+    const voltage = raw.voltage;
+    const current = raw.current;
+    const ma_voltage = ma.voltage;
+    const ma_current = ma.current;
+
+    return [
+        time,
+        voltage,
+        current,
+        ma_voltage,
+        ma_current
+    ];
 }
+
 
 function get_placeholder_width() {
     // console.log("!@#$ width : ", document.querySelector("pulse-graph-in-stack").offsetWidth);
@@ -5834,7 +5836,7 @@ function get_placeholder_width() {
     return document.querySelector(".widget.stack-state-graph .widget-body.d-grid").offsetWidth - 50;
 }
 
-function init_pulse_graph(_fullpath = "F002/EIS/2024/10/pulse_data/d2024-10-29-16-14-21/") {
+function init_pulse_graph(_fullpath = "") {
     document.querySelector("pulse-graph-in-stack").setAttribute("fullpath", _fullpath);
     // document.querySelector("pulse-graph-in-stack").setAttribute("fullpath", "/d2024-10-29-16-12-10/");
 }
@@ -5846,12 +5848,7 @@ function init_pulse_graph(_fullpath = "F002/EIS/2024/10/pulse_data/d2024-10-29-1
 class PulseGraphInStack extends HTMLElement {
     constructor() {
         super();
-        this.DATA_FILENAME = "p_moving_average.csv";
-        this.SUMMARY_FILENAME = "p_summary_metrics.csv";
-    }
-
-    disconnectedCallback() {
-        console.log("disconnectedCallback @ PulseGraphInStack");
+        this.SUMMARY_FILENAME = "summary.json";  
     }
 
     static get observedAttributes() {
@@ -5865,7 +5862,6 @@ class PulseGraphInStack extends HTMLElement {
                 case "fullpath":
                     window.uplot.destroy();
                     delete this.uplot;
-                    // 
                     this.fullpath = this.getAttribute("fullpath");
                     this.init_DOM();
                     this.init_data();
@@ -5877,7 +5873,6 @@ class PulseGraphInStack extends HTMLElement {
     connectedCallback() {
         console.log("connectedCallback @ PulseGraphInStack");
         this.fullpath = this.getAttribute("fullpath");
-
         this.init_DOM();
         this.init_data();
     }
@@ -5887,29 +5882,27 @@ class PulseGraphInStack extends HTMLElement {
         const PulseGraph = () => div({id: "pulse-graph", width: "100%"});
         this.custom_element = PulseGraph();
         van.add(this, this.custom_element)
-        // 
         console.log("!@#$ opts().width: ", opts().width);
         this.uplot = new uPlot(opts(), [], this.custom_element);
         window.uplot = this.uplot;
     }
 
-    init_data() {
-        if(this.fullpath == "") return;
-        // CSV 데이터 불러오기 → 문자열 → 배열로 파싱 → 그래프에 표시
-        fetch(`/data/${this.fullpath}/${this.DATA_FILENAME}`)
-        .then(res => res.text())              // ① 문자열로 변환
-        .then(parse_pulse_handler)            // ② 파싱 함수 거쳐 배열로
-        .then(r => {
-            this.data = r;                    // ③ 파싱된 데이터 저장
-            this.uplot.setData(r);            // ④ 그래프에 세팅
-        });
-
-        fetch(`/data/${this.fullpath}/${this.SUMMARY_FILENAME}`)
-        .then(res => res.text())
-        .then(parse_pulse_handler)
-        .then(r => {
-            // console.log("r : ", r);
-        });
+    async init_data() {
+        if (this.fullpath == "") return;
+        try {
+            const res = await fetch(`/data/${this.fullpath}`);
+        
+            // 응답 상태 확인
+            if (!res.ok) {
+                throw new Error(`Network response was not ok. Status: ${res.status}`);
+            }
+            console.log("✅ Response:", res);  // 응답 정보 로그
+            const data = await res.json();  // JSON으로 변환 후 데이터 저장
+            this.data = parse_pulse_handler(data);  // 파싱 후 저장
+            this.uplot.setData(this.data);  // 그래프에 세팅
+        } catch (error) {
+            console.error("❌ Error during fetch:", error);
+        }
     }
 }
 

@@ -643,9 +643,11 @@ function updateTable(value) {
         <th>시간</th>
         <th>Hz</th>
         <th>peak</th>
-        <th>d_voltage_diff</th>
-        <th>u_voltage_diff</th>
-        <th>overall_x_diff</th>
+        <th>x_diff_rbe</th>
+        <th>x_diff_rbk</th>
+        <th>y_diff_gpe</th>
+        <th>y_diff_rbe</th>
+        <th>y_diff_rbk</th>
         <th>Err</th>
         <th>Note</th>
       </tr>
@@ -1672,9 +1674,11 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
           <td>${row.hzTO || ""}</td>
-          <td>${row.d_voltage_diff || ""}</td>
-          <td>${row.u_voltage_diff || ""}</td>
-          <td>${row.overall_x_diff || ""}</td>
+          <td>${row.x_diff_rbe || ""}</td>
+          <td>${row.x_diff_rbk || ""}</td>
+          <td>${row.y_diff_gpe || ""}</td>
+          <td>${row.y_diff_rbe || ""}</td>
+          <td>${row.y_diff_rbk || ""}</td>
            <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
@@ -1696,26 +1700,27 @@ export function displayResults(results, currentPage, totalRows, type) {
       dateCell.addEventListener('click', async () => {
         const no = dateCell.getAttribute('data-no');
         console.log('Clicked cell NO:', no);
-        
-        try {
-          const response = await fetch(`js/stack/get_pulse_name.php?no=${no}&type=${type}`);
-          if (!response.ok) throw new Error('Network response was not ok');
-          const data = await response.json();
-          const name = data.name;
-                      
-          if (name) {
-            const graphElement = document.querySelector("pulse-graph-in-stack");
-            if (graphElement) {
-              console.log('Found graph element:', graphElement);
-              console.log('그래프 초기화 함수 호출: ', name);
-              window.init_pulse_graph(name);
-            } else {
-              console.error('pulse-graph-in-stack element not found in DOM');
+        if(type === 'PULSE' || type === 'NPULSE'){
+          try {
+            const response = await fetch(`js/stack/get_pulse_name.php?no=${no}&type=${type}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            const name = data.name;
+            
+            if (name) {
+              const graphElement = document.querySelector("pulse-graph-in-stack");
+              if (graphElement) {
+                console.log('Found graph element:', graphElement);
+                console.log('그래프 초기화 함수 호출: ', name);
+                window.init_pulse_graph(name);
+              } else {
+                console.error('pulse-graph-in-stack element not found in DOM');
+              }
             }
+          } catch (error) {
+            console.error('Error:', error);
+            console.warn('init_pulse_graph 함수가 정의되지 않았거나 실행 중 오류가 발생했습니다.');
           }
-        } catch (error) {
-          console.error('Error:', error);
-          console.warn('init_pulse_graph 함수가 정의되지 않았거나 실행 중 오류가 발생했습니다.');
         }
       }); 
 
@@ -2692,7 +2697,6 @@ export function generateGraphFromDateCell(dataNo) {
           color = '#06D001'; // 기본 색상
           console.log('Date cell not found, using default color');
       }
-
       const currentConfig = getCurrentConfig();
       const fuelcell_id = currentConfig.fuelcell_id;
       handleFileOperations(dataNos, color, fuelcell_id);

@@ -185,8 +185,8 @@ try {
               FROM search";
     } else if ($type === 'NPULSE') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
-        search.d_voltage_diff, search.u_voltage_diff, search.overall_x_diff, 
-        search.MERR, search.BIGO
+        search.x_diff_rbe, search.x_diff_rbk, search.y_diff_gpe, search.y_diff_rbe
+        , search.y_diff_rbk, search.MERR, search.BIGO
         FROM search";
     } else if ($type === 'CALIB') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
