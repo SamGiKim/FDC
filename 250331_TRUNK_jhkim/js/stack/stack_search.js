@@ -2484,8 +2484,9 @@ function updateBookmark(id, newName, newColorId) {
 // 그래프 그리기 
 // selected 디렉터리 비우는 함수 
 async function clearSelectedDirectory() {
+  const sessionId = getSessionId();
   try {
-      const response = await fetch("js/stack/delete_files_in_selected.php");
+      const response = await fetch(`js/stack/delete_files_in_selected.php?sessionId=${sessionId}`);
       const data = await response.json();
       console.log('Selected directory cleared:', data.message);
       return data;
@@ -2705,8 +2706,9 @@ export function generateGraphFromDateCell(dataNo) {
 
 // 선택된 파일 삭제 함수 추가
 async function deleteSelectedFile(no) {
+  const sessionId = getSessionId();
   try {
-      const response = await fetch(`js/stack/delete_selected_file.php?no=${no}`);
+      const response = await fetch(`js/stack/delete_selected_file.php?no=${no}&sessionId=${sessionId}`);
       if (!response.ok) {
           throw new Error('Network response was not ok');
       }

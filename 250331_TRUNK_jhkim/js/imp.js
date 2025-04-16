@@ -2554,6 +2554,15 @@ function init_xsxeysye() {
 }
 // <<< 240927 hjkim - xs,xe,ys,ye사용 체크박스
 
+// 세션 ID 관리 함수
+function getSessionId() {
+    let sessionId = document.cookie.split('; ')
+        .find(row => row.startsWith('SESS_ID='))
+        ?.split('=')[1];
+    
+    return sessionId;
+}
+
 // >>> 250212 hjkim - 원점체크박스 상태저장
 // function show_graph(is_origin = false, is_init = false, compact = "LB") {
 function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "normal") {
@@ -2571,6 +2580,8 @@ function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "
         _compact = ""; 
     }
     
+    var sessionId = getSessionId();
+
     if(is_xsxeysye_checked()) {
         // >>> 240927 hjkim - xs,xe,ys,ye사용 체크박스
         // TODO: xs,xe,ys,ye 사용 체크됨
@@ -2580,7 +2591,7 @@ function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "
         channel2.port2.postMessage({
             msg: "GET_STACK__STREAM",
             response_msg: _response_msg,
-            url_dir: "/FDC/work/bjy/impedance/selected",
+            url_dir: "/data/SES/" + sessionId + "/selected",
             compact : _compact,
             xs: _xy_se[0],
             xe: _xy_se[1],
@@ -2594,7 +2605,7 @@ function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "
         channel2.port2.postMessage({
             msg: "GET_STACK__STREAM",
             response_msg: _response_msg,
-            url_dir: "/FDC/work/bjy/impedance/selected",
+            url_dir: "/data/SES/" + sessionId + "/selected",
             compact : _compact,
         });
     }

@@ -6,7 +6,7 @@ try {
     require_once '../config/db_config.php';
 
     $no = $_GET['no'];
-    
+    $sessionId = $_GET['sessionId'] ?? null;
     // DB에서 파일명 조회
     $stmt = $pdo->prepare("SELECT NAME FROM search WHERE NO = :no");
     $stmt->execute([':no' => $no]);
@@ -17,12 +17,11 @@ try {
     }
 
     $fileName = $row['NAME'];
-    $directory = '/home/nstek/h2_system/patch_active/FDC/work/bjy/impedance/selected/';
+    $directory = '/home/nstek/h2_system/FDC/SES/' . $sessionId . '/selected';
     
     // 해당 번호의 파일 찾기 (색상 코드가 포함된 파일명)
-    $files = glob($directory . $fileName . "{*}");
-    
-    foreach ($files as $file) {
+    $files = glob($directory . $fileName . "{*}", GLOB_BRACE); // GLOB_BRACE 추가
+        foreach ($files as $file) {
         if (is_file($file)) {
             if (!unlink($file)) {
                 throw new Exception("파일 삭제 실패: " . $file);
