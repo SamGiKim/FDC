@@ -2987,16 +2987,21 @@ var TimeSeriesPlot                  = {};
     const soft_label = soft_system().join(",").split(",");
     // const hard_graph = g_graph_inst;
     // const soft_graph = g_graph_soft;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        adaptor_make_legend();
+    });
+
     function adaptor_make_legend() {
         const chk_els = document.querySelectorAll(".widget.HW-bop-senser-list input[type='checkbox']");
         const chk_els2 = document.querySelectorAll(".widget.soft-senser-list input[type='checkbox']");
-        const group_els = document.querySelectorAll(".widget.HW-bop-senser-list span.group-title"); 
+        const group_els = document.querySelectorAll(".widget.HW-bop-senser-list span.group-title");
+        const group_els2 = document.querySelectorAll(".widget.soft-senser-list span.group-title");  
         const deco_els = document.querySelectorAll(".widget.HW-bop-senser-list span.deco");
-        const group_els2 = document.querySelectorAll(".widget.soft-senser-list span.group-title"); 
         const deco_els2 = document.querySelectorAll(".widget.soft-senser-list span.deco");
         const check_all = document.querySelector(".widget.HW-bop-senser-list .widget-head-gadget .mini:nth-child(1)");
-        const except_all = document.querySelector(".widget.HW-bop-senser-list .widget-head-gadget .mini:nth-child(2)");
         const check_all2 = document.querySelector(".widget.soft-senser-list .widget-head-gadget .mini:nth-child(1)");
+        const except_all = document.querySelector(".widget.HW-bop-senser-list .widget-head-gadget .mini:nth-child(2)");
         const except_all2 = document.querySelector(".widget.soft-senser-list .widget-head-gadget .mini:nth-child(2)");
         // >>> 240123 hjkim - Hard 범례 바인딩
         // 전체 선택/해제
@@ -3011,12 +3016,26 @@ var TimeSeriesPlot                  = {};
         const hard_legend_deselect_all = () => Array.from(document.querySelectorAll("#hw-bop-sensor-list .tree-ui ul input")).map(el => el.checked = false);
 
         // >>> 241025 hjkim - Hard/Soft 센서 범례 연동
-        function legend_select_all()    { soft_legend_select_all(); hard_legend_select_all(); all_graph("on"); all_graph("on", g_graph_soft); }
-        function legend_deselect_all()  { soft_legend_deselect_all(); hard_legend_deselect_all(); all_graph("off"); all_graph("off", g_graph_soft); }
-        check_all2.addEventListener("click", legend_select_all);
-        check_all.addEventListener("click",  legend_select_all);
-        except_all2.addEventListener("click", legend_deselect_all);
-        except_all.addEventListener("click",  legend_deselect_all);
+        function legend_soft_select_all() {
+            soft_legend_select_all(); 
+            all_graph("on", g_graph_soft); 
+        }
+        function legend_soft_deselect_all() {
+            soft_legend_deselect_all();
+            all_graph("off", g_graph_soft); 
+        }
+        function legend_hard_select_all() {
+            hard_legend_select_all(); 
+            all_graph("on", g_graph_hard); 
+        }
+        function legend_hard_deselect_all() {
+            hard_legend_deselect_all();
+            all_graph("off", g_graph_hard); 
+        }
+        check_all2.addEventListener("click", legend_soft_select_all);
+        except_all2.addEventListener("click", legend_soft_deselect_all);
+        check_all.addEventListener("click",  legend_hard_select_all);
+        except_all.addEventListener("click",  legend_hard_deselect_all);
         // <<< 241025 hjkim - Hard/Soft 센서 범례 연동
 
         // check_all2.addEventListener("click", soft_legend_select_all);
@@ -3126,6 +3145,8 @@ soft_chk.map((el, idx)  => {
     label_text = label_text.replace(/\u200B/gi, '');
     // 
     let keys = Object.keys(bind_model);
+    // Soft 센서 체크박스를 처리하는 코드
+
     keys.map((k) => {
         if(label_text.indexOf(k) != 0) return; // Early Exit
         el.addEventListener("click", (e) => {
@@ -3136,18 +3157,19 @@ soft_chk.map((el, idx)  => {
                     if(_ACTION == "ON") {
                         if(_IS_HARD_CHECKED[key_name] != true ) {
                             _IS_HARD_CHECKED[key_name] = true;
-                            hard_chk_el[key_name].click();
+                            // hard_chk_el[key_name].click();
                         }
                     } else if(_ACTION == "OFF") {
                         if(_IS_HARD_CHECKED[key_name] == true ) {
                             _IS_HARD_CHECKED[key_name] = false;
-                            hard_chk_el[key_name].click();
+                            // hard_chk_el[key_name].click();
                         }
                     }
                 }
             });
         });
-    });
+    }); 
+
     el.addEventListener('change', () => { __group_chk_valid(el);
         toggle_nth_graph(idx, soft_label, g_graph_soft);
     });
@@ -3186,7 +3208,7 @@ document.body.addEventListener("data_refreshed", () => {
     }, 50);
 });
 // <<< 240123 hjkim - 데이터 변경 바인딩
-}
+}  
 
 function __style_bold(el) { return el.style.fontWeight = (el.style.fontWeight == "bold") ? "normal" : "bold"; }
 function __line_show(d, l) { if(d.label.indexOf(l) == 0) { d.lines.show = !d.lines.show; } }
