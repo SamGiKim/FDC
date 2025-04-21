@@ -91,6 +91,7 @@ export class UnitControl {
 
     // STATUS 관련 값 리셋
     document.getElementById('fdu-status').textContent = '-';
+    documnet.getElementById('dac-range').textContent = '-';
     document.getElementById('current-frequency').textContent = '-';
     document.getElementById('remaining-time').textContent = '-';
     document.getElementById('measurement-interval').textContent = '-';
@@ -150,6 +151,7 @@ export class UnitControl {
       
     // JSON 문자열을 객체로 파싱
     const data = JSON.parse(statusResult.data);
+    const dacValue = (data.DAC === 'none' || !data.DAC) ? '-' : data.DAC;
 
     // 파일 업로드 성공 메시지 확인
     if (data.RESP) {
@@ -239,6 +241,7 @@ export class UnitControl {
 
     // STATUS 값을 HTML에 업데이트
     const status = data.STATUS;
+    status[4] = dacValue;
     console.log("status :",status);
 
      
@@ -264,10 +267,11 @@ export class UnitControl {
 
      // 항상 업데이트를 수행하도록 변경
      document.getElementById('fdu-status').innerText = status[0] || '-';
+     document.getElementById('dac-range').innerText = `${status[4] || '-'} `;
      document.getElementById('current-frequency').innerText = status[1] || '-';
      document.getElementById('measurement-interval').innerText = status[2] || '-';
      document.getElementById('remaining-time').innerText = `${status[3] || '-'} `; // 'sec' 단위 추가
- 
+
      // frequency div 업데이트
      const frequencyElement = document.getElementById('frequency');
      const currentFrequency = status[1] || '-';
