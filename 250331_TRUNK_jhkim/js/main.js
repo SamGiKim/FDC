@@ -3157,12 +3157,12 @@ soft_chk.map((el, idx)  => {
                     if(_ACTION == "ON") {
                         if(_IS_HARD_CHECKED[key_name] != true ) {
                             _IS_HARD_CHECKED[key_name] = true;
-                            // hard_chk_el[key_name].click();
+                            hard_chk_el[key_name].click();
                         }
                     } else if(_ACTION == "OFF") {
                         if(_IS_HARD_CHECKED[key_name] == true ) {
                             _IS_HARD_CHECKED[key_name] = false;
-                            // hard_chk_el[key_name].click();
+                            hard_chk_el[key_name].click();
                         }
                     }
                 }
