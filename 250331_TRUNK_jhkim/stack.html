@@ -117,6 +117,8 @@
                       <option value="stop" class="text-center" >STOP</option>
                       <option value="dac_range" class="text-center">DAC_RANGE</option>
                       <option value="pulse" class="text-center">PULSE</option>
+                      <option value="npulse" class="text-center">NPULSE</option>
+                      <option value="calibration" class="text-center">CALIBRATION</option>
                       <option value="disconnect" class="text-center">DISCONNECT</option>
                     </select>
                     <p id="cmd_desc"></p>
@@ -150,6 +152,9 @@
                           <!-- <div class="col-sm-3"> -->
                           <div class="">
                             <input type="number" id="value2" name="value2"><sup id="unit2"></span>
+                          </div>
+                          <div class="calibration-only" style="display: none;">
+                            <input type="text" id="value3" name="value3"><sup id="unit3"></span>
                           </div>
                         </dd>
                       <!-- </div> -->

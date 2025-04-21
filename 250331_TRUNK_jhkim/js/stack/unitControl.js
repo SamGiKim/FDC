@@ -343,6 +343,17 @@ const cmdInfo = {
     val1Unit: 'Hz',
     val2Unit: 'mV'
   },
+  'npulse': {
+    desc: 'The npulse command performs a measurement of transient responses by generating a various kind of npulse current injections with parameters such as amplitude (in mV) and phase offset (in the range of 0 to 360 degrees).',
+    val1Unit: 'Hz',
+    val2Unit: 'mV'
+  },
+  'calibration': {
+    desc: '',
+    val1Unit: '',
+    val2Unit: '',
+    val3Unit: ''
+  },
   'help': {
     desc: '통신 상태를 점검합니다. ',
     val1Unit: '',
@@ -374,11 +385,13 @@ export class StartButtonHandler {
     this.cmdSelect = document.getElementById('cmd');
     this.val1Input = document.getElementById('value1');
     this.val2Input = document.getElementById('value2');
+    this.val3Input = document.getElementById('value3');
     this.cmdDesc = document.getElementById('cmd_desc');
     this.unit1Span = document.getElementById('unit1');
     this.unit2Span = document.getElementById('unit2');
-    this.bigoInput = document.getElementById('bigo'); 
-    this.merrInput = document.getElementById('merr'); 
+    this.unit3Span = document.getElementById('unit3');
+    this.bigoInput = document.getElementById('bigo');
+    this.merrInput = document.getElementById('merr');
 
     if (this.startButton) {
       this.startButton.startButtonHandler = this;  // 인스턴스를 버튼 요소에 연결
@@ -397,7 +410,7 @@ export class StartButtonHandler {
 
     this.isRunning = false;
     this.lastCommand = null;
-    this.allCommands = ['connect', 'help', 'run', 'stop', 'dac_range', 'pulse', 'disconnect'];
+    this.allCommands = ['connect', 'help', 'run', 'stop', 'dac_range', 'pulse', 'npulse', 'calibration' , 'disconnect'];
 
     // 페이지 로드 시 초기 옵션 설정
     this.initializeOptions();
@@ -435,6 +448,9 @@ export class StartButtonHandler {
     if (this.unit2Span) {
       this.unit2Span.innerText = cmdData.val2Unit ? ` ${cmdData.val2Unit}` : '';
     }
+    if (this.unit3Span) {
+      this.unit3Span.innerText = cmdData.val3Unit ? ` ${cmdData.val3Unit}` : '';
+    }
   }
 
   restoreCmdSelection() {
@@ -461,6 +477,7 @@ export class StartButtonHandler {
     const config = getCurrentConfig();
     let val1 = this.val1Input ? this.val1Input.value : '';
     let val2 = this.val2Input ? this.val2Input.value : '';
+    let val3 = this.val3Input ? this.val3Input.value : '';
     let bigo = this.bigoInput ? this.bigoInput.value : '';
     let merr = this.merrInput ? this.merrInput.value : '';
 	
@@ -480,6 +497,7 @@ export class StartButtonHandler {
       "cmd": cmd,
       "val1": val1,
       "val2": val2,
+      "val3": val3,
       "bigo": bigo,
       "merr": merr
     };
@@ -558,9 +576,7 @@ export class StartButtonHandler {
         this.cmdSelect.appendChild(optionElement);
       });
     }
-}
-  
-
+  }
 
   resetFields() {
     if (this.val1Input) {
@@ -568,6 +584,9 @@ export class StartButtonHandler {
     }
     if (this.val2Input) {
       this.val2Input.value = '';
+    }
+    if (this.val3Input) {
+      this.val3Input.value = '';
     }
     if (this.bigoInput) {
       this.bigoInput.value = '';
@@ -603,5 +622,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   } catch (error) {
     console.error('페이지 초기화 중 오류:', error);
+  }
+});
+
+// CALIBRATION 선택 시 TextFields 추가
+document.getElementById('cmd').addEventListener('change', function () {
+  const cmd = this.value;
+  const calibrationFields = document.querySelectorAll('.calibration-only');
+
+  if (cmd === 'calibration') {
+    calibrationFields.forEach(el => el.style.display = 'block');
+  } else {
+    calibrationFields.forEach(el => el.style.display = 'none');		
   }
 });
