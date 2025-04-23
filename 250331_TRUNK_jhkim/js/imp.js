@@ -351,7 +351,7 @@ channel2.port2.onmessage = (e) => {
             var _pad_x = (_pholder_arr[0].clientWidth  / 3) * 1;
             var _pad_y = (_pholder_arr[0].clientHeight / 3) * 1;
             // >>> 240418 상대좌표계를 위한 설정
-            ImpedanceChart.graph_axis_reset();
+            ImpedanceChart.graph_axis_reset();          
             // >>> 240612 hjkim - Refactoring :: Intro. Param. Obj.
             var _opt = {
                 PX_RANGE_PADDING__X: 0,
@@ -370,6 +370,9 @@ channel2.port2.onmessage = (e) => {
                 yaxis_max: e.data.yaxis_max,
                 // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
             };
+            if (window.graphColor) {
+                e.data.color = window.graphColor;  // window.graphColor 값을 e.data.color에 넣기
+            }
             ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _opt);
             //ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], 0, 0, 3, 0 /*원점*/, e.data.ack_number, e.data.max_x-e.data.min_x);
             // <<< 240612 hjkim - Refactoring :: Intro. Param. Obj.
@@ -952,7 +955,8 @@ function Run_ImpedanceChart(ImpedanceChart) {
                 break;
                 default:
                     // >>> 250328 kjlee - x_range를 잘못 계산한 버그
-					          let x_range = _range(opt.xaxis_max, 0);
+                    let x_range = _range(opt != undefined ? opt.xaxis_max : g_micro_ohm.max_x, 0);
+                    // >>> 250423 jhkim - xaxis_max -> opt.xaxis_max로 변경 후 안 그려지던 그래프도 그려짐
                     // <<< 250328 kjlee - x_range를 잘못 계산한 버그
                     // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
                     //let x_range = _range(window.g_micro_ohm.max_x, 0);
@@ -2565,51 +2569,31 @@ function getSessionId() {
 
 // >>> 250212 hjkim - 원점체크박스 상태저장
 // function show_graph(is_origin = false, is_init = false, compact = "LB") {
-function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "normal") {
-    console.log("#show_graph", is_origin, mode);
-// >>> 250212 hjkim - 원점체크박스 상태저장
-    var _response_msg = "DRAW_NYQUIST";
-    var _compact = "";
-    
-    // 파라미터로부터 아규먼트 정리
-    if(is_origin == true) { 
-        _response_msg = "DRAW_NYQUIST__RELATIVE";
-        _compact = compact 
-    } else { 
-        _response_msg = "DRAW_NYQUIST"; 
-        _compact = ""; 
-    }
-    
+function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "normal", color = null) {
+    console.log("#show_graph", is_origin, mode, color);
+
+    var _response_msg = is_origin ? "DRAW_NYQUIST__RELATIVE" : "DRAW_NYQUIST";
+    var _compact = is_origin ? compact : "";
+
     var sessionId = getSessionId();
 
-    if(is_xsxeysye_checked()) {
-        // >>> 240927 hjkim - xs,xe,ys,ye사용 체크박스
-        // TODO: xs,xe,ys,ye 사용 체크됨
-        let _xy_se = get_xsxeysye();
-
-        // 메시지 송신
-        channel2.port2.postMessage({
-            msg: "GET_STACK__STREAM",
-            response_msg: _response_msg,
-            url_dir: "/data/SES/" + sessionId + "/selected",
-            compact : _compact,
-            xs: _xy_se[0],
-            xe: _xy_se[1],
-            ys: _xy_se[2],
-            ye: _xy_se[3],
-        });
-        // <<< 240927 hjkim - xs,xe,ys,ye사용 체크박스
-    } else {
-        // xs,xe,ys,e 사용 체크안됨
-        // 메시지 송신
-        channel2.port2.postMessage({
-            msg: "GET_STACK__STREAM",
-            response_msg: _response_msg,
-            url_dir: "/data/SES/" + sessionId + "/selected",
-            compact : _compact,
-        });
+    const msgData = {
+        msg: "GET_STACK__STREAM",
+        response_msg: _response_msg,
+        url_dir: "/data/SES/" + sessionId + "/selected",
+        compact: _compact,
+    };
+    // 전역에서 color 정보 가져오기
+    if (window.graphColor) {
+        msgData.color = window.graphColor;  // 전역 변수에서 색상 정보 사용
     }
+    if (is_xsxeysye_checked()) {
+        const [xs, xe, ys, ye] = get_xsxeysye();
+        Object.assign(msgData, { xs, xe, ys, ye });
+    }
+    channel2.port2.postMessage(msgData);
 }
+    
 // >>> 240425 hjkim - xsxe_ysye 구현(DOM-driven 버전)
 if(TITLE.includes("스택진단")) {
     

@@ -2728,53 +2728,66 @@ async function deleteSelectedFile(no) {
 async function handleDateCellClick(event) {
   const clickedElement = event.target;
 
-  if((type === 'SIN' || type === 'CALIB') && clickedElement.tagName === 'TD' && clickedElement.cellIndex === 1) {
-      const row = clickedElement.closest('tr');
-      const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
-      const graphBtn = document.getElementById('graph-btn');
+  if ((type === 'SIN' || type === 'CALIB') && clickedElement.tagName === 'TD' && clickedElement.cellIndex === 1) {
+    const row = clickedElement.closest('tr');
+    const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
+    const graphBtn = document.getElementById('graph-btn');
 
-      if(checkbox && graphBtn) {
-          try {
-              const isCurrentlyChecked = checkbox.checked;
-              const dataNo = row.querySelector('.date-cell').getAttribute('data-no');
-              
-              checkbox.checked = !isCurrentlyChecked;
-              
-              if (!isCurrentlyChecked) {
-                  // 체크되는 경우: 그래프 그리기
-                  graphBtn.click();
-              } else {
-                  // 체크 해제되는 경우
-                  try {
-                      // 1. 파일 삭제
-                      await deleteSelectedFile(dataNo);
-                      
-                      // 2. 그래프 초기화 (전역 함수 호출)
-                      if (typeof window.clear_graph === 'function') {
-                          window.clear_graph(); //imp.js 의 함수 호출(해당 파일 모듈화 안되어있어서 일단 전역호출)
-                      }
-                      
-                      // 3. 남은 체크된 항목들의 그래프만 다시 그리기
-                      const checkedBoxes = document.querySelectorAll(
-                          'input[type="checkbox"][name="search-checkbox"]:checked'
-                      );
-                      
-                      if (checkedBoxes.length > 0) {
-                          graphBtn.click();
-                      }
-                  } catch (error) {
-                      console.error('Error:', error);
-                      checkbox.checked = true;
-                  }
-              }
+    if (checkbox && graphBtn) {
+      try {
+        const isCurrentlyChecked = checkbox.checked;
+        const dateCell = row.querySelector('.date-cell');
+        const dataNo = dateCell.getAttribute('data-no');
 
-              updateSelectedCount();
-          } catch (error) {
-              console.error("Error during date cell click:", error);
-              checkbox.checked = isCurrentlyChecked;
-              updateSelectedCount();
+        checkbox.checked = !isCurrentlyChecked;
+
+        if (!isCurrentlyChecked) {
+          // 색상 추출해서 전역 변수 설정
+          let color;
+          const fileName = dateCell.getAttribute('data-filename');
+          if (fileName) {
+            color = getColorFromFileName(fileName);
+            console.log('Color from filename:', color);
+          } else {
+            const errCode = dateCell.getAttribute('data-err')?.split('.')[0];
+            color = getColorByMERR(errCode) || '#06D001';
+            console.log('Fallback color by MERR:', color);
           }
+
+          // 전역 색상 설정
+          window.graphColor = color;
+
+          // 그래프 그리기
+          graphBtn.click();
+        } else {
+          // 체크 해제되는 경우
+          try {
+            await deleteSelectedFile(dataNo);
+
+            if (typeof window.clear_graph === 'function') {
+              window.clear_graph();
+            }
+
+            const checkedBoxes = document.querySelectorAll(
+              'input[type="checkbox"][name="search-checkbox"]:checked'
+            );
+
+            if (checkedBoxes.length > 0) {
+              graphBtn.click();
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            checkbox.checked = true;
+          }
+        }
+
+        updateSelectedCount();
+      } catch (error) {
+        console.error('Error during date cell click:', error);
+        checkbox.checked = isCurrentlyChecked;
+        updateSelectedCount();
       }
+    }
   }
 }
 
@@ -2957,7 +2970,7 @@ function getColorByMERR(errCode) {
 
 //////////////////////////////////////////////////////////////////////////////
 // 체크박스 선택된 값 안에서 최대값 구해서 selected.conf에 저장하는 함수
-function handleDataResponse(data) {
+function handleDataResponse(data, color) {
   // console.log('handleDataResponse called with data:', data);
   let maxValues = {
     X1: -Infinity,
@@ -2986,6 +2999,9 @@ function handleDataResponse(data) {
     maxValues.Y2 !== -Infinity
   ) {
     saveMaxValueToFile(maxValueString);
+  }
+  if (color) {
+    window.graphColor = color;
   }
 }
 
