@@ -323,6 +323,9 @@ channel2.port2.onmessage = (e) => {
                 yaxis_max: e.data.yaxis_max,
                 // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
             };
+            if (window.graphColor) {
+                e.data.color = window.graphColor;  // window.graphColor 값을 e.data.color에 넣기
+            }
             ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _opt);
             // ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _pad_x, _pad_y, 0, 50 /* 우측으로 쉬프트 */, e.data.ack_number, e.data.max_x);
             // <<< 240612 hjkim - Refactoring :: Intro. Param. Obj.
