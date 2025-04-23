@@ -1227,6 +1227,260 @@
               </dialog>
               <!-- modal html 끝  -->
 
+
+              <!-- 2025-04-22 -->
+              <!-- 리포트 프린팅 modal html 시작 -->
+              <dialog class="default-modal" id="report-printing-modal">
+
+                <div class="modal-header">
+                  <h5 class="modal-title">리포트 작성</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal('report-printing-modal')" title="닫기">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                </div>
+  
+                <div class="modal--body scrollmini scrollmini-noborder">
+
+                  <div class="conetent-group report-printing-header">
+
+                    <h3 class="right-line">머리말</h3>
+
+                    <div class="inline">
+                      <label for="">제목</label>
+                      <input type="text" id="" value="디알퓨얼셀 PoC 리포트">
+                    </div>
+
+                    <div class="inline">
+                      <label for="">기간</label>
+                      <input type="date" value="2025-04-17" class=""> ~ <input type="date" value="2025-04-18" class="">
+                    </div>
+
+                    <div class="inline">
+                      <label for="">리모트ID</label>
+                      <input type="text" id="" class="" value="FR20250301">
+                    </div>
+
+                  </div>
+
+                  <div class="conetent-group experiment-info-data input--group">
+                    <div class="experiment-info">
+                      <h3>실험정보</h3>
+                      <div class="bg-padding">
+                        <div class="input--group bottom-line">
+                            <label for="">기관명</label>
+                            <input type="text" id="" class="" value="blueFC">
+                            <label for="">S/N</label>
+                            <input type="text" id="" class="" value="FD40P2503001">
+                        </div>
+                        <div class="input--group bottom-line">
+                            <label for="">연료전지</label>
+                            <input type="text" id="" class="" value="성남 5KW">
+                            <label for="">ID</label>
+                            <input type="text" id="" class="" value="SE01GR001F001">
+                        </div>
+                        <div class="input--group s-input">
+                            <label for="">TYPE</label>
+                            <input type="text" id="" class="" value="400v">
+                            <label for="">센서</label>
+                            <input type="text" id="" class="" value="100A">
+                            <label for="">F/W</label>
+                            <input type="text" id="" class="" value="2.13">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="experiment-data">
+                      <h3>실험시 측정값</h3>
+                      <div class="bg-padding bg-tb">
+                        <div class="input--group s-input bottom-line">
+                            <label for="">H2</label>
+                            <input type="text" id="" class="" value="0.0"><span>lpm</span>
+                            <label for="">STOCH H2</label>
+                            <input type="text" id="" class="" value="0.0"><span>stm</span>
+                        </div>
+                        <div class="input--group s-input bottom-line">
+                            <label for="">AIR</label>
+                            <input type="text" id="" class="" value="0.0"><span>lpm</span>
+                            <label for="">STOCH AIR</label>
+                            <input type="text" id="" class="" value="0.0"><span>stm</span>
+                        </div>
+                        <div class="input--group s-input">
+                            <label for="">MAX VOLTAGE</label>
+                            <input type="text" id="" class="" value="0.0"><span>v</span>
+                            <label for="">MAX CURRENT</label>
+                            <input type="text" id="" class="" value="0.0"><span>A</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="conetent-group detail-analyze-graph">
+                    <h3>그래프 상세 분석 작성</h3>
+
+                    <div class="analyze-graph">
+
+                      <div class="result">
+                        <h5><input type="checkbox" id="">01</h5>
+                        <img src="img/nyquist-plot-image-1.png" alt="img/nyquist-plot-image-1">
+                        <div class="caption bg-tb">
+                          <div class="item">
+                            <label for="">DATE</label>
+                            <span>2025-02-06 14:40:36</span>
+                            <label for="">RANGE</label>
+                            <span>2000Hz~0.1Hz</span>
+                          </div>
+                          <div class="items-m">
+                            <div class="voltage">
+                              <label for="">VOLTAGE</label>
+                              <div>113V</div>
+                            </div>
+                            <div class="current">
+                              <label for="">CURRENT</label>
+                              <div>5A</div>
+                            </div>
+                            <div class="dac-range">
+                              <label for="">DAC_RANGE</label>
+                              <div>50 10</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="analyze-textarea">
+
+                        <div class="main-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+항목추가</button>
+                            <button class="btn-of">+부항목추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                        <div class="sub-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                        <div class="sub-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                        <div class="main-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+항목추가</button>
+                            <button class="btn-of">+부항목추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                  </div>
+                                 
+                  <div class="conetent-group summary-analyze-graph">
+
+                    <div class="result">
+                      <h3>그래프 종합 분석 작성</h3>
+                      <div class="analyze-textarea">
+
+                        <div class="main-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+항목추가</button>
+                            <button class="btn-of">+부항목추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                        <div class="sub-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                        <div class="sub-text">
+                          <textarea name="" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                        <div class="main-text">
+                          <textarea name="btn--group" id="" cols="30" rows="10" placeholder="상세 분석 작성"></textarea>
+                          <div class="btn--group">
+                            <button class="btn-of">+항목추가</button>
+                            <button class="btn-of">+부항목추가</button>
+                            <button class="btn-of delete">×삭제</button>
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+
+
+                  </div>
+
+                </div>
+                
+                <div class="modal--footer">
+                  <button class="btn-of w-24 mx-1 delete float-start" id="" onclick="openModal('delete-modal')">×삭제</button>
+                  <button class="btn-of w-24 mx-1" id="download-btn" onclick="openView()">미리보기</button>
+                  <button class="btn-of w-24" onclick="closeModal('report-printing-modal')">취소</button>
+                </div>
+
+              </dialog>
+              <!-- 리포트 프린팅 modal html 끝 -->
+              <!-- 리포트 프린팅 script 시작 -->
+              <script>
+                function openView(){
+                var popupW = 840;
+                var popupH = 900;
+                var left = Math.ceil((window.screen.width - popupW)/2);
+                var top = Math.ceil((window.screen.height - popupH)/2);
+                window.open('report-printing.html','','width='+popupW+',height='+popupH+',left='+left+',top='+top+',scrollbars=yes,resizable=no,toolbar=no,titlebar=no,menubar=no,location=no')			
+               }
+              </script>
+              <!-- 리포트 프린팅 script 끝 -->
+
+
+              <!-- 삭제 modal html 시작 -->
+              <dialog id="delete-modal">
+                
+                <div class="modal-header" style="background: #d00; color: #fff">
+                  <h5 class="modal-title">항목삭제</h5>
+                  <button class="close" type="button" onclick="closeModal('delete-modal')" title="닫기">
+                    <span aria-hidden="true" style="color: #fff">×</span>
+                  </button>
+                </div>
+
+                <div class="modal-body">
+                  <h5>선택된 항목을 삭제하시겠습니까?</h5>
+                </div>
+
+                <div class="modal-footer">
+                  <button class="btn-of w-24 mx-1 delete" id="">×삭제</button>
+                  <button class="btn-of w-24" onclick="closeModal('delete-modal')">취소</button>
+                </div>
+                
+              </dialog>
+              <!-- 삭제 modal html 끝 -->
+
+
+
               <!-- 기본 modal html 시작 -->
               <dialog class="default-modal">
                 <div class="dialog-box">

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>디알퓨얼셀 PoC 리포트</title>
+  <!-- <link rel="stylesheet" href="./css/common.css"> -->
+  <link rel="stylesheet" href="./css/report-printing.css">
+  <script src="./js/report-printing.js"></script>
+</head>
+
+<body>
+  <header class="no-print">
+    
+    <h1>디알퓨얼셀 PoC 리포트</h1>
+      
+    <div class="sn">
+      <label for="">REPORT ID</label>
+      <div>FR20250301</div>
+    </div>
+    
+    <div class="duration">
+      <label for="">DATE</label>
+      <div>2025-02-06 ~ 2025-03-18</div>
+    </div>       
+  
+  </header>
+
+  <div class="no-print print-btn">
+    <button onclick="window.print();">인쇄하기</button>
+    <button onclick="window.close()">닫기</button>
+  </div>
+
+  <main class="print-no-m">
+
+    <section class="environment">
+
+      <h2 class="print-no-m">Experimental environment</h2>
+      
+      <div class="environment-items">
+        <div class="item company">
+          <label for="">COMPANY</label>
+          <div>BlueFC</div>
+        </div>
+        <div class="item fuel-cell">
+          <label for="">FUEL CELL</label>
+          <div>성남 5KW</div>
+        </div>
+        <div class="item Identification">
+          <label for="">IDENTIFICATION</label>
+          <div>SE01GR001F001</div>
+        </div>
+        <div class="item sn">
+          <label for="">S/N</label>
+          <div>FD40P2503001</div>
+        </div>
+        <div class="item type">
+          <label for="">TYPE</label>
+          <div>400V</div>
+        </div>
+        <div class="item sensor">
+          <label for="">SENSOR</label>
+          <div>100A</div>
+        </div>
+        <div class="item fw">
+          <label for="">F/W</label>
+          <div>2.13</div>
+        </div>
+      </div>
+
+      <div class="measurements">
+        <div class="item h2">
+          <label for="">H2</label>
+          <div>0.0 lpm</div>
+        </div>
+        <div class="item air">
+          <label for="">AIR</label>
+          <div>0.0 lpm</div>
+        </div>
+        <div class="item max-voltage">
+          <label for="">MAX VOLTAGE</label>
+          <div>0.0 v</div>
+        </div>
+        <div class="item h2-stoich">
+          <label for="">STOCH H2</label>
+          <div>0.0 stm</div>
+        </div>
+        <div class="item air-stoich">
+          <label for="">STOCH AIR</label>
+          <div>0.0 stm</div>
+        </div>
+        <div class="item max-current">
+          <label for="">MAX CURRENT</label>
+          <div>0.0 A</div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="nyquist-plot">
+      <h2>NYQUIST PLOT</h2>
+      <div class="nyquist-plot-result ">
+        <div class="result">
+            <h3>01</h3>
+            <img src="img/nyquist-plot-image-1.png" alt="img/nyquist-plot-image-1">
+            <div class="caption">
+              <div class="item date">
+                <label for="">DATE</label>
+                <span>2025-02-06 14:40:36</span>
+              </div>
+              <div class="item date">
+                <label for="">RANGE</label>
+                <span>2000Hz~0.1Hz</span>
+              </div>
+              <div class="items-m">
+                <div class="voltage">
+                  <label for="">VOLTAGE</label>
+                  <div>113V</div>
+                </div>
+                <div class="current">
+                  <label for="">CURRENT</label>
+                  <div>5A</div>
+                </div>
+                <div class="dac-range"">
+                  <label for="">DAC_RANGE</label>
+                  <div>50 10</div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="result">
+          <h3>02</h3>
+          <img src="img/nyquist-plot-image-2.png" alt="img/nyquist-plot-image-2">
+          <div class="caption">
+            <div class="item date">
+              <label for="">DATE</label>
+              <span>2025-02-06 14:40:36</span>
+            </div>
+            <div class="item date">
+              <label for="">RANGE</label>
+              <span>2000Hz~0.1Hz</span>
+            </div>
+            <div class="items-m">
+              <div class="voltage">
+                <label for="">VOLTAGE</label>
+                <div>113V</div>
+              </div>
+              <div class="current">
+                <label for="">CURRENT</label>
+                <div>5A</div>
+              </div>
+              <div class="dac-range"">
+                <label for="">DAC_RANGE</label>
+                <div>50 10</div>
+              </div>
+            </div>
+          </div>
+        </div>        
+        <div class="result">
+          <h3>03</h3>
+          <img src="img/nyquist-plot-image-1.png" alt="img/nyquist-plot-image-1">
+          <div class="caption">
+            <div class="item date">
+              <label for="">DATE</label>
+              <span>2025-02-06 14:40:36</span>
+            </div>
+            <div class="item date">
+              <label for="">RANGE</label>
+              <span>2000Hz~0.1Hz</span>
+            </div>
+            <div class="items-m">
+              <div class="voltage">
+                <label for="">VOLTAGE</label>
+                <div>113V</div>
+              </div>
+              <div class="current">
+                <label for="">CURRENT</label>
+                <div>5A</div>
+              </div>
+              <div class="dac-range"">
+                <label for="">DAC_RANGE</label>
+                <div>50 10</div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </section>
+
+    <section class="expert-notice next-page">
+      <h2>EXPERT NOTICE</h2>
+      <div class="expert-notice-content">
+        <!-- <pre style="white-space: pre-line;"> -->
+          <ul class="e-notice">
+            <li><pre>2월6일과 3월18일의 실험은 장치의 EIS 측정 여부 및 calibration을 확인이 목적으로 유효한 dataset을 구축하기 위한 사전 단계로 수행된 것임.</pre></li>
+            <li><pre>결과적으로 FDR(Fuelcell DR) 장치의 calibration은 한 두번의 추가 실험으로 완료될 수 있을 것으로 보임.</pre></li>
+            <li><pre>2월6일과 3월18일의 실험 결과로 볼 때 3월18일의 BlueFC의 스택의 안정성이 2월6일의 상태와 비교하여 저하된 것으로 보임.
+그 원인으로는 아래의 원인 중 하나로 추가 실험을 통해 확인이 될 것으로 보임.</pre></li>
+            <li><pre>Stack 자체의 성능 저하</pre></li>
+            <ul class="e-notice">
+              <li><pre>운전시 BOP가 적절한 수소/공기/온도를 조절하지 못함</pre></li>
+              <li><pre>생성된 stack의 물을 제때 배출시키지 못함</pre></li>
+            </ul>
+          </ul> 
+      </div>
+    </section>    
+
+    <section class="nyquist-plot-details">
+      <h2 class="print-no-m">NYQUIST PLOT DETAILS</h2>
+      <figure class="nyquist-plot-figure">
+        <img src="img/nyquist-plot-image-1.png" alt="img/nyquist-plot-image-1">
+        <div class="data-notices">  
+          <div class="caption">
+            <h3>01</h3>
+            <div class="item date">
+              <label for="">DATE</label>
+              <span>2025-02-06 14:40:36</span>
+            </div>
+            <div class="item date">
+              <label for="">RANGE</label>
+              <span>2000Hz~0.1Hz</span>
+            </div>
+            <div class="items-m">
+              <div class="voltage">
+                <label for="">VOLTAGE</label>
+                <div>113V</div>
+              </div>
+              <div class="current">
+                <label for="">CURRENT</label>
+                <div>5A</div>
+              </div>
+              <div class="dac-range"">
+                <label for="">DAC_RANGE</label>
+                <div>50 10</div>
+              </div>
+            </div>
+          </div>
+          <ul class="e-notice">
+            <li><pre>2월6일과 3월18일의 실험은 장치의 EIS 측정 여부 및 calibration을 확인이 목적으로 유효한 dataset을 구축하기 위한 사전 단계로 수행된 것임.</pre></li>
+            <li><pre>결과적으로 FDR(Fuelcell DR) 장치의 calibration은 한 두번의 추가 실험으로 완료될 수 있을 것으로 보임.</pre></li>
+            <li><pre>2월6일과 3월18일의 실험 결과로 볼 때 3월18일의 BlueFC의 스택의 안정성이 2월6일의 상태와 비교하여 저하된 것으로 보임.
+그 원인으로는 아래의 원인 중 하나로 추가 실험을 통해 확인이 될 것으로 보임.</pre></li>
+            <li><pre>Stack 자체의 성능 저하</pre></li>
+            <ul class="e-notice">
+              <li><pre>운전시 BOP가 적절한 수소/공기/온도를 조절하지 못함</pre></li>
+              <li><pre>생성된 stack의 물을 제때 배출시키지 못함</pre></li>
+            </ul>
+          </ul> 
+        </div>
+      </figure>
+
+      <figure class="nyquist-plot-figure">
+        <img src="img/nyquist-plot-image-1.png" alt="img/nyquist-plot-image-1">
+        <div class="data-notices">  
+
+          <div class="caption">
+            <h3>02</h3>
+            <div class="item date">
+              <label for="">DATE</label>
+              <span>2025-02-06 14:40:36</span>
+            </div>
+            <div class="item date">
+              <label for="">RANGE</label>
+              <span>2000Hz~0.1Hz</span>
+            </div>
+            <div class="items-m">
+              <div class="voltage">
+                <label for="">VOLTAGE</label>
+                <div>113V</div>
+              </div>
+              <div class="current">
+                <label for="">CURRENT</label>
+                <div>5A</div>
+              </div>
+              <div class="dac-range"">
+                <label for="">DAC_RANGE</label>
+                <div>50 10</div>
+              </div>
+            </div>
+          </div>
+          <ul class="e-notice">
+            <li><pre>2월6일과 3월18일의 실험은 장치의 EIS 측정 여부 및 calibration을 확인이 목적으로 유효한 dataset을 구축하기 위한 사전 단계로 수행된 것임.</pre></li>
+            <li><pre>결과적으로 FDR(Fuelcell DR) 장치의 calibration은 한 두번의 추가 실험으로 완료될 수 있을 것으로 보임.</pre></li>
+            <li><pre>2월6일과 3월18일의 실험 결과로 볼 때 3월18일의 BlueFC의 스택의 안정성이 2월6일의 상태와 비교하여 저하된 것으로 보임.
+그 원인으로는 아래의 원인 중 하나로 추가 실험을 통해 확인이 될 것으로 보임.</pre></li>
+            <li><pre>Stack 자체의 성능 저하</pre></li>
+            <ul class="e-notice">
+              <li><pre>운전시 BOP가 적절한 수소/공기/온도를 조절하지 못함</pre></li>
+              <li><pre>생성된 stack의 물을 제때 배출시키지 못함</pre></li>
+            </ul>
+          </ul> 
+        </div>
+      </figure>
+
+      <figure class="nyquist-plot-figure">
+        <img src="img/nyquist-plot-image-1.png" alt="img/nyquist-plot-image-1">
+        <div class="data-notices">  
+          <div class="caption">
+            <h3>03</h3>
+            <div class="item date">
+              <label for="">DATE</label>
+              <span>2025-02-06 14:40:36</span>
+            </div>
+            <div class="item date">
+              <label for="">RANGE</label>
+              <span>2000Hz~0.1Hz</span>
+            </div>
+            <div class="items-m">
+              <div class="voltage">
+                <label for="">VOLTAGE</label>
+                <div>113V</div>
+              </div>
+              <div class="current">
+                <label for="">CURRENT</label>
+                <div>5A</div>
+              </div>
+              <div class="dac-range"">
+                <label for="">DAC_RANGE</label>
+                <div>50 10</div>
+              </div>
+            </div>
+          </div>
+          <ul class="e-notice">
+            <li><pre>2월6일과 3월18일의 실험은 장치의 EIS 측정 여부 및 calibration을 확인이 목적으로 유효한 dataset을 구축하기 위한 사전 단계로 수행된 것임.</pre></li>
+            <li><pre>결과적으로 FDR(Fuelcell DR) 장치의 calibration은 한 두번의 추가 실험으로 완료될 수 있을 것으로 보임.</pre></li>
+            <li><pre>2월6일과 3월18일의 실험 결과로 볼 때 3월18일의 BlueFC의 스택의 안정성이 2월6일의 상태와 비교하여 저하된 것으로 보임.
+그 원인으로는 아래의 원인 중 하나로 추가 실험을 통해 확인이 될 것으로 보임.</pre></li>
+            <li><pre>Stack 자체의 성능 저하</pre></li>
+            <ul class="e-notice">
+              <li><pre>운전시 BOP가 적절한 수소/공기/온도를 조절하지 못함</pre></li>
+              <li><pre>생성된 stack의 물을 제때 배출시키지 못함</pre></li>
+            </ul>
+          </ul> 
+        </div>
+      </figure>      
+
+
+    </section>
+  </main>
+
+  
+  <footer class="no-print">
+    <div class="logo"></div>
+    <div class="copyright">
+      @2025 H2Systems Inc. All rights reserved.
+    </div>
+  </footer>
+  
+</body>
+</html>

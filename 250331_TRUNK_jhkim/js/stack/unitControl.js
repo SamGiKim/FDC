@@ -151,7 +151,7 @@ export class UnitControl {
       
     // JSON 문자열을 객체로 파싱
     const data = JSON.parse(statusResult.data);
-    const dacValue = (data.DAC === 'none' || !data.DAC) ? '-' : data.DAC;
+    const dacValue = (data.DAC.toLowerCase() === 'none' || !data.DAC) ? '-' : data.DAC;
 
     // 파일 업로드 성공 메시지 확인
     if (data.RESP) {
@@ -569,7 +569,7 @@ export class StartButtonHandler {
         
         // Redis의 frequency 값이 있거나 run 명령어가 실행 중일 때
         if ((this.isRunning || this.lastCommand === 'run') && 
-                (option === 'run' || option === 'pulse' || option === 'help' || option === 'dac_range')) {
+                (option === 'run' || option === 'pulse' || option === 'help' || option === 'dac_range' || option === 'npulse' || option === 'calibration')) {
                 optionElement.textContent = `${option.toUpperCase()} (동작중)`;
                 optionElement.disabled = true;
         } else {
