@@ -296,6 +296,9 @@ channel2.port2.onmessage = (e) => {
             var _grid_el = document.querySelector(".widget-body.d-grid");
             var _pholder_arr = _grid_el.querySelectorAll('.content-section>div:not(.float-end)');
             var _e = { target: _pholder_arr[0] };
+            if (window.graphColor) {
+                e.data.color = window.graphColor;  // window.graphColor 값을 e.data.color에 넣기
+            }
             ImpedanceChart.IAdd_series_in_imp_graph(_e, e.data.url, e.data.color);
         break;
         case "DRAW_NYQUIST":
