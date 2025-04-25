@@ -557,6 +557,7 @@ function updateTable(value) {
   const searchDetail = document.querySelector('#dynamic-search-detail');  // 상세검색 tbody
   const tableBody = document.querySelector('#dynamic-table tbody'); // 실제 데이터 들어갈 tbody
   
+  // 항목에 따라 css 변경
   if (value === 'PULSE' || value === 'NPULSE') {
     table.className = 'table table-fixed table-striped pulse'
   } else if (value === 'SIN' || value === 'CALIB') {
