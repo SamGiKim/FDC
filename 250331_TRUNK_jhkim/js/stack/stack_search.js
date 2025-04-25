@@ -619,7 +619,6 @@ function updateTable(value) {
         <th>To</th>
         <th>M-L</th>
         <th>x1</th>
-        <th>x2</th>
         <th>Err</th>
         <th>Note</th>
       </tr>
@@ -671,7 +670,6 @@ function updateTable(value) {
         <th>To</th>
         <th>M-L</th>
         <th>x1</th>
-        <th>x2</th>
         <th>Err</th>
         <th>Note</th>
       </tr>
@@ -1641,7 +1639,6 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td>${row.hzTO || ""}</td>
           <td>${row["M-L"] || ""}</td>
           <td>${row.x1 || ""}</td>
-          <td>${row.x2 || ""}</td>
           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
@@ -1678,7 +1675,6 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td>${row.hzTO || ""}</td>
           <td>${row["M-L"] || ""}</td>
           <td>${row.x1 || ""}</td>
-          <td>${row.x2 || ""}</td>
           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
