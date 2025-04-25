@@ -552,10 +552,17 @@ function updateTable(value) {
   // 전역 type 변수 업데이트 추가
   type= value; 
 
+  const table = document.querySelector('#dynamic-table');
   const tableHead = document.querySelector('#dynamic-table thead');
   const searchDetail = document.querySelector('#dynamic-search-detail');  // 상세검색 tbody
   const tableBody = document.querySelector('#dynamic-table tbody'); // 실제 데이터 들어갈 tbody
   
+  if (value === 'PULSE' || value === 'NPULSE') {
+    table.className = 'table table-fixed table-striped pulse'
+  } else if (value === 'SIN' || value === 'CALIB') {
+    table.className = 'table table-fixed table-striped'
+  }
+
   tableHead.innerHTML = ''; // 기존 헤더 초기화
   tableBody.innerHTML = ''; // 기존 본문 초기화
 

@@ -1945,7 +1945,40 @@ main.stack {
           width: calc(100% - ( 26px + 19.5% + (6% * 2) + (7% * 2) + (8% * 3) + 6%));
         } */
       }
-
+      .pulse {
+        thead tr {
+          width: calc(100% - 6px);
+          td {
+            padding: 5px 0px;
+          }
+        }
+        th,td {
+          &:nth-child(1){
+            width: 26px;  
+            text-align: center;
+          }
+          &:nth-child(2){
+            width: 19.5%;  
+          }
+          &:nth-child(3){
+            width: 4.5%;
+          }
+          &:nth-child(4),
+          &:nth-child(5),
+          &:nth-child(6),
+          &:nth-child(7),
+          &:nth-child(8),
+          &:nth-child(9){
+            width: 5.5%;
+          }
+          &:nth-child(10){
+            width: 8%;
+          }
+          &:nth-child(11){
+            width: 30.5%;
+          }
+        }
+      }
       /* th:nth-child(1),
       td:nth-child(1){
         width: 24px;
