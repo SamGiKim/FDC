@@ -1122,19 +1122,7 @@ document.querySelectorAll(".search_reset").forEach((button) => {
   button.addEventListener("click", function () {
     resetSearchConditions(); // 검색 조건 초기화 함수 호출
     isResetTriggered = true;
-    
-    // 두 번째 검색 버튼에 강제로 클릭 이벤트 발생(검색 버튼 두개인거 참고)
-    const searchButtons = document.querySelectorAll(".stk-sch-btn");
-    if (searchButtons && searchButtons.length >= 2) {
-        const clickEvent = new MouseEvent('click', {
-            view: window,
-            bubbles: true,
-            cancelable: true
-        });
-        searchButtons[1].dispatchEvent(clickEvent);
-    } else {
-        console.error("Second search button not found");
-    }
+    performSearch({ skipUrlUpdate : true })
   });
 });
 
@@ -1223,140 +1211,133 @@ export function resetSearchConditions() {
 export function addSearchButtonListener() {
   document.querySelectorAll(".stk-sch-btn").forEach((button) => {
     button.addEventListener("click", function () {
-      // 검색 조건 수집 함수
-      const getInputValue = (inputId) => {
-        const inputElement = document.getElementById(inputId);
-        if (!inputElement) {
-          console.log(`Element not found for ID: ${inputId}`);
-          return ""; // 빈 문자열 반환하거나, 적절한 기본값 설정
-        }
-        const value = inputElement.value.trim(); // 입력값에서 앞뒤 공백 제거
-        if (value) {
-          // 값이 있는 경우에만 로깅
-          console.log(`입력 값 가져오기: ${inputId}`);
-          console.log(`Value for ${inputId}: ${value}`);
-        }
-        return value;
-      };
-
-      // 날짜 범위 가져오기
-      const { fromDate, toDate } = getSearchDateRange();
-  
-      // MySQL datetime 형식으로 변환
-      const startDate = formatDateForSearch(fromDate);
-      const endDate = formatDateForSearch(toDate);
-      // 날짜 유효성 검사
-      if (fromDate > toDate) {
-        alert("시작 날짜가 종료 날짜보다 뒤에 있습니다.");
-        return;
-      }
-
-      // Error Code select 값 가져오기
-      const errorCode = document.getElementById('stack-error-codes-search').value;
-
-      // 검색 조건 수집
-      const labelOrBigoType = document.getElementById('label-or-bigo').value;  // 변경된 ID 사용
-      const searchValue = getInputValue("input-label");
-
-      const searchConditions = {
-        "start-date": startDate,  // PHP와 일치하도록 키 이름 변경
-        "end-date": endDate,  
-        hzFROM: {
-          value: getInputValue("input-from"),
-          condition: getSelectedCondition("a07"),
-        },
-        hzTO: {
-          value: getInputValue("input-to"),
-          condition: getSelectedCondition("a08"),
-        },
-        "M-L": {
-          value: getInputValue("input-m-l"),
-          condition: getSelectedCondition("a02"),
-        },
-        x1: {
-          value: getInputValue("input-x1"),
-          condition: getSelectedCondition("a03"),
-        },
-        x2: {
-          value: getInputValue("input-x2"),
-          condition: getSelectedCondition("a04"),
-        },
-        // y1: {
-        //   value: getInputValue("input-y1"),
-        //   condition: getSelectedCondition("a05"),
-        // },
-        // y2: {
-        //   value: getInputValue("input-y2"),
-        //   condition: getSelectedCondition("a06"),
-        // },
-        MERR: { 
-          value: errorCode, // select box에서 선택된 값
-          condition: "=" // MERR은 정확한 값 매칭만 사용
-        }
-        // LABEL: { value: getInputValue("input-label") }
-      };
-
-      // 검색어가 있을 경우에만 검색 타입에 따라 조건 추가
-        if (searchValue) {
-          searchConditions[labelOrBigoType] = { value: searchValue };
-        }
-
-      // 빈 값 필터링
-      Object.keys(searchConditions).forEach((key) => {
-        // 값이 객체인 경우 .value를 확인하고, 그렇지 않은 경우 값을 직접 확인
-        if (
-          typeof searchConditions[key] === "object" &&
-          searchConditions[key] !== null
-        ) {
-          if (!searchConditions[key].value) {
-            delete searchConditions[key];
-          }
-        } else {
-          // 값이 단순 데이터 타입인 경우 (예: 문자열), 값 자체를 확인
-          if (!searchConditions[key]) {
-            delete searchConditions[key];
-          }
-        }
-      });
-
-      console.log("검색 조건:", searchConditions);
-
-      // 검색 조건을 sessionStorage에 저장
-      sessionStorage.setItem('searchConditions', JSON.stringify(searchConditions));
-
-      // 검색 조건을 쿼리 문자열로 변환
-      const queryString = new URLSearchParams(searchConditions).toString();
-
-      // 현재 URL에 검색 조건 추가
-      const newUrl = `${window.location.pathname}?${queryString}`;
-      window.history.pushState({ path: newUrl }, '', newUrl);
-
-      // 서버에 검색 요청
-      if (currentPageContext === "bookmark") {
-        filterDataByBookmark(currentBookmarkId, 1, searchConditions).then(
-          () => {
-            // 필터링된 항목 선택 상태 초기화 및 체크박스 업데이트
-            initCheckboxStateAndSelectAll(true); // 북마크 탭에서도 체크박스 선택
-            updateSelectedCount();
-          }
-        );
-      } else {
-        searchWithData(searchConditions).then(() => {
-          // 필터링된 항목 선택 상태 초기화 및 체크박스 업데이트
-          initCheckboxStateAndSelectAll();
-
-          // 초기화 버튼이 눌린 후에는 모든 체크박스를 해제
-          if (isResetTriggered) {
-            initCheckboxStateAndSelectAll(false);
-            isResetTriggered = false;
-          }
-
-          updateSelectedCount();
-        });
-      }
+      performSearch();
     });
   });
 }
+
+export function performSearch({ skipUrlUpdate = false } = {}) {
+  // 검색 조건 수집 함수
+  const getInputValue = (inputId) => {
+    const inputElement = document.getElementById(inputId);
+    if (!inputElement) {
+      console.log(`Element not found for ID: ${inputId}`);
+      return ""; // 빈 문자열 반환하거나, 적절한 기본값 설정
+    }
+    const value = inputElement.value.trim(); // 입력값에서 앞뒤 공백 제거
+    if (value) {
+      // 값이 있는 경우에만 로깅
+      console.log(`입력 값 가져오기: ${inputId}`);
+      console.log(`Value for ${inputId}: ${value}`);
+    }
+    return value;
+  };
+
+  // 날짜 범위 가져오기
+  const { fromDate, toDate } = getSearchDateRange();
+
+  // MySQL datetime 형식으로 변환
+  const startDate = formatDateForSearch(fromDate);
+  const endDate = formatDateForSearch(toDate);
+
+  // 날짜 유효성 검사
+  if (fromDate > toDate) {
+    alert("시작 날짜가 종료 날짜보다 뒤에 있습니다.");
+    return;
+  }
+
+  // Error Code select 값 가져오기
+  const errorCode = document.getElementById('stack-error-codes-search').value;
+
+  // 검색 조건 수집
+  const labelOrBigoType = document.getElementById('label-or-bigo').value;
+  const searchValue = getInputValue("input-label");
+
+  const searchConditions = {
+    "start-date": startDate,  
+    "end-date": endDate,  
+    hzFROM: {
+      value: getInputValue("input-from"),
+      condition: getSelectedCondition("a07"),
+    },
+    hzTO: {
+      value: getInputValue("input-to"),
+      condition: getSelectedCondition("a08"),
+    },
+    "M-L": {
+      value: getInputValue("input-m-l"),
+      condition: getSelectedCondition("a02"),
+    },
+    x1: {
+      value: getInputValue("input-x1"),
+      condition: getSelectedCondition("a03"),
+    },
+    x2: {
+      value: getInputValue("input-x2"),
+      condition: getSelectedCondition("a04"),
+    },
+    MERR: { 
+      value: errorCode, 
+      condition: "=" 
+    }
+  };
+
+  // 검색어가 있을 경우에만 검색 타입에 따라 조건 추가
+  if (searchValue) {
+    searchConditions[labelOrBigoType] = { value: searchValue };
+  }
+
+  // 빈 값 필터링
+  Object.keys(searchConditions).forEach((key) => {
+    if (
+      typeof searchConditions[key] === "object" &&
+      searchConditions[key] !== null
+    ) {
+      if (!searchConditions[key].value) {
+        delete searchConditions[key];
+      }
+    } else {
+      if (!searchConditions[key]) {
+        delete searchConditions[key];
+      }
+    }
+  });
+
+  console.log("검색 조건:", searchConditions);
+
+  // 검색 조건을 sessionStorage에 저장
+  sessionStorage.setItem('searchConditions', JSON.stringify(searchConditions));
+
+  // URL을 업데이트하려면 skipUrlUpdate가 false여야 함
+  if (!skipUrlUpdate) {
+    // 검색 조건을 쿼리 문자열로 변환
+    const queryString = new URLSearchParams(searchConditions).toString();
+
+    // 현재 URL에 검색 조건 추가
+    const newUrl = `${window.location.pathname}?${queryString}`;
+  }
+
+  // 서버에 검색 요청
+  if (currentPageContext === "bookmark") {
+    filterDataByBookmark(currentBookmarkId, 1, searchConditions).then(
+      () => {
+        initCheckboxStateAndSelectAll(true); 
+        updateSelectedCount();
+      }
+    );
+  } else {
+    searchWithData(searchConditions).then(() => {
+      initCheckboxStateAndSelectAll();
+      if (isResetTriggered) {
+        initCheckboxStateAndSelectAll(false);
+        isResetTriggered = false;
+      }
+      updateSelectedCount();
+    });
+  }
+}
+
+
 
 // 선택된 조건을 반환하는 함수
 function getSelectedCondition(name) {
