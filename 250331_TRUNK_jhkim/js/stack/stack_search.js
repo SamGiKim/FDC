@@ -2656,6 +2656,7 @@ export async function copySelectedFiles() {
           const fetchPromises = dataNos.map((no) => {
               const color = getGraphColor(no);
               console.log(`Processing file for NO: ${no}, Color: ${color}`);
+              window.graphColor = color;
               return copyFilesForGraph(
                   no, 
                   color, 
@@ -2754,9 +2755,7 @@ async function handleDateCellClick(event) {
             console.log('Fallback color by MERR:', color);
           }
 
-          // 전역 색상 설정
           window.graphColor = color;
-
           // 그래프 그리기
           graphBtn.click();
         } else {
@@ -2999,9 +2998,6 @@ function handleDataResponse(data, color) {
     maxValues.Y2 !== -Infinity
   ) {
     saveMaxValueToFile(maxValueString);
-  }
-  if (color) {
-    window.graphColor = color;
   }
 }
 
