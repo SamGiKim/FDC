@@ -238,12 +238,10 @@ export class UnitControl {
     // 전체 데이터를 console-section에 표시
    this.updateConsoleSection(statusResult.data);
 
-
     // STATUS 값을 HTML에 업데이트
     const status = data.STATUS;
     status[4] = dacValue;
     console.log("status :",status);
-
      
     // Redis의 frequency 값(status[1])에 따라 cmd 옵션 제어
     const startButton = document.getElementById('start');
@@ -512,6 +510,9 @@ export class StartButtonHandler {
   }
 
   sendCommand(data) {
+    if (data.cmd === 'calibration') {
+      data.cmd = 'cal';  
+    }
     fetch('http://112.216.161.114:8082/api/set_cmd/', {
       method: 'POST',
       headers: {
@@ -607,7 +608,6 @@ export class StartButtonHandler {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async () => {
   try {
