@@ -346,15 +346,15 @@ const cmdInfo = {
     val2Unit: 'mV'
   },
   'npulse': {
-    desc: 'The npulse command performs a measurement of transient responses by generating a various kind of npulse current injections with parameters such as amplitude (in mV) and phase offset (in the range of 0 to 360 degrees).',
+    desc: 'The npulse command enables repetitive execution of pulse current injections, using the same parameters as the pulse command, such as amplitude (in mV) and phase offset (in the range of 0 to 360 degrees). This functionality allows for the measurement of transient responses over multiple iterations, providing robust data collection and analysis for applications requiring repeated pulse patterns.',
     val1Unit: 'Hz',
     val2Unit: 'mV'
   },
   'calibration': {
-    desc: '',
-    val1Unit: '',
-    val2Unit: '',
-    val3Unit: ''
+    desc: 'The calibration command performs EIS (Electrochemical Impedance Spectroscopy) measurements by taking input parameters including a starting DAC peak value, an ending DAC peak value, and a delta frequency value. The measurements are conducted incrementally, increasing the frequency from the start value to the end value by the specified delta frequency step',
+    val1Unit: 'Hz',
+    val2Unit: 'Hz',
+    val3Unit: 'Δf'
   },
   'help': {
     desc: '통신 상태를 점검합니다. ',
