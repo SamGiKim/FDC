@@ -3391,11 +3391,13 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
           const field = td.dataset.field;
           let value = payload[field];
 
+          // FileName 경로일 경우 / 맨 뒤 파일이름만 보이게
           if ((type === 'PULSE' || type === 'NPULSE') && field === 'NAME' && value != null) {
             const parts = value.split(/[\\/]/); // 슬래시나 역슬래시 구분
             value = parts[parts.length - 1];
           }
 
+          // 종류가 숫자가 아닌 문자
           if (field === 'SIN') {
             switch(value) {
               case 0 :
