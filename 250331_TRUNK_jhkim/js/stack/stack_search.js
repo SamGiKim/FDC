@@ -3397,6 +3397,17 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
 
       openModal('data-detail-modal');
 
+      const nyquistFields = document.querySelectorAll('#nyquist-detail');
+      const pulseFields = document.querySelectorAll('#pulse-detail');
+
+      if (type === 'SIN' || type === 'CALIB') {
+        nyquistFields.forEach(field => field.style.display = '');
+        pulseFields.forEach(field => field.style.display = 'none');
+      } else if (type === 'PULSE' || type === 'NPULSE') {
+        nyquistFields.forEach(field => field.style.display = 'none');
+        pulseFields.forEach(field => field.style.display = '');
+      }
+
       document.getElementById('download-btn').onclick = function() {
         const { powerplant_id, fuelcell_id, DATE } = payload;
         
