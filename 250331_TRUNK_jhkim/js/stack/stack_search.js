@@ -711,7 +711,6 @@ function updateSearchFields(type) {
   const npulseFields = document.querySelectorAll('.npulse-field');
   const calibFields = document.querySelectorAll('.calib-field');
 
-
   // 공통 필드는 항상 표시
   commonFields.forEach(field => field.style.display = '');
 
@@ -3373,84 +3372,55 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
   if (selectedCheckboxes.length === 0) {
     alert('데이터를 하나 선택해주세요.');
     return;
-} else if (selectedCheckboxes.length > 1) {
+  } else if (selectedCheckboxes.length > 1) {
     alert('하나의 데이터만 선택해주세요.');
     return;
-}
+  }
 
-  const selectedNo = selectedCheckboxes[0].getAttribute('data-no'); // data-no 속성에서 ID 가져오기
-  console.log('Selected NO:', selectedNo); // NO 확인
+  const selectedNo = selectedCheckboxes[0].getAttribute('data-no');
+  console.log('Selected NO:', selectedNo);
 
   fetch(`js/stack/get_data_detail.php?no=${selectedNo}`)
-      .then(response => response.json())
-      .then(data => {
-          if (data.error) {
-              alert(data.error);
-          } else {
-              // 모달에 데이터 표시
-              document.getElementById('data-detail-modal-body').innerHTML = `
-              <div>고장모사</div>
-              <dl>
-                  <dt>측정종류</dt>
-                  <dd>${data.data.SIN ?? '-'}</dd>
-                  
-                  <dt>전압유형</dt>
-                  <dd>${data.data.VT ? data.data.VT + 'V' : '-'}</dd>
-                  
-                  <dt>전력유형</dt>
-                  <dd>${data.data.KW ? data.data.KW + 'KW' : '-'}</dd>
-          
-                  <dt>전압센서</dt>
-                  <dd>${data.data.CI ?? '-'}</dd>
-                  
-                  <dt>STM</dt>
-                  <dd>${data.data.STM ?? '-'}</dd>
-                  
-                  <dt>from</dt>
-                  <dd>${data.data.hzFROM ?? '-'}</dd>
-                  
-                  <dt>to</dt>
-                  <dd>${data.data.hzTO ?? '-'}</dd>
-                  
-                  <dt>에러코드</dt>
-                  <dd>${data.data.MERR ?? '-'}</dd>
-          
-                  <dt>실험내용</dt>
-                  <dd>${data.data.BIGO ?? '-'}</dd>
-              </dl>
-          `;
-              openModal('data-detail-modal'); // 모달 열기
+    .then(response => response.json())
+    .then(data => {
+      console.log('받은 데이터:', data);
 
-               // 다운로드 버튼 클릭 이벤트 추가
-               document.getElementById('download-btn').onclick = function() {
-                // console.log('전체 데이터:', data);
-                // console.log('data.data:', data.data);
-                const powerplant_id = data.data.powerplant_id;
-                const fuelcell_id = data.data.fuelcell_id;
+      const payload = data.data ?? data;
 
-                const date = new Date(data.data.DATE); // DATE 가져오기
-                const year = date.getFullYear(); // 연도
-                const month = String(date.getMonth() + 1).padStart(2, '0'); // 월 (0부터 시작하므로 +1)
-                const day = String(date.getDate()).padStart(2, '0'); // 일
-                const hours = String(date.getHours()).padStart(2, '0'); // 시
-                const minutes = String(date.getMinutes()).padStart(2, '0'); // 분
-                const seconds = String(date.getSeconds()).padStart(2, '0'); // 초
-
-                // ZIP 파일명 생성
-                const zipFileName = `d${year}-${month}-${day}-${hours}-${minutes}-${seconds}.zip`; // 초를 포함하도록 수정
-
-                const downloadUrl = `http://fuelcelldr.com:11180/RAW/${powerplant_id}/${fuelcell_id}/EIS/${year}/${month}/${zipFileName}`;
-                window.open(downloadUrl, '_blank'); // 새 탭에서 다운로드
-
-                // 모달 닫기
-                closeModal('data-detail-modal'); // 모달 닫기 함수 호출
-            };
-        }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          alert('데이터를 가져오는 중 오류가 발생했습니다.');
+      ['nyquist-detail', 'pulse-detail'].forEach(id => {
+        document.querySelectorAll(`#${id} td[data-field]`).forEach(td => {
+          const field = td.dataset.field;
+          const value = payload[field];
+          td.innerText = value != null ? value : '-';
+        });
       });
+
+      openModal('data-detail-modal');
+
+      document.getElementById('download-btn').onclick = function() {
+        const { powerplant_id, fuelcell_id, DATE } = payload;
+        
+        const date = new Date(DATE);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+
+        const zipFileName = `d${year}-${month}-${day}-${hours}-${minutes}-${seconds}.zip`;
+
+        const downloadUrl = `http://fuelcelldr.com:11180/RAW/${powerplant_id}/${fuelcell_id}/EIS/${year}/${month}/${zipFileName}`;
+        window.open(downloadUrl, '_blank');
+
+        closeModal('data-detail-modal');
+      };
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('데이터를 가져오는 중 오류가 발생했습니다.');
+    });
 });
+
 
 
