@@ -3384,13 +3384,34 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
     .then(response => response.json())
     .then(data => {
       console.log('받은 데이터:', data);
-
       const payload = data.data ?? data;
 
       ['nyquist-detail', 'pulse-detail'].forEach(id => {
         document.querySelectorAll(`#${id} td[data-field]`).forEach(td => {
           const field = td.dataset.field;
-          const value = payload[field];
+          let value = payload[field];
+
+          if ((type === 'PULSE' || type === 'NPULSE') && field === 'NAME' && value != null) {
+            const parts = value.split(/[\\/]/); // 슬래시나 역슬래시 구분
+            value = parts[parts.length - 1];
+          }
+
+          if (field === 'SIN') {
+            switch(value) {
+              case 0 :
+                value = 'SIN';
+                break;
+              case 1 :
+                value = 'PULSE';
+                break;
+              case 2 :
+                value = 'NPULSE';
+                break;
+              case 3 :
+                value = 'CALIB';
+                break;
+            }
+          }
           td.innerText = value != null ? value : '-';
         });
       });
@@ -3400,6 +3421,7 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
       const nyquistFields = document.querySelectorAll('#nyquist-detail');
       const pulseFields = document.querySelectorAll('#pulse-detail');
 
+      // type에 따라 보이는 data field 설정
       if (type === 'SIN' || type === 'CALIB') {
         nyquistFields.forEach(field => field.style.display = '');
         pulseFields.forEach(field => field.style.display = 'none');
@@ -3410,7 +3432,6 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
 
       document.getElementById('download-btn').onclick = function() {
         const { powerplant_id, fuelcell_id, DATE } = payload;
-        
         const date = new Date(DATE);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -3420,7 +3441,6 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
         const seconds = String(date.getSeconds()).padStart(2, '0');
 
         const zipFileName = `d${year}-${month}-${day}-${hours}-${minutes}-${seconds}.zip`;
-
         const downloadUrl = `http://fuelcelldr.com:11180/RAW/${powerplant_id}/${fuelcell_id}/EIS/${year}/${month}/${zipFileName}`;
         window.open(downloadUrl, '_blank');
 
