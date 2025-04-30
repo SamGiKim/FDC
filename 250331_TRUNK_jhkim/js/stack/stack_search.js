@@ -284,7 +284,7 @@ export async function initializeSearch() {
   getBookmarkTabs();
 
   // 체크박스 초기화
-  initCheckboxStateAndSelectAll(true);
+  initCheckboxStateAndSelectAll(false);
 
   // 마지막에 한 번만 데이터 로드, type전달
   return searchWithData(currentSearchConditions, 1, type);
@@ -512,6 +512,7 @@ function initializeTypeSelector(typeSelector) {
     updateSearchFields(selectedValue);
     updateEisOptions(selectedValue);
     resetSearchConditions();   // 검색 조건 초기화
+    initCheckboxStateAndSelectAll(false); // 체크박스 초기화
     // 새로운 타입으로 데이터 검색
     searchWithData({}, 1, selectedValue);
   });
@@ -543,7 +544,6 @@ function updateEisOptions(selectedType) {
       });
     }
   }
-  
   showHide(eisSelector);
 }
 
@@ -751,7 +751,7 @@ function updateSearchFields(type) {
   dbEdit.forEach((e, i) =>
     e.addEventListener("dblclick", function () {
       chkbox.forEach((e) => {
-        e.disabled = true;
+        e.disabled = false;
       });
       dbEdit[i].classList.toggle("d-none");
       dbEditActive[i].classList.toggle("d-none");
@@ -1685,6 +1685,36 @@ export function displayResults(results, currentPage, totalRows, type) {
         const no = dateCell.getAttribute('data-no');
         console.log('Clicked cell NO:', no);
         if(type === 'PULSE' || type === 'NPULSE'){
+        const row = dateCell.closest('tr');
+        const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
+        const graphBtn = document.getElementById('graph-btn');
+
+          if (checkbox && graphBtn) {
+            const isCurrentlyChecked = checkbox.checked;
+            checkbox.checked = !isCurrentlyChecked;
+
+            if (!isCurrentlyChecked) {
+              updateSelectedCount();
+            } else {
+              try {
+                await deleteSelectedFile(no);
+                if (typeof window.clear_graph === 'function') {
+                  window.clear_graph();
+                }
+
+                const checkedBoxes = document.querySelectorAll(
+                  'input[type="checkbox"][name="search-checkbox"]:checked'
+                );
+                if (checkedBoxes.length > 0) {
+                  graphBtn.click();
+                }
+                updateSelectedCount();
+              } catch (error) {
+                console.error('체크박스 해제 중 오류:', error);
+                checkbox.checked = true; // 실패 시 복구
+              }
+            }
+          }
           try {
             const response = await fetch(`js/stack/get_pulse_name.php?no=${no}&type=${type}`);
             if (!response.ok) throw new Error('Network response was not ok');
@@ -1741,10 +1771,10 @@ export function displayResults(results, currentPage, totalRows, type) {
             this.appendChild(input);
             input.focus();
         });
-    });
+      });
       tbody.appendChild(tr);
-  });
-}
+    });
+  }
 
 
   // 항목갯수 동적으로 변경
@@ -1956,6 +1986,15 @@ export function initCheckboxStateAndSelectAll(shouldCheckAll = false) {
   const selectAllCheckbox = document.getElementById("search-all-checkbox");
   if (selectAllCheckbox) {
     selectAllCheckbox.checked = shouldCheckAll;
+
+    selectAllCheckbox.onclick = function() {
+      const shouldCheckAll = selectAllCheckbox.checked;
+      const checkboxes = document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = shouldCheckAll;
+      });
+      updateSelectedCount();
+    };
   }
 
   // 체크박스 상태 업데이트
@@ -3396,8 +3435,6 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
             const parts = value.split(/[\\/]/); // 슬래시나 역슬래시 구분
             value = parts[parts.length - 1];
           }
-
-          // 종류가 숫자가 아닌 문자
           if (field === 'SIN') {
             switch(value) {
               case 0 :
