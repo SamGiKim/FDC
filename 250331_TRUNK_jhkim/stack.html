@@ -1047,115 +1047,126 @@
                       <!-- </form> -->
                       <div class="modal-text"></div>
                     </div>
-
                     <div class="modal-body">
-
                       <div id="nyquist-detail">
                         <h3>Nyquist</h3>
+                        <div class="data-detail-grid nyquist" id="hz-container">
+                          <div class="frequency-select">
+                            <h4>Select</h4>
+                            <div class="hz-select scrollmini scrollmini-noborder" id="hz-data-table">
+                            </div>
+                          </div>                      
+    
+                          <div class="graph-selected">
+                            <h4>Nyquist 그래프</h4>
+                            <div id="uplot-container"></div>
+                          </div>
 
-                        <div class="modal-table">
-                          <table class="table table-striped table-hover">
-                            <caption>
-                              측정 정보
-                            </caption>
-                            <tr>
-                              <th>종류(SIN)</th>
-                              <td data-field="SIN">--</td>
-                            </tr>
-                            <tr>
-                              <th>일자(DATE)</th>
-                              <td data-field="DATE">--</td>
-                            </tr>
-                            <tr>
-                              <th>전압유형(VT)</th>
-                              <td data-field="VT">--</td>
-                            </tr>
-                            <tr>
-                              <th>전류센서(KW)</th>
-                              <td data-field="KW">--</td>
-                            </tr>
-                            <tr>
-                              <th>라벨(LABEL)</th>
-                              <td data-field="LABEL">--</td>
-                            </tr>
-                            <tr>
-                              <th>비고(BIGO)</th>
-                              <td data-field="BIGO">--</td>
-                            </tr>
-                            <tr>
-                              <th>파일이름(NAME)</th>
-                              <td data-field="NAME">--</td>
-                            </tr>
-                            <tr>
-                              <th>hzFrom</th>
-                              <td data-field="hzFROM">--</td>
-                            </tr>
-                            <tr>
-                              <th>hzTo</th>
-                              <td data-field="hzTO">--</td>
-                            </tr>
-                            <tr>
-                              <th>에러코드(MERR)</th>
-                              <td data-field="MERR">--</td>
-                            </tr>
-                            <tr>
-                              <th>경과시간(DURATION)</th>
-                              <td data-field="DURATION">--</td>
-                            </tr>
-                          </table>
+                          <div class="modal-table scrollmini scrollmini-noborder">
 
-                          <table class="table table-striped table-hover">
-                            <caption>
-                              세부 정보​
-                            </caption>
-                            <tr>
-                              <th>H-M​</th>
-                              <td data-field="H-M">--</td>
-                            </tr>
-                            <tr>
-                              <th>M-L</th>
-                              <td data-field="M-L">--</td>
-                            </tr>
-                            <tr>
-                              <th>X1</th>
-                              <td data-field="X1">--</td>
-                            </tr>
-                            <tr>
-                              <th>X2</th>
-                              <td data-field="X2">--</td>
-                            </tr>
-                            <tr>
-                              <th>Y1</th>
-                              <td data-field="Y1">--</td>
-                            </tr>
-                            <tr>
-                              <th>Y2</th>
-                              <td data-field="Y2">--</td>
-                            </tr>
-                            <tr>
-                              <th>M</th>
-                              <td data-field="M">--</td>
-                            </tr>
-                            <tr>
-                              <th>L</th>
-                              <td data-field="L">--</td>
-                            </tr>
-                            <tr>
-                              <th>SQ</th>
-                              <td data-field="SQ">--</td>
-                            </tr>
-                            <tr>
-                              <th>BQ</th>
-                              <td data-field="BQ">--</td>
-                            </tr>
-                          </table>
+                            <table class="table table-striped table-hover">
+                              <caption>
+                                측정 정보
+                              </caption>
+                              <tr>
+                                <th>종류(SIN)</th>
+                                <td data-field="SIN">--</td>
+                              </tr>
+                              <tr>
+                                <th>일자(DATE)</th>
+                                <td data-field="DATE">--</td>
+                              </tr>
+                              <tr>
+                                <th>전압유형(VT)</th>
+                                <td data-field="VT">--</td>
+                              </tr>
+                              <tr>
+                                <th>전류센서(KW)</th>
+                                <td data-field="KW">--</td>
+                              </tr>
+                              <tr>
+                                <th>라벨(LABEL)</th>
+                                <td data-field="LABEL">--</td>
+                              </tr>
+                              <tr>
+                                <th>비고(BIGO)</th>
+                                <td data-field="BIGO">--</td>
+                              </tr>
+                              <tr>
+                                <th>파일이름(NAME)</th>
+                                <td data-field="NAME">--</td>
+                              </tr>
+                              <tr>
+                                <th>hzFrom</th>
+                                <td data-field="hzFROM">--</td>
+                              </tr>
+                              <tr>
+                                <th>hzTo</th>
+                                <td data-field="hzTO">--</td>
+                              </tr>
+                              <tr>
+                                <th>에러코드(MERR)</th>
+                                <td data-field="MERR">--</td>
+                              </tr>
+                              <tr>
+                                <th>경과시간(DURATION)</th>
+                                <td data-field="DURATION">--</td>
+                              </tr>
+                            </table>
+  
+                            <table class="table table-striped table-hover">
+                              <caption>
+                                세부 정보​
+                              </caption>
+                              <tr>
+                                <th>H-M​</th>
+                                <td data-field="H-M">--</td>
+                              </tr>
+                              <tr>
+                                <th>M-L</th>
+                                <td data-field="M-L">--</td>
+                              </tr>
+                              <tr>
+                                <th>X1</th>
+                                <td data-field="X1">--</td>
+                              </tr>
+                              <tr>
+                                <th>X2</th>
+                                <td data-field="X2">--</td>
+                              </tr>
+                              <tr>
+                                <th>Y1</th>
+                                <td data-field="Y1">--</td>
+                              </tr>
+                              <tr>
+                                <th>Y2</th>
+                                <td data-field="Y2">--</td>
+                              </tr>
+                              <tr>
+                                <th>M</th>
+                                <td data-field="M">--</td>
+                              </tr>
+                              <tr>
+                                <th>L</th>
+                                <td data-field="L">--</td>
+                              </tr>
+                              <tr>
+                                <th>SQ</th>
+                                <td data-field="SQ">--</td>
+                              </tr>
+                              <tr>
+                                <th>BQ</th>
+                                <td data-field="BQ">--</td>
+                              </tr>
+                            </table>                            
+                          </div>
                         </div>
+
                       </div>
 
                       <div id="pulse-detail" style="clear: both;">
                         <h3>Pulse</h3>
-
-                        <div class="modal-table">
+                        <div class="modal-table pulse">
                           <table class="table table-striped table-hover">
                             <caption>
                               측정정보
@@ -1213,9 +1224,7 @@
                           </table>
                         </div>
                       </div>
-
                     </div>
-                    
                     <div class="modal-footer">
                       <button class="btn-of w-24 mx-1" id="download-btn">다운로드</button>
                       <button class="btn-of w-24" onclick="closeModal('data-detail-modal')">취소</button>

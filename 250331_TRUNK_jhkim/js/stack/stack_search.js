@@ -3403,6 +3403,29 @@ function handleFileUpload(e) {
    });
  }
 
+// .dat파일 파싱
+function parseDatFile(txt) {
+  const rows = txt.trim().split("\n").filter(row => row.trim() !== "");
+  const micro = [];
+  const voltage = [];
+  const current = [];
+
+  for (const row of rows) {
+    const cols = row.split(",");
+    if (cols.length < 3) continue; 
+
+    micro.push(parseFloat(cols[0]));
+    voltage.push(parseFloat(cols[1]));
+    current.push(parseFloat(cols[2]));
+  }
+
+  return [
+    micro,
+    voltage,
+    current
+  ];
+}
+
 //////////////////////////////////////////////////////////////////////////
 // [상세 데이터]
 document.getElementById('data-detail-btn').addEventListener('click', function() {
@@ -3454,33 +3477,90 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
           td.innerText = value != null ? value : '-';
         });
       });
-
       openModal('data-detail-modal');
 
       const nyquistFields = document.querySelectorAll('#nyquist-detail');
       const pulseFields = document.querySelectorAll('#pulse-detail');
 
       // type에 따라 보이는 data field 설정
-      if (type === 'SIN' || type === 'CALIB') {
+      if (type === 'SIN') {
         nyquistFields.forEach(field => field.style.display = '');
         pulseFields.forEach(field => field.style.display = 'none');
-      } else if (type === 'PULSE' || type === 'NPULSE') {
+        document.getElementById('hz-container').style.display = '';
+        document.getElementById('uplot-container').style.display = '';
+      } else if (type === 'PULSE' || type === 'NPULSE' || type === 'CALIB') {
         nyquistFields.forEach(field => field.style.display = 'none');
         pulseFields.forEach(field => field.style.display = '');
+        document.getElementById('hz-container').style.display = 'none';
+        document.getElementById('uplot-container').style.display = 'none';
       }
 
-      document.getElementById('download-btn').onclick = function() {
-        const { powerplant_id, fuelcell_id, DATE } = payload;
-        const date = new Date(DATE);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
+      const date = new Date(payload.DATE);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
 
-        const zipFileName = `d${year}-${month}-${day}-${hours}-${minutes}-${seconds}.zip`;
-        const downloadUrl = `http://fuelcelldr.com:11180/RAW/${powerplant_id}/${fuelcell_id}/EIS/${year}/${month}/${zipFileName}`;
+      if (type === 'SIN') {
+        // 디렉토리 경로에 있는 .dat 파일 목록을 가져와 테이블에 표시
+        const formattedDate = `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+        const dir = `${payload.powerplant_id}/${payload.fuelcell_id}/EIS/${year}/${month}/d${formattedDate}`;
+        fetch(`js/stack/get_dat_list.php?dir=${dir}`)
+          .then(res => res.json())
+          .then(fileList => {
+            console.log(fileList); // 파일 목록 확인
+            const tableBody = document.getElementById('hz-data-table');
+            tableBody.innerHTML = ''; 
+        
+            fileList.forEach((file, index) => {
+              const tr = document.createElement('tr');
+              const td = document.createElement('td');
+              const fullFileName = file;
+              tr.setAttribute('data-file', fullFileName);
+              td.textContent = file.split('_')[0]; // 속성으로 파일이름 저장
+              td.addEventListener('click', () => {
+                document.querySelectorAll('#hz-data-table td').forEach(el => {
+                  el.classList.remove('selected');
+                });
+                td.classList.add('selected');
+                const filePath = `${payload.powerplant_id}/${payload.fuelcell_id}/EIS/${year}/${month}/d${formattedDate}/${fullFileName}`;
+                const uplotContainer = document.getElementById('uplot-container');
+
+                if (!window.uplotInstance && uplotContainer) {
+                  window.uplotInstance = new uPlot(opts(), [], uplotContainer);
+                }
+                fetch(`js/stack/get_dat_list.php?file=${filePath}`)
+                  .then(res => res.json())
+                  .then(json => {
+                    const dataText = json.fileContent;
+                    const parsedData = parseDatFile(dataText);
+                    if (window.uplotInstance) {
+                      window.uplotInstance.setData(parsedData);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error fetching .dat file:', error);
+                    alert('파일을 가져오는 중 오류가 발생했습니다.');
+                  });
+              });
+              tr.appendChild(td);
+              tableBody.appendChild(tr);
+              if (index === 0) {
+                td.classList.add('selected');
+                td.click();  // 첫 번째 파일 클릭 트리거로 그래프 자동 실행
+              }
+            });
+          })
+        .catch(error => {
+            console.error('Error fetching .dat files:', error);
+            alert('파일 목록을 가져오는 데 오류가 발생했습니다.');
+        });
+      }
+      document.getElementById('download-btn').onclick = function() {
+        const zipFileName = `d${formattedDate}.zip`;
+        const downloadUrl = `http://fuelcelldr.com:11180/RAW/${payload.powerplant_id}/${payload.fuelcell_id}/EIS/${year}/${month}/${zipFileName}`;
         window.open(downloadUrl, '_blank');
 
         closeModal('data-detail-modal');
@@ -3491,6 +3571,35 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
       alert('데이터를 가져오는 중 오류가 발생했습니다.');
     });
 });
+
+function opts() {
+  const container = document.querySelector(".graph-selected");
+  const width = container ? container.clientWidth : 550;
+  const height = Math.floor(width * 3 / 4);
+
+  return {
+    title: "Voltage & Current",
+    width,
+    height,
+    scales: {
+      x: { time: false },
+      y: { auto: true }
+    },
+    series: [
+      {}, // x축
+      {
+        label: "Voltage",
+        points: {show: false},
+        stroke: "blue"
+      },
+      {
+        label: "Current",
+        points: {show: false},
+        stroke: "red"
+      }
+    ]
+  };
+}
 
 
 
