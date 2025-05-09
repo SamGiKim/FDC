@@ -2649,61 +2649,50 @@ export async function handleFileOperations(dataNos, colorInput, fuelcell_id) {
 // 체크박스 선택하고 '그래프 그리기' 버튼 클릭 이벤트 처리
 export async function copySelectedFiles() {
   const checkboxes = document.querySelectorAll(
-      'input[type="checkbox"][name="search-checkbox"]:checked'
+    'input[type="checkbox"][name="search-checkbox"]:checked'
   );
-  
-  if (checkboxes.length === 0) {
-      return;
-  }
+  if (checkboxes.length === 0) return;
 
-  // 현재 설정 가져오기
   const currentConfig = await getCurrentConfig();
-  console.log('현재 설정:', currentConfig);
-
-  if (!currentConfig || !currentConfig.powerplant_id || !currentConfig.fuelcell_id) {
-      console.error('설정을 가져올 수 없습니다:', currentConfig);
-      throw new Error('발전소 또는 연료전지 설정을 찾을 수 없습니다.');
+  if (!currentConfig?.powerplant_id || !currentConfig?.fuelcell_id) {
+    console.error('설정을 가져올 수 없습니다:', currentConfig);
+    throw new Error('발전소 또는 연료전지 설정을 찾을 수 없습니다.');
   }
 
-  // type 변수가 전역으로 정의되어 있는지 확인
-  const type = document.querySelector('#sin-pulse-select')?.value || 'SIN'; // 기본값으로 'SIN' 설정
-
+  const type = document.querySelector('#sin-pulse-select')?.value || 'SIN';
   if (type === 'SIN' || type === 'CALIB') {
-      const dataNos = Array.from(checkboxes).map(checkbox => checkbox.getAttribute("data-no"));
-      
-      try {
-          // clearSelectedDirectory 함수 사용
-          await clearSelectedDirectory();
+    const dataNos = Array.from(checkboxes).map(cb => cb.getAttribute("data-no"));
 
-          // 각 데이터 번호별로 개별 색상 가져오기
-          const fetchPromises = dataNos.map((no) => {
-              const color = getGraphColor(no);
-              console.log(`Processing file for NO: ${no}, Color: ${color}`);
-              window.graphColor = color;
-              return copyFilesForGraph(
-                  no, 
-                  color, 
-                  new Date().toISOString(), 
-                  currentConfig.fuelcell_id,
-                  currentConfig.powerplant_id
-              );
-          });
+    try {
+      await clearSelectedDirectory();
 
-          const results = await Promise.all(fetchPromises);
-          const allData = results.filter((data) => data !== null);
-          console.log('All fetched data:', allData);
-          
-          if (allData.length > 0) {
-              handleDataResponse(allData);
-          } else {
-              console.error('처리된 데이터가 없습니다.');
-          }
-      } catch (error) {
-          console.error("Error during file operations:", error);
-          throw error;
+      const fetchPromises = dataNos.map((no) => {
+        const color = getGraphColor(no);
+        console.log(`Processing file for NO: ${no}, Color: ${color}`);
+        return copyFilesForGraph(
+          no, color, new Date().toISOString(),
+          currentConfig.fuelcell_id, currentConfig.powerplant_id
+        ).then((result) => {
+          if (result) return { ...result, color };
+          return null;
+        });
+      });
+
+      const results = await Promise.all(fetchPromises);
+      const allData = results.filter(data => data !== null);
+
+      if (allData.length > 0) {
+        handleDataResponse(allData); // color 포함된 구조 전달
+      } else {
+        console.error('처리된 데이터가 없습니다.');
       }
+    } catch (error) {
+      console.error("Error during file operations:", error);
+      throw error;
+    }
   }
 }
+
 
 
 // 날짜 td 클릭 시 그래프 그리기 (개별)
@@ -2766,40 +2755,32 @@ async function handleDateCellClick(event) {
         checkbox.checked = !isCurrentlyChecked;
 
         if (!isCurrentlyChecked) {
-          // 색상 추출해서 전역 변수 설정
           let color;
           const fileName = dateCell.getAttribute('data-filename');
           if (fileName) {
             color = getColorFromFileName(fileName);
-            console.log('Color from filename:', color);
           } else {
             const errCode = dateCell.getAttribute('data-err')?.split('.')[0];
             color = getColorByMERR(errCode) || '#06D001';
-            console.log('Fallback color by MERR:', color);
           }
 
-          window.graphColor = color;
-          // 그래프 그리기
+          graphBtn.setAttribute("data-color", color);
+          graphBtn.setAttribute("data-datano", dataNo);
           graphBtn.click();
         } else {
-          // 체크 해제되는 경우
-          try {
-            await deleteSelectedFile(dataNo);
+          await deleteSelectedFile(dataNo);
 
-            if (typeof window.clear_graph === 'function') {
-              window.clear_graph();
-            }
+          if (typeof window.clear_graph === 'function') {
+            window.clear_graph();
+          }
 
-            const checkedBoxes = document.querySelectorAll(
-              'input[type="checkbox"][name="search-checkbox"]:checked'
-            );
-
-            if (checkedBoxes.length > 0) {
-              graphBtn.click();
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            checkbox.checked = true;
+          const checkedBoxes = document.querySelectorAll(
+            'input[type="checkbox"][name="search-checkbox"]:checked'
+          );
+          if (checkedBoxes.length > 0) {
+            graphBtn.removeAttribute("data-color");
+            graphBtn.removeAttribute("data-datano");
+            graphBtn.click();
           }
         }
 
@@ -2813,6 +2794,7 @@ async function handleDateCellClick(event) {
   }
 }
 
+
 // 개별 날짜 td 클릭시 그래프 그리는 기능(DOM로드시 실행되도록 적어줄 것)
 // 날짜 셀 클릭 이벤트 핸들러 설정 함수
 function dateCellClickHandler(tableBody) {
@@ -2823,8 +2805,6 @@ function dateCellClickHandler(tableBody) {
 
   tableBody.addEventListener('click', handleDateCellClick);
 }
-
-
 
 // 컬러(색깔) -  색상 맵을 로드하는 함수
 // 그래프 색상 선택기 초기화

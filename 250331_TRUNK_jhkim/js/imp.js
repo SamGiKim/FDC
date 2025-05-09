@@ -285,6 +285,7 @@ window. color_cnt = 0;
 const IS_UPLOT = 1;
 channel2.port2.onmessage = (e) => {
     // >>> 250211 hjkim - 원점체크박스 상태저장
+    const color = document.querySelector("#graph-btn").getAttribute("data-color") || null;
     let org_chk = getLocalStorage(`${PLANT_FOLDER()}/${STACK_NAME()}/org_chk`);
     if(e.data.msg == "DRAW_NYQUIST" || e.data.msg == "DRAW_NYQUIST__RELATIVE") {
         if(org_chk == "true") e.data.msg = "DRAW_NYQUIST__RELATIVE";
@@ -296,9 +297,7 @@ channel2.port2.onmessage = (e) => {
             var _grid_el = document.querySelector(".widget-body.d-grid");
             var _pholder_arr = _grid_el.querySelectorAll('.content-section>div:not(.float-end)');
             var _e = { target: _pholder_arr[0] };
-            if (window.graphColor) {
-                e.data.color = window.graphColor;  // window.graphColor 값을 e.data.color에 넣기
-            }
+            e.data.color = color
             ImpedanceChart.IAdd_series_in_imp_graph(_e, e.data.url, e.data.color);
         break;
         case "DRAW_NYQUIST":
@@ -326,9 +325,7 @@ channel2.port2.onmessage = (e) => {
                 yaxis_max: e.data.yaxis_max,
                 // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
             };
-            if (window.graphColor) {
-                e.data.color = window.graphColor;  // window.graphColor 값을 e.data.color에 넣기
-            }
+            e.data.color = color
             ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _opt);
             // ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _pad_x, _pad_y, 0, 50 /* 우측으로 쉬프트 */, e.data.ack_number, e.data.max_x);
             // <<< 240612 hjkim - Refactoring :: Intro. Param. Obj.
@@ -376,9 +373,7 @@ channel2.port2.onmessage = (e) => {
                 yaxis_max: e.data.yaxis_max,
                 // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
             };
-            if (window.graphColor) {
-                e.data.color = window.graphColor;  // window.graphColor 값을 e.data.color에 넣기
-            }
+            e.data.color = color
             ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _opt);
             //ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], 0, 0, 3, 0 /*원점*/, e.data.ack_number, e.data.max_x-e.data.min_x);
             // <<< 240612 hjkim - Refactoring :: Intro. Param. Obj.
@@ -2510,7 +2505,10 @@ if(TITLE.includes("스택진단")) {
             }
         });
         // 핸들러 함수
-        function single_click_handler() { show_graph(org_toggle.val); clear_time_queue(); }
+        function single_click_handler() { 
+            show_graph(org_toggle.val);
+            clear_time_queue(); 
+        }
         function double_click_handler() { clear_graph(); clear_time_queue(); }
         function triple_click_handler() { /* NOP */ clear_time_queue(); }
         function timeout_handler() { clear_time_queue(); }
@@ -2589,9 +2587,8 @@ function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "
         url_dir: "/data/SES/" + sessionId + "/selected",
         compact: _compact,
     };
-    // 전역에서 color 정보 가져오기
-    if (window.graphColor) {
-        msgData.color = window.graphColor;  // 전역 변수에서 색상 정보 사용
+    if (color) {
+        msgData.color = color;
     }
     if (is_xsxeysye_checked()) {
         const [xs, xe, ys, ye] = get_xsxeysye();
