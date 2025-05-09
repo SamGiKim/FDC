@@ -63,7 +63,7 @@ function initializeDateSelection() {
       const option = document.createElement('option');
       const monthStr = month.toString().padStart(2, '0');
       option.value = monthStr;
-      option.textContent = monthStr;
+      option.textContent = monthStr; 
       monthSelect.appendChild(option);
     }
   }
@@ -2918,6 +2918,11 @@ function handleTimeSearch() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  const graphBtn = document.querySelector("#graph-btn");
+  if (graphBtn && !graphBtn.getAttribute("data-color")) {
+    graphBtn.setAttribute("data-color", "#06D001"); 
+  }
+
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has('stime')) {
     setTimeout(handleTimeSearch, 1000);
@@ -3580,6 +3585,3 @@ function opts() {
     ]
   };
 }
-
-
-
