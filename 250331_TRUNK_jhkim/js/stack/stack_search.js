@@ -3603,11 +3603,28 @@ document.getElementById('data-detail-btn').addEventListener('click', function() 
         });
       }
       document.getElementById('download-btn').onclick = function() {
-        const zipFileName = `d${formattedDate}.zip`;
-        const downloadUrl = `http://fuelcelldr.com:11180/RAW/${payload.powerplant_id}/${payload.fuelcell_id}/EIS/${year}/${month}/${zipFileName}`;
-        window.open(downloadUrl, '_blank');
+        const formattedDate = `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+        const baseUrl = `http://fuelcelldr.com:11180/RAW/${payload.powerplant_id}/${payload.fuelcell_id}/EIS/${year}/${month}`;
+        let downloadUrl = "";
 
-        closeModal('data-detail-modal');
+        switch (type) {
+            case 'SIN':
+            case 'CALIB':
+                downloadUrl = `${baseUrl}/d${formattedDate}.zip`;
+                break;
+            case 'PULSE':
+                downloadUrl = `${baseUrl}/pulse_data/d${formattedDate}.zip/d${formattedDate}.zip`;
+                break;
+            case 'NPULSE':
+                // NPULSE는 초(second) 없이 파일명 생성
+                const npulseDate = `${year}-${month}-${day}-${hours}-${minutes}`;
+                downloadUrl = `${baseUrl}/npulse_data/${day}/npulse_d${npulseDate}.zip`;
+                break;
+            default:
+                alert("지원되지 않는 타입입니다.");
+                return;
+        }
+        window.open(downloadUrl, '_blank');
       };
     })
     .catch(error => {
