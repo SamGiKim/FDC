@@ -2752,30 +2752,6 @@ export async function copySelectedFiles() {
   }
 }
 
-
-
-// 날짜 td 클릭 시 그래프 그리기 (개별)
-export function generateGraphFromDateCell(dataNo) {
-  if (type === 'SIN' || type === 'CALIB') {
-      const dataNos = [dataNo];
-      // date-cell에서 data-err 값을 가져옴
-      const dateCell = document.querySelector(`.date-cell[data-no="${dataNo}"]`);
-      let color;
-      
-      if (dateCell) {
-          const errCode = dateCell.getAttribute('data-err').split('.')[0]; // "2. MFM 후 누설" 에서 "2"만 추출
-          color = getColorByMERR(errCode);
-          console.log(`Date cell clicked - NO: ${dataNo}, Error code: ${errCode}, Color: ${color}`);
-      } else {
-          color = '#06D001'; // 기본 색상
-          console.log('Date cell not found, using default color');
-      }
-      const currentConfig = getCurrentConfig();
-      const fuelcell_id = currentConfig.fuelcell_id;
-      handleFileOperations(dataNos, color, fuelcell_id);
-  }
-}
-
 // 선택된 파일 삭제 함수 추가
 async function deleteSelectedFile(no) {
   const sessionId = getSessionId();
@@ -2795,7 +2771,6 @@ async function deleteSelectedFile(no) {
   }
 }
 
-
 // 날짜 셀 클릭 이벤트 처리 함수
 async function handleDateCellClick(event) {
   const clickedElement = event.target;
@@ -2814,6 +2789,9 @@ async function handleDateCellClick(event) {
         checkbox.checked = !isCurrentlyChecked;
 
         if (!isCurrentlyChecked) {
+          if (typeof window.clear_graph === 'function') {
+            window.clear_graph();
+          }
           let color;
           const fileName = dateCell.getAttribute('data-filename');
           if (fileName) {
@@ -2824,7 +2802,7 @@ async function handleDateCellClick(event) {
           }
 
           graphBtn.setAttribute("data-color", color);
-          graphBtn.setAttribute("data-datano", dataNo);
+          graphBtn.setAttribute("data-no", dataNo);
           graphBtn.click();
         } else {
           await deleteSelectedFile(dataNo);
@@ -2838,7 +2816,7 @@ async function handleDateCellClick(event) {
           );
           if (checkedBoxes.length > 0) {
             graphBtn.removeAttribute("data-color");
-            graphBtn.removeAttribute("data-datano");
+            graphBtn.removeAttribute("data-no");
             graphBtn.click();
           }
         }
