@@ -1684,10 +1684,11 @@ export function displayResults(results, currentPage, totalRows, type) {
       dateCell.addEventListener('click', async () => {
         const no = dateCell.getAttribute('data-no');
         console.log('Clicked cell NO:', no);
-        if(type === 'PULSE' || type === 'NPULSE'){
-        const row = dateCell.closest('tr');
-        const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
-        const graphBtn = document.getElementById('graph-btn');
+
+        if (type === 'PULSE' || type === 'NPULSE') {
+          const row = dateCell.closest('tr');
+          const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
+          const graphBtn = document.getElementById('graph-btn');
 
           if (checkbox && graphBtn) {
             const isCurrentlyChecked = checkbox.checked;
@@ -1711,32 +1712,51 @@ export function displayResults(results, currentPage, totalRows, type) {
                 updateSelectedCount();
               } catch (error) {
                 console.error('체크박스 해제 중 오류:', error);
-                checkbox.checked = true; // 실패 시 복구
+                checkbox.checked = true; 
               }
             }
           }
+
           try {
-            const response = await fetch(`js/stack/get_pulse_name.php?no=${no}&type=${type}`);
-            if (!response.ok) throw new Error('Network response was not ok');
-            const data = await response.json();
-            const name = data.name;
-            
-            if (name) {
+            const selectedItems = Array.from(document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')).map(cb => {
+              return {
+                no: cb.getAttribute('data-no'),
+                type: cb.getAttribute('data-type')
+              };
+            });
+
+            const fullpaths = [];
+            for (const checkedItem of selectedItems) {
+              const response = await fetch(`js/stack/get_pulse_name.php?no=${checkedItem.no}&type=${checkedItem.type}`);
+              const data = await response.json();
+              if (data.name) fullpaths.push(data.name); 
+            }
+
+            if (fullpaths.length > 0) {
               const graphElement = document.querySelector("pulse-graph-in-stack");
               if (graphElement) {
-                console.log('Found graph element:', graphElement);
-                console.log('그래프 초기화 함수 호출: ', name);
-                window.init_pulse_graph(name);
+                // 날짜 순 정렬
+                fullpaths.sort((a, b) => {
+                  const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
+                  return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
+                         new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
+                });
+            
+                // 직접 내부 상태에 fullpaths 설정
+                graphElement.fullpaths = fullpaths;
+                graphElement.destroyPlot();   // 기존 그래프 제거
+                graphElement.init_DOM();
+                await graphElement.init_data();
               } else {
-                console.error('pulse-graph-in-stack element not found in DOM');
+                console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
               }
             }
           } catch (error) {
             console.error('Error:', error);
-            console.warn('init_pulse_graph 함수가 정의되지 않았거나 실행 중 오류가 발생했습니다.');
+            console.warn('그래프 데이터를 불러오는 중 오류 발생');
           }
         }
-      }); 
+      });
 
       // MERR 셀에 더블클릭 이벤트 추가 (SIN, PULSE 모두 적용)
       const merrCell = tr.querySelector('.merr-cell');
@@ -2689,6 +2709,45 @@ export async function copySelectedFiles() {
     } catch (error) {
       console.error("Error during file operations:", error);
       throw error;
+    }
+  } else if (type === 'PULSE' || type === 'NPULSE') {
+    try {
+      const selectedItems = Array.from(checkboxes).map(cb => ({
+        no: cb.getAttribute("data-no"),
+        type: cb.getAttribute("data-type"),
+      }));
+
+      const fullpaths = [];
+
+      for (const item of selectedItems) {
+        const response = await fetch(`js/stack/get_pulse_name.php?no=${item.no}&type=${item.type}`);
+        const data = await response.json();
+        if (data.name) fullpaths.push(data.name);
+      }
+
+      if (fullpaths.length > 0) {
+        const graphElement = document.querySelector("pulse-graph-in-stack");
+        if (graphElement) {
+          // 날짜 순 정렬
+          fullpaths.sort((a, b) => {
+            const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
+            return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
+                   new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
+          });
+      
+          // 직접 내부 상태에 fullpaths 설정
+          graphElement.fullpaths = fullpaths;
+          graphElement.destroyPlot();   // 기존 그래프 제거
+          graphElement.init_DOM();      // 그래프 초기 DOM 생성
+          await graphElement.init_data();     // 그래프 그리기
+        } else {
+          console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
+        }
+      } else {
+        console.warn("가져온 파일 경로가 없습니다.");
+      }
+    } catch (error) {
+      console.error("PULSE 데이터 처리 중 오류 발생:", error);
     }
   }
 }

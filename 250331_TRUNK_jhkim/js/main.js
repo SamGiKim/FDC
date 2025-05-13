@@ -5860,10 +5860,14 @@ function get_placeholder_width() {
     return document.querySelector(".widget.stack-state-graph .widget-body.d-grid").offsetWidth - 50;
 }
 
-function init_pulse_graph(_fullpath = "") {
-    document.querySelector("pulse-graph-in-stack").setAttribute("fullpath", _fullpath);
-    // document.querySelector("pulse-graph-in-stack").setAttribute("fullpath", "/d2024-10-29-16-12-10/");
-}
+// function init_pulse_graph(_fullpath = "") {
+//     const graphElement = document.querySelector("pulse-graph-in-stack");
+//     if (graphElement) {
+//       graphElement.setAttribute("fullpath", _fullpath);
+//       graphElement.drawMultipleGraphs([_fullpath]); 
+//     }
+//   }
+  
 
 /* -------------------------------------------------------------------------- */
 /*                          CLASS FOR CUSTOM ELEMENT                          */
@@ -5873,62 +5877,140 @@ class PulseGraphInStack extends HTMLElement {
     constructor() {
         super();
         this.SUMMARY_FILENAME = "summary.json";  
+        this.fullpaths = [];
+        this.loading = false;  
+        this.totalFiles = 0;   
+        this.loadedFiles = 0;  
     }
 
     static get observedAttributes() {
         return ["fullpath"];
     }
 
+    // fullpath 값이 바뀔 때마다 새로운 그래프 렌더링
     attributeChangedCallback(name, oldVal, newVal) {
-        if(oldVal != undefined) { // updated
-            console.log(`!@#$ Attribute ${name} has changed. : `, name, oldVal, newVal);
-            switch(name) {
-                case "fullpath":
-                    window.uplot.destroy();
-                    delete this.uplot;
-                    this.fullpath = this.getAttribute("fullpath");
-                    this.init_DOM();
-                    this.init_data();
-                break;
-            }
+        if (oldVal !== undefined && name === "fullpath") {
+            console.log(`Attribute ${name} has changed:`, oldVal, "→", newVal);
+            this.destroyPlot();
+            this.fullpaths = [newVal];  
+            this.init_DOM();
+            this.init_data();
         }
     }
 
+    // 커스텀 엘리먼트가 DOM에 붙을 때 호출됨
     connectedCallback() {
         console.log("connectedCallback @ PulseGraphInStack");
-        this.fullpath = this.getAttribute("fullpath");
+        const fullpathAttr = this.getAttribute("fullpath");
+        if (fullpathAttr) {
+            this.fullpaths = [fullpathAttr];
+        }
         this.init_DOM();
         this.init_data();
     }
 
-    init_DOM() {
-        const {div} = van.tags;
-        const PulseGraph = () => div({id: "pulse-graph", width: "100%"});
-        this.custom_element = PulseGraph();
-        van.add(this, this.custom_element)
-        console.log("!@#$ opts().width: ", opts().width);
-        this.uplot = new uPlot(opts(), [], this.custom_element);
-        window.uplot = this.uplot;
+    // 기존 그래프 객체 제거 (중복 생성 방지)
+    destroyPlot() {
+        if (this.uplot) {
+            this.uplot.destroy();
+            delete this.uplot;
+        }
     }
 
+    // 그래프를 그릴 DOM 구조 생성
+    init_DOM() {
+        const { div } = van.tags;
+        const PulseGraph = () => div({ id: "pulse-graph", width: "100%" });
+        this.innerHTML = ""; 
+
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'loading-indicator';
+        loadingIndicator.style.display = 'none';
+        loadingIndicator.innerHTML = `
+            <progress max="100" value="0"></progress>
+            <div>그래프 불러오는 중...</div>
+        `;
+        this.appendChild(loadingIndicator);  
+        this.custom_element = PulseGraph();
+        van.add(this, this.custom_element);
+        console.log("opts().width:", opts().width);
+        this.uplot = new uPlot(opts(), [], this.custom_element);
+        window.uplot = this.uplot;  
+    }
+
+    // 그래프에 필요한 데이터 비동기 로딩 및 병합 처리
     async init_data() {
-        if (this.fullpath == "") return;
-        try {
-            const res = await fetch(`/data/${this.fullpath}`);
-        
-            // 응답 상태 확인
-            if (!res.ok) {
-                throw new Error(`Network response was not ok. Status: ${res.status}`);
+        this.setLoading(true);  
+        if (!this.fullpaths || this.fullpaths.length === 0) return;
+        const allData = [];
+        let offset = 0; 
+        this.totalFiles = this.fullpaths.length;  
+        this.loadedFiles = 0;  
+
+        // // 각 경로에 대해 JSON 데이터 로딩
+        for (const path of this.fullpaths) {
+            try {
+                const res = await fetch(`/data/${path}`);
+                if (!res.ok) throw new Error(`Fetch failed: ${path}, status ${res.status}`);
+                const json = await res.json();
+                const parsed = parse_pulse_handler(json);
+                allData.push(parsed);
+            } catch (e) {
+                console.error(`Failed to load or parse ${path}`, e);
+            } finally {
+                this.loadedFiles++;
+                this.updateProgress();  
             }
-            console.log("Response:", res);  // 응답 정보 로그
-            const data = await res.json();  // JSON으로 변환 후 데이터 저장
-            this.data = parse_pulse_handler(data);  // 파싱 후 저장
-            this.uplot.setData(this.data);  // 그래프에 세팅
-        } catch (error) {
-            console.error("Error during fetch:", error);
+        }
+        const merged = this.mergePulseData(allData, offset);
+        this.uplot.setData(merged);
+        this.setLoading(false);  
+    }
+
+    // 로딩 바 상태 업데이트
+    updateProgress() {
+        const progress = this.querySelector('#loading-indicator progress');
+        if (progress) {
+            const percent = (this.loadedFiles / this.totalFiles) * 100;
+            progress.value = percent;
+        }
+    }
+    
+    mergePulseData(dataList, offset) {
+        const merged = [[], [], [], [], []]; 
+        for (const data of dataList) {
+            const shiftData = data[0].map(value => value + offset);  
+            for (let i = 0; i < data[0].length; i++) {
+                merged[0].push(shiftData[i]);
+                merged[1].push(data[1][i]);
+                merged[2].push(data[2][i]);
+                merged[3].push(data[3][i]);
+                merged[4].push(data[4][i]);
+            }
+            offset = merged[0][merged[0].length - 1];  
+        }
+        const zipped = merged[0].map((t, i) => [t, merged[1][i], merged[2][i], merged[3][i], merged[4][i]]);
+        zipped.sort((a, b) => a[0] - b[0]);
+        return [
+            zipped.map(x => x[0]),
+            zipped.map(x => x[1]),
+            zipped.map(x => x[2]),
+            zipped.map(x => x[3]),
+            zipped.map(x => x[4])
+        ];
+    }
+
+    setLoading(isLoading) {
+        this.loading = isLoading;
+        const indicator = this.querySelector('#loading-indicator');
+        if (indicator) {
+            indicator.style.display = isLoading ? 'block' : 'none';
         }
     }
 }
+
+
+
 
 // >>> 241128 hjkim - Bode 그래프 추가
 class BodeGraphInStack extends HTMLElement {
