@@ -5978,7 +5978,7 @@ class PulseGraphInStack extends HTMLElement {
     
     mergePulseData(dataList, offset) {
         const merged = [[], [], [], [], []]; 
-        for (const data of dataList) {
+        for (const data of dataList.reverse()) { // 최신데이터가 가장 오른쪽으로
             const shiftData = data[0].map(value => value + offset);  
             for (let i = 0; i < data[0].length; i++) {
                 merged[0].push(shiftData[i]);
