@@ -94,7 +94,7 @@ function retry(condition       , interval       , limit       , fn_callback     
 // }
 // <<< 241202 hjkim - 버그 있는 retry 교체
 
-if(TITLE.includes("스택진단")) {
+if(typeof TITLE !== "undefined" && TITLE.includes("스택진단")) {
     /* -------------------------------------------------------------------------- */
     /*                           스택진단 / 하단 그래프 초기화                    */
     /* -------------------------------------------------------------------------- */
@@ -280,6 +280,71 @@ function get_best_fit(min_x, min_y, max_x, max_y, XY_RATIO = 3.5) {
     }
     return r;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+// 체크박스 선택된 값 안에서 최대값 구해서 selected.conf에 저장하는 함수
+function handleDataResponse(allData) {
+    let maxValues = {
+      X1: -Infinity,
+      X2: -Infinity,
+      Y1: -Infinity,
+      Y2: -Infinity,
+    };
+  
+    // 최대값 계산
+    allData.forEach((item) => {
+      const { X1, X2, Y1, Y2 } = item;
+      maxValues.X1 = Math.max(maxValues.X1, parseFloat(X1));
+      maxValues.X2 = Math.max(maxValues.X2, parseFloat(X2));
+      maxValues.Y1 = Math.max(maxValues.Y1, parseFloat(Y1));
+      maxValues.Y2 = Math.max(maxValues.Y2, parseFloat(Y2));
+    });
+  
+    const maxValueString = `X1=${maxValues.X1}\nX2=${maxValues.X2}\nY1=${maxValues.Y1}\nY2=${maxValues.Y2}`;
+  
+    // 그래프 그리기 (색상 정보 포함)
+    const _grid_el = document.querySelector(".widget-body.d-grid");
+    const _pholder_arr = _grid_el.querySelectorAll('.content-section>div:not(.float-end)');
+    const canvasEl = _pholder_arr[0]; // 같은 캔버스에 그래프들 그리기
+    const isRelative = getLocalStorage(`${PLANT_FOLDER()}/${STACK_NAME()}/org_chk`) === 'true';
+
+    // 축 초기화
+    ImpedanceChart.graph_axis_reset();
+    window.g_micro_ohm.init = false;
+    window.is_draw_xtick_label = false;
+    window.is_draw_ytick_label = false;
+  
+    // 각 데이터에 대해 그래프를 그립니다.
+    allData.forEach((item) => {
+        const {
+            data, color, ack_number,
+            max_x, min_x,
+            max_y, min_y,
+            xaxis_max, yaxis_max
+        } = item;
+      
+        if (isRelative) {
+            const min_x_in_series = data.reduce((acc, d) => Math.min(acc, d[1]), Infinity);
+            data.forEach(d => d[1] -= min_x_in_series);
+        }
+
+        const _opt = {
+            PX_RANGE_PADDING__X: 0,
+            PX_RANGE_PADDING__Y: 0,
+            ack_number,
+            max_x,
+            min_x,
+            max_y,
+            min_y,
+            BEST_FIT: get_best_fit(min_x, min_y, max_x, max_y),
+            xaxis_max,
+            yaxis_max
+        };
+        window.lastUsedGraphColor = color;
+    });
+}
+window.handleDataResponse = handleDataResponse;
+
 // <<< 240613 hjkim - Best Fit
 window. color_cnt = 0;
 const IS_UPLOT = 1;
@@ -287,6 +352,11 @@ channel2.port2.onmessage = (e) => {
     // >>> 250211 hjkim - 원점체크박스 상태저장
     const color = document.querySelector("#graph-btn").getAttribute("data-color") || null;
     let org_chk = getLocalStorage(`${PLANT_FOLDER()}/${STACK_NAME()}/org_chk`);
+    if (e.data.msg === "DRAW_MULTIPLE_NYQUIST") {
+        // 다중 데이터를 처리하는 새로운 메시지
+        window.handleDataResponse(e.data.allData);
+        return;
+      }
     if(e.data.msg == "DRAW_NYQUIST" || e.data.msg == "DRAW_NYQUIST__RELATIVE") {
         if(org_chk == "true") e.data.msg = "DRAW_NYQUIST__RELATIVE";
         else  e.data.msg = "DRAW_NYQUIST";
@@ -297,7 +367,6 @@ channel2.port2.onmessage = (e) => {
             var _grid_el = document.querySelector(".widget-body.d-grid");
             var _pholder_arr = _grid_el.querySelectorAll('.content-section>div:not(.float-end)');
             var _e = { target: _pholder_arr[0] };
-            e.data.color = color
             ImpedanceChart.IAdd_series_in_imp_graph(_e, e.data.url, e.data.color);
         break;
         case "DRAW_NYQUIST":
@@ -313,7 +382,7 @@ channel2.port2.onmessage = (e) => {
             var _opt = {
                 PX_RANGE_PADDING__X: 0,
                 PX_RANGE_PADDING__Y: 0,
-                SHIFT_X: 25,
+                SHIFT_X: e.data.min_x,
                 ack_number: e.data.ack_number,
                 max_x: e.data.max_x,
                 min_x: e.data.min_x,
@@ -325,7 +394,6 @@ channel2.port2.onmessage = (e) => {
                 yaxis_max: e.data.yaxis_max,
                 // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
             };
-            e.data.color = color
             ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _opt);
             // ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _pad_x, _pad_y, 0, 50 /* 우측으로 쉬프트 */, e.data.ack_number, e.data.max_x);
             // <<< 240612 hjkim - Refactoring :: Intro. Param. Obj.
@@ -373,7 +441,6 @@ channel2.port2.onmessage = (e) => {
                 yaxis_max: e.data.yaxis_max,
                 // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
             };
-            e.data.color = color
             ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], _opt);
             //ImpedanceChart._draw_imp_data(e.data.data, e.data.color, _pholder_arr[0], 0, 0, 3, 0 /*원점*/, e.data.ack_number, e.data.max_x-e.data.min_x);
             // <<< 240612 hjkim - Refactoring :: Intro. Param. Obj.
@@ -1032,6 +1099,7 @@ function Run_ImpedanceChart(ImpedanceChart) {
 
         // 2. 스캐터 차트 그림
         ctx.save();
+        console.log("draw_scatter 호출 전 color:", color);
         draw_scatter(ctx, data, window.fn_mohm2px_x, window.fn_mohm2px_y, color);
         ctx.restore();
     }
@@ -2432,7 +2500,7 @@ if(TITLE.includes("스택진단")) {
         br,
         button({class:"btn-of w-24", onclick:()=>{ org_chk_click_handler(); clear_graph(); show_graph(org_toggle.val, false); }}, 
         () => `${org_toggle.val == false ? "원점이동" : "절대값"}`), br,
-        button({class: "btn-of w-24", onclick: clear_graph}, "클리어"), 
+        button({class: "btn-of w-24", onclick: all_clear_graph}, "클리어"), 
         // <<< 250212 hjkim - 원점체크박스 상태저장
     ); // DOM 생성
     van.derive(() => { // 체크박스와 org_toggle 상태 동기화
@@ -2506,7 +2574,8 @@ if(TITLE.includes("스택진단")) {
         });
         // 핸들러 함수
         function single_click_handler() { 
-            show_graph(org_toggle.val);
+            const color = window.lastUsedGraphColor;
+            show_graph(org_toggle.val, false, "LB", "normal", color);
             clear_time_queue(); 
         }
         function double_click_handler() { clear_graph(); clear_time_queue(); }
@@ -2516,8 +2585,39 @@ if(TITLE.includes("스택진단")) {
     });
     // <<< 240417 hjkim - 그래프 보기 버튼 클릭
 }
+
+// 파일까지 전부 삭제
+function all_clear_graph() {
+    window.clearSelectedDirectory();
+    // >>> 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
+    window.series_cnt = 0;
+    // <<< 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
+	
+	// >>> 250313 hjkim - 레이어 1 추가: xy축 레이블용
+	window.is_draw_xtick_label = false;
+	window.is_draw_ytick_label = false;
+	// <<< 250313 hjkim - 레이어 1 추가: xy축 레이블용
+
+    // >>> 250214 hjkim - xsxeysye 초기화
+    init_xsxeysye();
+    // <<< 250214 hjkim - xsxeysye 초기화
+
+    // >>> 250214 hjkim - xsxeysye 자동갱신
+    // let _input_arr = document.querySelectorAll(".widget.stack-state-graph .float-end .graph input");
+    // _input_arr[1].value = xsxe_ysye__scope.xs;
+    // _input_arr[2].value = xsxe_ysye__scope.xe;
+    // _input_arr[3].value = xsxe_ysye__scope.ys;
+    // _input_arr[4].value = xsxe_ysye__scope.ye;
+    // <<< 250214 hjkim - xsxeysye 자동갱신
+
+    var el = document.querySelector(".impedence_graph").parentElement;
+    el.innerHTML = "";
+    ImpedanceChart.IImpedanceChart_init(el, el.clientWidth, el.clientHeight);
+    ImpedanceChart.graph_axis_reset();
+}
+
+// 화면에 그래프만 지움
 function clear_graph() {
-    
     // >>> 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
     window.series_cnt = 0;
     // <<< 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
@@ -2578,18 +2678,19 @@ function show_graph(is_origin = false, is_init = false, compact = "LB", mode = "
 
     var _response_msg = is_origin ? "DRAW_NYQUIST__RELATIVE" : "DRAW_NYQUIST";
     var _compact = is_origin ? compact : "";
-
     var sessionId = getSessionId();
+
+    if (!color && window.lastUsedGraphColor) {
+        color = window.lastUsedGraphColor;
+    }
 
     const msgData = {
         msg: "GET_STACK__STREAM",
         response_msg: _response_msg,
         url_dir: "/data/SES/" + sessionId + "/selected",
         compact: _compact,
+        color : color
     };
-    if (color) {
-        msgData.color = color;
-    }
     if (is_xsxeysye_checked()) {
         const [xs, xe, ys, ye] = get_xsxeysye();
         Object.assign(msgData, { xs, xe, ys, ye });

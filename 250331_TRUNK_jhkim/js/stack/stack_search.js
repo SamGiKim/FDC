@@ -935,12 +935,14 @@ document.addEventListener('change', function(e) {
 
   ////////////////////////////////////////////////////////////////////////
   // 페이지 당 데이터 수 선택 콤보박스 이벤트 리스너
-  const itemsPerPageSelect = document.getElementById("items-per-page");
-  itemsPerPageSelect.addEventListener("change", function () {
-    itemsPerPage =
-      this.value === "all-data" ? "all-data" : parseInt(this.value); // 'all-data'로 설정
-    goToPage(1); // 첫 페이지로 이동하여 데이터 로드
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === "items-per-page") {
+      const selectedValue = e.target.value;
+      itemsPerPage = selectedValue === "all-data" ? "all-data" : parseInt(selectedValue);
+      goToPage(1);
+    }
   });
+  
   ////////////////////////////////////////////////////////////////////////
 
   // 데이터 로드 및 기타 초기화
@@ -1417,7 +1419,7 @@ function fetchData(conditions = {}, page = 1, bookmarkId = null, type) {
 }
 
 // searchWithData와 filterDataByBookmark 함수를 fetchData를 사용하도록 수정
-export function searchWithData(conditions, page = 1, searchType=null) {
+export function searchWithData(conditions, page = 1, searchType=null, perPage = 100) {
   return new Promise((resolve, reject) => {
     try {
       currentPageContext = "search";
@@ -1448,7 +1450,7 @@ export function searchWithData(conditions, page = 1, searchType=null) {
       
       // 기본 파라미터 추가
       searchParams.append('page', page);
-      searchParams.append('perPage', 100);  // 기본값 설정
+      searchParams.append('perPage', perPage);  // 기본값 설정
       searchParams.append('type', typeToUse);
       searchParams.append('powerplant_id', powerplant_id);
       searchParams.append('fuelcell_id', fuelcell_id);
@@ -2208,32 +2210,28 @@ export function goToPage(pageNumber, bookmarkId = null) {
     perPage: itemsPerPage,
   });
 
+  const resolvedPerPage = itemsPerPage === "all-data" ? 999999 : itemsPerPage;
+
   if (currentPageContext === "all") {
-    searchWithData(currentSearchConditions, pageNumber).then(() => {
+    searchWithData(currentSearchConditions, pageNumber, null, resolvedPerPage).then(() => {
       console.log("searchWithData 완료 - all");
       initCheckboxStateAndSelectAll(false);
       updateSelectedCount();
     });
   } else if (currentPageContext === "search") {
-    searchWithData(currentSearchConditions, pageNumber).then(() => {
+    searchWithData(currentSearchConditions, pageNumber, null, resolvedPerPage).then(() => {
       console.log("searchWithData 완료 - search");
       initCheckboxStateAndSelectAll(false);
       updateSelectedCount();
     });
   } else if (currentPageContext === "bookmark") {
-    filterDataByBookmark(bookmarkId || currentBookmarkId, pageNumber, currentSearchConditions).then(() => {
+    filterDataByBookmark(bookmarkId || currentBookmarkId, pageNumber, currentSearchConditions, resolvedPerPage).then(() => {
       console.log("filterDataByBookmark 완료");
       initCheckboxStateAndSelectAll(false);
       updateSelectedCount();
     });
   }
 }
-
-
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // 북마크 탭관리
@@ -2521,8 +2519,6 @@ function updateBookmark(id, newName, newColorId) {
     });
 }
 
-
-
 ////////////////////////////////////////////////////////////////////////////////////////
 // 그래프 그리기 
 // selected 디렉터리 비우는 함수 
@@ -2538,6 +2534,7 @@ async function clearSelectedDirectory() {
       throw error;
   }
 }
+window.clearSelectedDirectory = clearSelectedDirectory;
 
 // 세션 ID 관리 함수
 function getSessionId() {
@@ -2549,61 +2546,68 @@ function getSessionId() {
 }
 
 async function copyFilesForGraph(no, color, dateValue, fuelcell_id, powerplant_id) {
-  // 파라미터 유효성 검사 추가
   if (!powerplant_id || !fuelcell_id) {
-      console.error('필수 파라미터 누락:', {
-          powerplant_id,
-          fuelcell_id
-      });
-      throw new Error('발전소 ID와 연료전지 ID가 필요합니다.');
+    console.error('필수 파라미터 누락:', { powerplant_id, fuelcell_id });
+    throw new Error('발전소 ID와 연료전지 ID가 필요합니다.');
   }
 
-  const type = document.querySelector('#sin-pulse-select').value; 
+  const type = document.querySelector('#sin-pulse-select').value;
   const sessionId = getSessionId();
   const defaultColor = color.toLowerCase() === '#ffffff' ? '' : encodeURIComponent(color);
   const isRawData = document.querySelector('#raw-data-checkbox')?.checked || false;
-  
-  // URL 파라미터 로깅
-  console.log('파일 복사 요청 파라미터:', {
-      no,
-      type,
-      color: defaultColor,
-      date: dateValue,
-      fuelcell_id,
-      powerplant_id,
-      isRawData,
-      sessionId
-  });
-  
+
   const url = `js/stack/copyFileForGraph.php?no=${no}&type=${type}&color=${defaultColor}&date=${encodeURIComponent(dateValue)}&fuelcell_id=${encodeURIComponent(fuelcell_id)}&powerplant_id=${encodeURIComponent(powerplant_id)}&isRawData=${isRawData}&sessionId=${sessionId}`;
-  console.log(document.cookie)
-  
+
   try {
-      const response = await fetch(url);
-      const text = await response.text();
-      console.log('서버 응답 전체:', text);
-      
-      try {
-          const data = JSON.parse(text);
-          console.log('서버 응답 데이터:', data);
-          
-          if (!data.success) {
-              if (isRawData && data.message.includes("파일을 찾을 수 없습니다")) {
-                  alert("Raw Data가 없습니다.");
-                  return null;
-              }
-              throw new Error(data.message);
-          }
-          return data;
-      } catch (e) {
-          console.error('JSON 파싱 에러:', e);
-          throw new Error('서버 응답을 처리할 수 없습니다');
+    const response = await fetch(url);
+    const text = await response.text();
+    const result = JSON.parse(text);
+
+    if (!result.success) {
+      if (isRawData && result.message.includes("파일을 찾을 수 없습니다")) {
+        alert("Raw Data가 없습니다.");
+        return null;
       }
-  } catch (error) {
-      console.error('copyFileForGraph 에러:', error);
-      throw error;
+      throw new Error(result.message);
+    }
+
+    if (Array.isArray(result.data)) {
+      const xs = result.data.map(d => d[1]);
+      const ys = result.data.map(d => d[2]);
+
+      const min_x = Math.min(...xs);
+      const max_x = Math.max(...xs);
+      const min_y = Math.min(...ys);
+      const max_y = Math.max(...ys);
+
+      const xaxis_max = Math.ceil(max_x * 1.1);
+      const yaxis_max = Math.ceil(max_y * 1.1);
+
+      const isRelative = typeof getLocalStorage === "function" && getLocalStorage(`${PLANT_FOLDER()}/${STACK_NAME()}/org_chk`) === 'true';
+
+      return {
+        ...result,
+        data: result.data,
+        color: color,
+        min_x,
+        max_x,
+        min_y,
+        max_y,
+        xaxis_max,
+        yaxis_max,
+        isRelative,
+        ack_number: Date.now() % 1000000 // 임시 구분값
+      };
+    } else {
+      console.warn("서버 응답에 그래프 데이터가 없습니다.");
+      return null;
+    }
+  } catch (e) {
+    console.error('copyFilesForGraph 오류:', e);
+    throw e;
   }
 }
+
 
 // handleFileOperations 함수도 수정
 export async function handleFileOperations(dataNos, colorInput, fuelcell_id) {
@@ -2659,7 +2663,7 @@ export async function handleFileOperations(dataNos, colorInput, fuelcell_id) {
       }
       
       console.log('모든 데이터 처리 완료:', allData);
-      handleDataResponse(allData);
+      window.handleDataResponse(allData);
   } catch (error) {
       console.error("파일 작업 중 에러:", error);
       throw error;
@@ -2680,29 +2684,36 @@ export async function copySelectedFiles() {
   }
 
   const type = document.querySelector('#sin-pulse-select')?.value || 'SIN';
+
   if (type === 'SIN' || type === 'CALIB') {
-    const dataNos = Array.from(checkboxes).map(cb => cb.getAttribute("data-no"));
-
     try {
-      await clearSelectedDirectory();
+      const fetchPromises = Array.from(checkboxes).map(cb => {
+        const row = cb.closest('tr');
+        const dateCell = row.querySelector('.date-cell');
+        const no = cb.getAttribute("data-no");
 
-      const fetchPromises = dataNos.map((no) => {
-        const color = getGraphColor(no);
-        console.log(`Processing file for NO: ${no}, Color: ${color}`);
+        let color;
+        const fileName = dateCell.getAttribute('data-filename');
+        if (fileName) {
+          color = getColorFromFileName(fileName);
+        } else {
+          const errCode = dateCell.getAttribute('data-err')?.split('.')[0];
+          color = getColorByMERR(errCode) || '#06D001';
+        }
+
+        console.log(`Processing NO: ${no}, Color: ${color}`);
+
         return copyFilesForGraph(
           no, color, new Date().toISOString(),
           currentConfig.fuelcell_id, currentConfig.powerplant_id
-        ).then((result) => {
-          if (result) return { ...result, color };
-          return null;
-        });
+        ).then(result => result ? { ...result, color } : null);
       });
 
       const results = await Promise.all(fetchPromises);
       const allData = results.filter(data => data !== null);
 
       if (allData.length > 0) {
-        handleDataResponse(allData); // color 포함된 구조 전달
+        window.handleDataResponse(allData); // 그래프 색상 포함 전달
       } else {
         console.error('처리된 데이터가 없습니다.');
       }
@@ -2728,18 +2739,17 @@ export async function copySelectedFiles() {
       if (fullpaths.length > 0) {
         const graphElement = document.querySelector("pulse-graph-in-stack");
         if (graphElement) {
-          // 날짜 순 정렬
-          fullpaths.sort((a, b) => {
-            const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
-            return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
-                   new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
-          });
-      
-          // 직접 내부 상태에 fullpaths 설정
+          // 날짜순 정렬
+          // fullpaths.sort((a, b) => {
+          //   const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
+          //   return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
+          //          new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
+          // });
+
           graphElement.fullpaths = fullpaths;
-          graphElement.destroyPlot();   // 기존 그래프 제거
-          graphElement.init_DOM();      // 그래프 초기 DOM 생성
-          await graphElement.init_data();     // 그래프 그리기
+          graphElement.destroyPlot();
+          graphElement.init_DOM();
+          await graphElement.init_data();
         } else {
           console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
         }
@@ -2775,6 +2785,7 @@ async function deleteSelectedFile(no) {
 async function handleDateCellClick(event) {
   const clickedElement = event.target;
 
+  // type이 SIN 또는 CALIB인 경우에만 실행
   if ((type === 'SIN' || type === 'CALIB') && clickedElement.tagName === 'TD' && clickedElement.cellIndex === 1) {
     const row = clickedElement.closest('tr');
     const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
@@ -2785,13 +2796,13 @@ async function handleDateCellClick(event) {
         const isCurrentlyChecked = checkbox.checked;
         const dateCell = row.querySelector('.date-cell');
         const dataNo = dateCell.getAttribute('data-no');
-
         checkbox.checked = !isCurrentlyChecked;
 
         if (!isCurrentlyChecked) {
           if (typeof window.clear_graph === 'function') {
             window.clear_graph();
           }
+
           let color;
           const fileName = dateCell.getAttribute('data-filename');
           if (fileName) {
@@ -2806,11 +2817,10 @@ async function handleDateCellClick(event) {
           graphBtn.click();
         } else {
           await deleteSelectedFile(dataNo);
-
           if (typeof window.clear_graph === 'function') {
             window.clear_graph();
           }
-
+          
           const checkedBoxes = document.querySelectorAll(
             'input[type="checkbox"][name="search-checkbox"]:checked'
           );
@@ -2824,13 +2834,12 @@ async function handleDateCellClick(event) {
         updateSelectedCount();
       } catch (error) {
         console.error('Error during date cell click:', error);
-        checkbox.checked = isCurrentlyChecked;
+        checkbox.checked = !checkbox.checked; 
         updateSelectedCount();
       }
     }
   }
 }
-
 
 // 개별 날짜 td 클릭시 그래프 그리는 기능(DOM로드시 실행되도록 적어줄 것)
 // 날짜 셀 클릭 이벤트 핸들러 설정 함수
@@ -2983,8 +2992,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-
-
 /////////////////////////////////////////////////////////////////////////////
 // 에러코드에 따른 색상 매핑 함수(그래프 그리기)
 function getColorByMERR(errCode) {
@@ -3010,40 +3017,6 @@ function getColorByMERR(errCode) {
       '31': '#00A300'    //정상복귀
   };
   return colorMap[errCode] || '#06D001'; // 매핑되지 않은 코드는 기본값으로 초록색 반환
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// 체크박스 선택된 값 안에서 최대값 구해서 selected.conf에 저장하는 함수
-function handleDataResponse(data, color) {
-  // console.log('handleDataResponse called with data:', data);
-  let maxValues = {
-    X1: -Infinity,
-    X2: -Infinity,
-    Y1: -Infinity,
-    Y2: -Infinity,
-  };
-
-  data.forEach((row) => {
-    maxValues.X1 = Math.max(maxValues.X1, parseFloat(row.X1));
-    maxValues.X2 = Math.max(maxValues.X2, parseFloat(row.X2));
-    maxValues.Y1 = Math.max(maxValues.Y1, parseFloat(row.Y1));
-    maxValues.Y2 = Math.max(maxValues.Y2, parseFloat(row.Y2));
-  });
-
-  //console.log(
-  //   `Calculated Max Values: X1=${maxValues.X1}, X2=${maxValues.X2}, Y1=${maxValues.Y1}, Y2=${maxValues.Y2}`
-  // );
-
-  const maxValueString = `X1=${maxValues.X1}\nX2=${maxValues.X2}\nY1=${maxValues.Y1}\nY2=${maxValues.Y2}`;
-
-  if (
-    maxValues.X1 !== -Infinity &&
-    maxValues.X2 !== -Infinity &&
-    maxValues.Y1 !== -Infinity &&
-    maxValues.Y2 !== -Infinity
-  ) {
-    saveMaxValueToFile(maxValueString);
-  }
 }
 
 function saveMaxValueToFile(maxValueString) {

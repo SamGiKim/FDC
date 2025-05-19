@@ -628,52 +628,43 @@ function channel2_handler(argv, port1) {
             .then(txt => _extract_url(txt)) // URL만 파싱
             .then(arr => arr.filter(d => d.includes(".txt"))); // .txt 확장자만 필터링
 			var color_list = [];
-            var received_url = {};
             url_lists.then(url_arr => {
                 // 1. 전처리부
-                var _color = "#00FF00";
-                const color_re = /[0-9A-Fa-f]{6}/gi;
                 var mat_arr = url_arr.map(url => {
                     var full_url = `${argv.data.url_dir}/${url}`;
-                    // 색상 도출
-                    var m = full_url.match(color_re);
-                    if(m != null && m != "null") {_color = `#${m[0]}`;}
-					else {
-						const label = ["유량센서", "MFM전누설", "MFM후누설", "공기부족", "공기과잉",   "블로워",    "수소부족", "수소과잉", "압력센서",   "정상"];
-						//const color = ["#EE0000", "#A020FO", "#000000", "#0000EE", "#FFD700", "#00A693", "#FFA500", "#FFA5FF", "#013220", "#00FF00"];
-						const color = ["#EE0000", "#252850", "#B8B799", "#0000EE", "#FFD700", "#00A693", "#FFA500", "#FFA5FF", "#924E7D", "#00FF00"];
-						var match_idx = label.map(l => { var r = full_url.indexOf(l); return r == -1 ? 65535 : r; });
-						// console.log("#data.js / match_idx:", match_idx);
-						var min_idx = match_idx.reduce( (min, v, i, d) => (v < d[min] ? i : min), 0);
-						// console.log("#data.js / min_idx:", min_idx);
-                        // >>> 241104 hjkim - Nyquist 그래프에 정상이 빨간색으로 나오는 버그
-                        if(match_idx[min_idx] != 65535) {
-                        // >>> 241104 hjkim - Nyquist 그래프에 정상이 빨간색으로 나오는 버그
+                    let _color = "#00FF00"; // 기본값
+                
+                    // >>> 정확한 색상 추출: {06D001} 와 같은 형식에서 추출
+                    const color_match = full_url.match(/\{([0-9A-Fa-f]{6})\}/);
+                    if (color_match) {
+                        _color = `#${color_match[1]}`;
+                    } else {
+                        const label = ["유량센서", "MFM전누설", "MFM후누설", "공기부족", "공기과잉", "블로워", "수소부족", "수소과잉", "압력센서", "정상"];
+                        const color = ["#EE0000",  "#252850",   "#B8B799",   "#0000EE", "#FFD700",  "#00A693", "#FFA500", "#FFA5FF", "#924E7D",  "#00FF00"];
+                        const match_idx = label.map(l => full_url.indexOf(l) === -1 ? 65535 : full_url.indexOf(l));
+                        const min_idx = match_idx.reduce((min, v, i, d) => (v < d[min] ? i : min), 0);
+                
+                        if (match_idx[min_idx] !== 65535) {
                             _color = color[min_idx];
                         }
-					}
-					color_list.push(_color);
-                    //
-                    var mat = fetch(full_url).then(res => res.text())
-                    // .then(txt => {console.log("#data.js / txt:", txt); return txt;})
-                    
+                    }
+                    // <<< 정확한 색상 추출
+                
+                    color_list.push(_color);
+                
+                    var mat = fetch(full_url)
+                        .then(res => res.text())
                     // 1.1 e단위 변환 및 y값 반전
-                    .then(txt => {
-						// >>> 250123 hjkim - 
-						let r = _parse_imp_data(txt, (arr) => {
-                            arr[1] *= M_OHM;        // x: Real Imp.
-                            arr[2] *= M_OHM * -1;   // y: -Imag Imp.
-                        });
-						//console.log("!@#$", txt, r);
-                        return r;
-						// <<< 250123 hjkim - 
-                    })
-                    // .then(data => {console.log("#data.js / data : ", data); return data;})
-                    
-                    // 1.2 y축이 0 이상인 것만 사용
-                    .then(data => data.filter(d => d[2] > 0));
+                        .then(txt => {
+                            let r = _parse_imp_data(txt, (arr) => {
+                                arr[1] *= M_OHM;        // x: Real Imp.
+                                arr[2] *= M_OHM * -1;   // y: -Imag Imp.
+                            });
+                            return r;
+                        })
+                        .then(data => data.filter(d => d[2] > 0)); // y값이 양수인 것만
                     return mat;
-                });
+                });                
 
                 // 2. URL 목록의 최대 최소 값 구하기
                 var zxy_axis_min = [65535, 65535, 65535];

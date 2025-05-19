@@ -65,13 +65,9 @@ try {
     // 파일 접근 가능 여부 확인
     if (!is_readable($sourcePath) && !is_readable($alternativeSourcePath)) {
         if (file_exists($sourcePath) || file_exists($alternativeSourcePath)) {
-            throw new Exception("파일 접근 권한이 없습니다 (Permission denied):\n첫 번째 경로: {$sourcePath}\n두 번째 경로: {$alternativeSourcePath}");
+            throw new Exception("파일 접근 권한이 없습니다:\n첫 번째 경로: {$sourcePath}\n두 번째 경로: {$alternativeSourcePath}");
         } else {
-            if ($isRawData) {
-                throw new Exception("Raw Data가 없습니다");
-            } else {
-                throw new Exception("파일을 찾을 수 없습니다:\n첫 번째 경로: {$sourcePath}\n두 번째 경로: {$alternativeSourcePath}");
-            }
+            throw new Exception($isRawData ? "Raw Data가 없습니다" : "파일을 찾을 수 없습니다:\n첫 번째 경로: {$sourcePath}\n두 번째 경로: {$alternativeSourcePath}");
         }
     }
 
@@ -80,7 +76,6 @@ try {
     // 세션 디렉토리 설정
     $baseDir = '/home/nstek/h2_system/FDC/SES/';
     $sessionDir = $baseDir . $sessionId . '/selected';
-
     if (!is_dir($sessionDir)) {
         mkdir($sessionDir, 0755, true);
     }
@@ -90,6 +85,26 @@ try {
 
     if (!copy($actualPath, $destinationPath)) {
         throw new Exception("파일 복사 실패: {$actualPath} -> {$destinationPath}");
+    }
+
+    // imp 데이터 파일 읽기
+    $dataRows = [];
+    if (($handle = fopen($actualPath, "r")) !== false) {
+        while (($line = fgets($handle)) !== false) {
+            $line = trim($line);
+            if (preg_match('/^[\d.eE+\-]+\s+[\d.eE+\-]+\s+[\d.eE+\-]+$/', $line)) {
+                $parts = preg_split('/\s+/', $line);
+                if (count($parts) >= 3) {
+                    $hz = floatval($parts[0]);
+                    $x  = floatval($parts[1]);
+                    $y  = floatval($parts[2]);
+                    $dataRows[] = [$hz, $x, $y];
+                }
+            }
+        }
+        fclose($handle);
+    } else {
+        throw new Exception("파일을 열 수 없습니다: $actualPath");
     }
 
     // 응답용으로만 파일명 인코딩
@@ -102,7 +117,8 @@ try {
         'X1' => $row['X1'],
         'X2' => $row['X2'],
         'Y1' => $row['Y1'],
-        'Y2' => $row['Y2']
+        'Y2' => $row['Y2'],
+        'data' => $dataRows
     ]);
 
 } catch (Exception $e) {

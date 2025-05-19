@@ -20,7 +20,7 @@ try {
     $directory = '/home/nstek/h2_system/FDC/SES/' . $sessionId . '/selected';
     
     // 해당 번호의 파일 찾기 (색상 코드가 포함된 파일명)
-    $files = glob($directory . $fileName . "{*}", GLOB_BRACE); // GLOB_BRACE 추가
+    $files = glob($directory . '/' . $fileName . "{*}");
         foreach ($files as $file) {
         if (is_file($file)) {
             if (!unlink($file)) {
@@ -32,7 +32,8 @@ try {
     echo json_encode([
         'success' => true,
         'message' => '파일 삭제 성공',
-        'fileName' => $fileName
+        'fileName' => $fileName,
+        'files' => $files
     ]);
 
 } catch (Exception $e) {
