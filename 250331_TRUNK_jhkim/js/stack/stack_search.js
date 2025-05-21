@@ -521,16 +521,19 @@ function initializeTypeSelector(typeSelector) {
 // Stack EIS Analysis 그래프 명 업데이트 함수
 function updateEisOptions(selectedType) {
   const eisSelector = document.getElementById('eis_select_title');
+  const pulseCheckBox = document.getElementById('view-mode-switch');
   // >>> 250327 hjkim - Added NPULSE >>> 250403 jhkim - Added CALIB
   if (selectedType === 'PULSE' || selectedType === 'NPULSE') {
     eisSelector.innerHTML = ` <option value="2" >Bode plot</option>
-      <option value="3" selected>PULSE</option>`
-      ;
+      <option value="3" selected>PULSE</option>
+    `;
+    pulseCheckBox.style.display = 'flex';
   } else if (selectedType === 'SIN' || selectedType === 'CALIB'){
     eisSelector.innerHTML = `
     <option value="1" selected data-i18n="stack.stack_state">스택상태</option>
     <option value="2">Bode plot</option>
-  `;
+   `;
+    pulseCheckBox.style.display = 'none';
   }
   
   // i18next 처리 수정
@@ -710,7 +713,12 @@ function updateSearchFields(type) {
   const pulseFields = document.querySelectorAll('.pulse-field');
   const npulseFields = document.querySelectorAll('.npulse-field');
   const calibFields = document.querySelectorAll('.calib-field');
-
+  const allCheckboxes = document.querySelectorAll(
+    'input[type="checkbox"][name="search-checkbox"]'
+  );
+  allCheckboxes.forEach((checkbox) => {
+    checkbox.checked = false; // 체크 해제
+  });
   // 공통 필드는 항상 표시
   commonFields.forEach(field => field.style.display = '');
 
@@ -744,9 +752,7 @@ function updateSearchFields(type) {
   const dbEditValue = document.querySelectorAll(".tab-list a.db-edit span");
   const dbEditActive = document.querySelectorAll(".tab-list div.db-edit");
   const dbEditInput = document.querySelectorAll(".tab-list div.db-edit input");
-  const dbEditSelect = document.querySelectorAll(
-    ".tab-list div.db-edit select"
-  );
+  const dbEditSelect = document.querySelectorAll(".tab-list div.db-edit select");
 
   dbEdit.forEach((e, i) =>
     e.addEventListener("dblclick", function () {
@@ -794,15 +800,23 @@ function updateSearchFields(type) {
 
   const tbody = document.querySelector("#stack_search_table");
   const graphButton = document.getElementById("graph-btn");
-  let checkboxes = document.querySelectorAll(
-    'input[type="checkbox"][name="search-checkbox"]'
-  );
   const addButton = document.getElementById("add-bmk-btn");
-  const stackDataMngHeadElement = document.getElementById(
-    "stack-data-mng-head"
-  );
+  const stackDataMngHeadElement = document.getElementById("stack-data-mng-head");
   const bookmarkTabContainer = document.getElementById("bookmark-tab");
+  const checkboxes = document.querySelectorAll('input[name="viewMode"]');
 
+ // PULSE, NPULSE 체크박스 단일 체크 이벤트 리스너
+checkboxes.forEach((cb) => {
+  cb.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      checkboxes.forEach((other) => {
+        if (other !== e.target) other.checked = false;
+      });
+    } else {
+      e.target.checked = true;
+    }
+  });
+});
 
  // '스택 데이터 관리' 클릭 시 이벤트 리스너
 if (stackDataMngHeadElement) {
@@ -1686,16 +1700,16 @@ export function displayResults(results, currentPage, totalRows, type) {
       dateCell.addEventListener('click', async () => {
         const no = dateCell.getAttribute('data-no');
         console.log('Clicked cell NO:', no);
-
+      
         if (type === 'PULSE' || type === 'NPULSE') {
           const row = dateCell.closest('tr');
           const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
           const graphBtn = document.getElementById('graph-btn');
-
+      
           if (checkbox && graphBtn) {
             const isCurrentlyChecked = checkbox.checked;
             checkbox.checked = !isCurrentlyChecked;
-
+      
             if (!isCurrentlyChecked) {
               updateSelectedCount();
             } else {
@@ -1704,7 +1718,7 @@ export function displayResults(results, currentPage, totalRows, type) {
                 if (typeof window.clear_graph === 'function') {
                   window.clear_graph();
                 }
-
+      
                 const checkedBoxes = document.querySelectorAll(
                   'input[type="checkbox"][name="search-checkbox"]:checked'
                 );
@@ -1714,11 +1728,11 @@ export function displayResults(results, currentPage, totalRows, type) {
                 updateSelectedCount();
               } catch (error) {
                 console.error('체크박스 해제 중 오류:', error);
-                checkbox.checked = true; 
+                checkbox.checked = true;
               }
             }
           }
-
+      
           try {
             const selectedItems = Array.from(document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')).map(cb => {
               return {
@@ -1726,29 +1740,54 @@ export function displayResults(results, currentPage, totalRows, type) {
                 type: cb.getAttribute('data-type')
               };
             });
-
+      
             const fullpaths = [];
             for (const checkedItem of selectedItems) {
               const response = await fetch(`js/stack/get_pulse_name.php?no=${checkedItem.no}&type=${checkedItem.type}`);
               const data = await response.json();
-              if (data.name) fullpaths.push(data.name); 
+              if (data.name) fullpaths.push(data.name);
             }
-
+      
             if (fullpaths.length > 0) {
               const graphElement = document.querySelector("pulse-graph-in-stack");
+              const viewMode = document.querySelector('input[name="viewMode"]:checked')?.value || "single";
+      
               if (graphElement) {
-                // 날짜 순 정렬
-                fullpaths.sort((a, b) => {
-                  const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
-                  return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
-                         new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
-                });
-            
-                // 직접 내부 상태에 fullpaths 설정
-                graphElement.fullpaths = fullpaths;
-                graphElement.destroyPlot();   // 기존 그래프 제거
-                graphElement.init_DOM();
-                await graphElement.init_data();
+                graphElement.setViewMode(viewMode);
+                
+                if (viewMode === "single") {
+                  document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')
+                    .forEach(cb => {
+                      if (cb !== checkbox) cb.checked = false;
+                    });
+                  checkbox.checked = true;
+                  updateSelectedCount();
+                  const latestChecked = selectedItems[selectedItems.length - 1];
+                  const response = await fetch(`js/stack/get_pulse_name.php?no=${latestChecked.no}&type=${latestChecked.type}`);
+                  const data = await response.json();
+                  if (data.name) {
+                    graphElement.fullpaths = [data.name];
+                    graphElement.destroyPlot();
+                    graphElement.init_DOM();
+                    await graphElement.init_data();
+                  }
+                } else if (viewMode === "timeseries") {
+                  // 시간순 정렬
+                  fullpaths.sort((a, b) => {
+                    const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
+                    return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
+                           new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
+                  });
+                  graphElement.fullpaths = fullpaths;
+                  graphElement.destroyPlot();
+                  graphElement.init_DOM();
+                  await graphElement.init_data();
+                } else if (viewMode === "overlay") {
+                  graphElement.fullpaths = fullpaths;
+                  graphElement.destroyPlot();
+                  graphElement.init_DOM();
+                  await graphElement.init_data();
+                }
               } else {
                 console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
               }
@@ -1758,7 +1797,7 @@ export function displayResults(results, currentPage, totalRows, type) {
             console.warn('그래프 데이터를 불러오는 중 오류 발생');
           }
         }
-      });
+      });      
 
       // MERR 셀에 더블클릭 이벤트 추가 (SIN, PULSE 모두 적용)
       const merrCell = tr.querySelector('.merr-cell');
@@ -2739,13 +2778,6 @@ export async function copySelectedFiles() {
       if (fullpaths.length > 0) {
         const graphElement = document.querySelector("pulse-graph-in-stack");
         if (graphElement) {
-          // 날짜순 정렬
-          // fullpaths.sort((a, b) => {
-          //   const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
-          //   return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
-          //          new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
-          // });
-
           graphElement.fullpaths = fullpaths;
           graphElement.destroyPlot();
           graphElement.init_DOM();

@@ -462,7 +462,7 @@
         <div class="row">
 
           <div class="col-xxl-12 col-12">
-            <div class="widget stack-state-graph">
+            <div class="widget stack-state-graph" style="overflow-y: auto;">
               <div class="widget-head">
                 <span data-i18n="stack.main_graph">
                   <!-- 스택 상태 그래프 -->
@@ -476,6 +476,11 @@
                     </option>
                     <option value="2">Bode plot</option>
                   </select>
+                </div>
+                <div id="view-mode-switch" style="display : none; position: relative; z-index: 10;">
+                  <label><input type="checkbox" name="viewMode" value="single" checked> Single</label>
+                  <label><input type="checkbox" name="viewMode" value="timeseries"> Time Series</label>
+                  <label><input type="checkbox" name="viewMode" value="overlay"> Overlay</label>
                 </div>
               </div>
               <div class="widget-body d-grid"

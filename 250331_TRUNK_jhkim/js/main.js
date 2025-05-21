@@ -5763,7 +5763,7 @@ var opts = () => {
         width: (get_placeholder_width)(),
         height: 600,
         series: [
-            {},
+            { label: "Time"},
             { label: "Voltage", stroke: "#0000FF", scale: "V", width: 1, 
                 points : { space: 0, /*fill: "#0000FF"*/ show : false},/*paths: u=> null,*/
                 value: (self, rawValue) => rawValue + " V" },
@@ -5838,7 +5838,7 @@ function parse_pulse_handler(json) {
     const raw = json.raw;
     const ma = json.ma;
 
-    const time = raw.time;
+    const time = raw.time.map(t => t * 1e-6);
     const voltage = raw.voltage;
     const current = raw.current;
     const ma_voltage = ma.voltage;
@@ -5858,6 +5858,37 @@ function get_placeholder_width() {
     // console.log("!@#$ width : ", document.querySelector("pulse-graph-in-stack").offsetWidth);
     // return document.querySelector("pulse-graph-in-stack").offsetWidth | 1250;
     return document.querySelector(".widget.stack-state-graph .widget-body.d-grid").offsetWidth - 50;
+}
+
+function optsOverlay(numSets) {
+    const series = [{ label: "Time" }];
+    for (let i = 0; i < numSets; i++) {
+        series.push({ label: `Voltage ${i+1}`, stroke: "#0000FF", scale: "V", width: 1, points: { show: false } });
+        series.push({ label: `Current ${i+1}`, stroke: "#008000", scale: "A", width: 1, points: { show: false } });
+        series.push({ label: `Voltage(MA) ${i+1}`, stroke: "#FFA500", scale: "V", width: 3, points: { show: false } });
+        series.push({ label: `Current(MA) ${i+1}`, stroke: "#C1E715", scale: "A", width: 3, points: { show: false } });
+    }
+
+    return {
+        title: "Voltage Change Detection",
+        width: get_placeholder_width(),
+        height: 600,
+        series: series,
+        axes: [
+            {},
+            { scale: "V", size: 70 },
+            { scale: "A", side: 1, size: 70, grid: { show: false } }
+        ],
+        scales: {
+            x: { time: false, distr: 2 },
+            V: { range: (u, min, max) => [min, max] },
+            A: { range: (u, min, max) => [min, max] }
+        },
+        legend: {
+            show: true,
+            live: true,
+        },
+    };
 }
 
 // function init_pulse_graph(_fullpath = "") {
@@ -5881,6 +5912,10 @@ class PulseGraphInStack extends HTMLElement {
         this.loading = false;  
         this.totalFiles = 0;   
         this.loadedFiles = 0;  
+    }
+    
+    setViewMode(mode) {
+        this.viewMode = mode;
     }
 
     static get observedAttributes() {
@@ -5932,39 +5967,90 @@ class PulseGraphInStack extends HTMLElement {
         `;
         this.appendChild(loadingIndicator);  
         this.custom_element = PulseGraph();
+        this.custom_element.style.overflowY = "auto";
         van.add(this, this.custom_element);
         console.log("opts().width:", opts().width);
-        this.uplot = new uPlot(opts(), [], this.custom_element);
+        if (this.viewMode === 'overlay') {
+            this.uplot = new uPlot(optsOverlay(this.fullpaths.length), [], this.custom_element);
+            setTimeout(() => {
+                const legend = this.custom_element.querySelector(".u-legend");
+                if (legend) {
+                    legend.style.maxHeight = "50px";  
+                    legend.style.overflowY = "auto";
+                }
+            }, 0);
+        } else {
+            this.uplot = new uPlot(opts(this.fullpaths.length), [], this.custom_element);
+        }
         window.uplot = this.uplot;  
     }
 
-    // 그래프에 필요한 데이터 비동기 로딩 및 병합 처리
     async init_data() {
         this.setLoading(true);  
         if (!this.fullpaths || this.fullpaths.length === 0) return;
-        const allData = [];
-        let offset = 0; 
         this.totalFiles = this.fullpaths.length;  
-        this.loadedFiles = 0;  
-
-        // // 각 경로에 대해 JSON 데이터 로딩
-        for (const path of this.fullpaths) {
+        this.loadedFiles = 0;
+        if(this.viewMode === 'single'){
             try {
-                const res = await fetch(`/data/${path}`);
-                if (!res.ok) throw new Error(`Fetch failed: ${path}, status ${res.status}`);
+                const res = await fetch(`/data/${this.fullpaths[0]}`);
+                if (!res.ok) throw new Error(`Fetch failed: ${this.fullpaths[0]}`);
                 const json = await res.json();
                 const parsed = parse_pulse_handler(json);
-                allData.push(parsed);
+        
+                this.uplot.setData(parsed);
             } catch (e) {
-                console.error(`Failed to load or parse ${path}`, e);
+                console.error(`Failed to load or parse ${this.fullpaths[0]}`, e);
             } finally {
                 this.loadedFiles++;
-                this.updateProgress();  
+                this.updateProgress();
             }
-        }
-        const merged = this.mergePulseData(allData, offset);
-        this.uplot.setData(merged);
+        } else if (this.viewMode === 'timeseries') {
+            const allData = [];
+            let offset = 0;
+            for (const path of this.fullpaths) {
+                try {
+                    const res = await fetch(`/data/${path}`);
+                    if (!res.ok) throw new Error(`Fetch failed: ${path}`);
+                    const json = await res.json();
+                    const parsed = parse_pulse_handler(json);
+                    allData.push(parsed);
+                } catch (e) {
+                    console.error(`Failed to load or parse ${path}`, e);
+                } finally {
+                    this.loadedFiles++;
+                    this.updateProgress();  
+                }
+            }
+            const merged = this.mergeTimeSeriesData(allData, offset);
+            this.uplot.setData(merged);
+        } else if (this.viewMode === 'overlay') {
+            const allData = [];
+            for (const path of this.fullpaths) {
+                try{
+                    const res = await fetch(`/data/${path}`);
+                    if (!res.ok) throw new Error(`Fetch failed: ${path}`);
+                    const json = await res.json();
+                    const parsed = parse_pulse_handler(json);
+                    allData.push(parsed);
+                } catch (e) {
+                    console.error(`Failed to load or parse ${path}`, e);
+                } finally {
+                    this.loadedFiles++;
+                    this.updateProgress();
+                }
+            }
+            const merged = this.mergeOverlayData(allData);
+            this.uplot.setData(merged);
+        } 
         this.setLoading(false);  
+    }
+
+    updateProgress() {
+        const progress = this.querySelector('#loading-indicator progress');
+        if (progress) {
+            const percent = (this.loadedFiles / this.totalFiles) * 100;
+            progress.value = percent;
+        }
     }
 
     // 로딩 바 상태 업데이트
@@ -5976,7 +6062,7 @@ class PulseGraphInStack extends HTMLElement {
         }
     }
     
-    mergePulseData(dataList, offset) {
+    mergeTimeSeriesData(dataList, offset) {
         const merged = [[], [], [], [], []]; 
         for (const data of dataList.reverse()) { // 최신데이터가 가장 오른쪽으로
             const shiftData = data[0].map(value => value + offset);  
@@ -5998,6 +6084,26 @@ class PulseGraphInStack extends HTMLElement {
             zipped.map(x => x[3]),
             zipped.map(x => x[4])
         ];
+    }
+
+    mergeOverlayData(dataList) {
+        if (dataList.length === 0) return [];
+    
+        const baseX = Array.from(new Set(dataList.flatMap(d => d[0]))).sort((a, b) => a - b);
+        const merged = [baseX];
+    
+        for (const data of dataList) {
+            for (let si = 1; si <= 4; si++) {  
+                const map = new Map();
+                for (let i = 0; i < data[0].length; i++) {
+                    map.set(data[0][i], data[si][i]);
+                }
+                const alignedY = baseX.map(x => map.has(x) ? map.get(x) : null);
+                merged.push(alignedY);
+            }
+        }
+    
+        return merged;
     }
 
     setLoading(isLoading) {
