@@ -486,12 +486,16 @@
                     <option value="2">Bode plot</option>
                   </select>
                 </div>
-                <div id="view-mode-switch" style="display : none; position: relative; z-index: 10;">
-                  <label><input type="checkbox" name="viewMode" value="single" checked> Single</label>
-                  <label><input type="checkbox" name="viewMode" value="timeseries"> Time Series</label>
-                  <label><input type="checkbox" name="viewMode" value="overlay"> Overlay</label>
-                  <button id="rangeSelectBtn" style="display: none;">시작점 설정</button>
-                  <button id="clearBtn">클리어</button>
+                <div id="view-mode-switch" style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 10;">
+                  <div class="left-controls">
+                    <label><input type="checkbox" name="viewMode" value="single" checked> Single</label>
+                    <label><input type="checkbox" name="viewMode" value="timeseries"> Time Series</label>
+                    <label><input type="checkbox" name="viewMode" value="overlay"> Overlay</label>
+                    <button id="rangeSelectBtn" style="display: none;">시작점 설정</button>
+                  </div>
+                  <div class="right-controls">
+                    <button id="clearBtn">클리어</button>
+                  </div>
                 </div>
               </div>
               <div class="widget-body d-grid"
