@@ -6103,7 +6103,6 @@ class PulseGraphInStack extends HTMLElement {
                 merged.push(alignedY);
             }
         }
-    
         return merged;
     }
 
@@ -6114,7 +6113,22 @@ class PulseGraphInStack extends HTMLElement {
             indicator.style.display = isLoading ? 'block' : 'none';
         }
     }
+
+    clearGraph() {
+        this.destroyPlot();        // 그래프 객체 제거
+        this.innerHTML = '';       // 내부 DOM 초기화
+        this.fullpaths = [];       // 데이터 경로 초기화
+        this.loadedFiles = 0;
+        this.totalFiles = 0;
+    }
 }
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+    const pulseGraphEl = document.querySelector('pulse-graph-in-stack');
+    if (pulseGraphEl && typeof pulseGraphEl.clearGraph === 'function') {
+        pulseGraphEl.clearGraph();
+    }
+});
 
 // >>> 241128 hjkim - Bode 그래프 추가
 class BodeGraphInStack extends HTMLElement {
