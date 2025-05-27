@@ -146,16 +146,6 @@ try {
                 'To' => 'hzTO',
                 'Err' => 'MERR',
                 'LABEL' => 'LABEL',
-                // PULSE 관련 필드 추가
-                'p_y0_voltage' => 'p_y0_voltage',
-                'p_y2' => 'p_y2',
-                'p_y2_y0_voltage' => 'p_y2_y0_voltage',
-                'p_y4_y0_voltage' => 'p_y4_y0_voltage',
-                'p_x' => 'p_x',
-                // NPULSE 관련 필드 추가
-                'd_voltage_diff'=> 'd_voltage_diff',
-                'u_voltage_diff'=> 'u_voltage_diff',
-                'overall_x_diff'=> 'overall_x_diff'
             ];
 
             $fieldName = isset($fieldMapping[$actualField]) ? $fieldMapping[$actualField] : "`$actualField`";
@@ -178,13 +168,13 @@ try {
                   FROM search";
     } else if ($type === 'PULSE') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
-                  search.x_diff_rbe, search.x_diff_rbk, search.y_diff_gpe, search.y_diff_rbe, 
-                  search.y_diff_rbk, search.MERR, search.BIGO
+                  search.RISE, search.APEX, search.DIFF, search.DEG, 
+                  search.RATE, search.MERR, search.BIGO
                   FROM search";
     } else if ($type === 'NPULSE') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 
-                  search.x_diff_rbe, search.x_diff_rbk, search.y_diff_gpe, search.y_diff_rbe, 
-                  search.y_diff_rbk, search.MERR, search.BIGO
+                  search.RISE, search.APEX, search.DIFF, search.DEG, 
+                  search.RATE, search.MERR, search.BIGO
                   FROM search";
     } else if ($type === 'CALIB') {
         $query = "SELECT DISTINCT search.NO, search.DATE, search.hzFROM, search.hzTO, 

@@ -635,11 +635,11 @@ function updateTable(value) {
         <th>시간</th>
         <th>Hz</th>
         <th>peak</th>
-        <th>x_diff_rbe</th>
-        <th>x_diff_rbk</th>
-        <th>y_diff_gpe</th>
-        <th>y_diff_rbe</th>
-        <th>y_diff_rbk</th>
+        <th>RISE</th>
+        <th>APEX</th>
+        <th>DIFF</th>
+        <th>DEG</th>
+        <th>RATE</th>
         <th>Err</th>
         <th>Note</th>
       </tr>
@@ -653,11 +653,11 @@ function updateTable(value) {
         <th>시간</th>
         <th>Hz</th>
         <th>peak</th>
-        <th>x_diff_rbe</th>
-        <th>x_diff_rbk</th>
-        <th>y_diff_gpe</th>
-        <th>y_diff_rbe</th>
-        <th>y_diff_rbk</th>
+        <th>RISE</th>
+        <th>APEX</th>
+        <th>DIFF</th>
+        <th>DEG</th>
+        <th>RATE</th>
         <th>Err</th>
         <th>Note</th>
       </tr>
@@ -1830,11 +1830,11 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
           <td>${row.hzTO || ""}</td>
-          <td>${row.x_diff_rbe || ""}</td>
-          <td>${row.x_diff_rbk || ""}</td>
-          <td>${row.y_diff_gpe || ""}</td>
-          <td>${row.y_diff_rbe || ""}</td>
-          <td>${row.y_diff_rbk || ""}</td>
+          <td>${row.RISE != null ? row.RISE : ""}</td>
+          <td>${row.APEX != null ? row.APEX : ""}</td>
+          <td>${row.DIFF != null ? row.DIFF : ""}</td>
+          <td>${row.DEG != null ? row.DEG : ""}</td>
+          <td>${row.RATE != null ? row.RATE : ""}</td>
           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
@@ -1843,11 +1843,11 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
           <td>${row.hzTO || ""}</td>
-          <td>${row.x_diff_rbe || ""}</td>
-          <td>${row.x_diff_rbk || ""}</td>
-          <td>${row.y_diff_gpe || ""}</td>
-          <td>${row.y_diff_rbe || ""}</td>
-          <td>${row.y_diff_rbk || ""}</td>
+          <td>${row.RISE != null ? row.RISE : ""}</td>
+          <td>${row.APEX != null ? row.APEX : ""}</td>
+          <td>${row.DIFF != null ? row.DIFF : ""}</td>
+          <td>${row.DEG != null ? row.DEG : ""}</td>
+          <td>${row.RATE != null ? row.RATE : ""}</td>
            <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
@@ -1953,8 +1953,7 @@ export function displayResults(results, currentPage, totalRows, type) {
                   requestAnimationFrame(() => {
                     applyDisabledLabels(graphElement.uplot, disabledLabels);
                   });
-                } 
-                else if (viewMode === "overlay") {
+                } else if (viewMode === "overlay") {
                   const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
                   graphElement.fullpaths = fullpaths;
                   graphElement.destroyPlot();
