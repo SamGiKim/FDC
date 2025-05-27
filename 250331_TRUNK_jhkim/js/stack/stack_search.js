@@ -401,7 +401,7 @@ async function loadInitialData() {
       updateSearchFields(type);
       
       // 여기에 체크박스 초기화 코드 추가
-      initCheckboxStateAndSelectAll(true);
+      initCheckboxStateAndSelectAll(false);
       
       // URL 파라미터가 있으면 데이터 로드
       const urlParams = new URLSearchParams(window.location.search);
@@ -465,7 +465,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     isInitializingCheckboxes = true;
 
     // 체크박스 초기화
-    initCheckboxStateAndSelectAll(true);
+    initCheckboxStateAndSelectAll(false);
     isInitializingCheckboxes = false;
 
     // 파일 업로드 성공 이벤트 리스너 추가
@@ -804,8 +804,9 @@ function updateSearchFields(type) {
   const stackDataMngHeadElement = document.getElementById("stack-data-mng-head");
   const bookmarkTabContainer = document.getElementById("bookmark-tab");
   const checkboxes = document.querySelectorAll('input[name="viewMode"]');
+  const rangeBtn = document.getElementById("rangeSelectBtn");
 
- // PULSE, NPULSE 체크박스 단일 체크 이벤트 리스너
+ // PULSE, NPULSE 체크박스 단일 체크, overlay 체크 시 범위 설정 보이기
 checkboxes.forEach((cb) => {
   cb.addEventListener('change', (e) => {
     if (e.target.checked) {
@@ -815,6 +816,8 @@ checkboxes.forEach((cb) => {
     } else {
       e.target.checked = true;
     }
+    const isOverlaySelected = document.querySelector('input[name="viewMode"][value="overlay"]').checked;
+    rangeBtn.style.display = isOverlaySelected ? 'flex' : 'none';
   });
 });
 
@@ -842,7 +845,7 @@ if (bookmarkTabContainer) {
         currentBookmarkId = bookmarkId;
         filterDataByBookmark(bookmarkId).then(() => {
         // 북마크 데이터 로드 후 체크박스 초기화
-        initCheckboxStateAndSelectAll(true); // 체크박스 선택 해제
+        initCheckboxStateAndSelectAll(false); // 체크박스 선택 해제
         });
       }
     }
@@ -906,7 +909,7 @@ document.addEventListener('change', function(e) {
       // 현재 검색 조건 유지하여 전체 데이터 검색
       searchWithData(currentSearchConditions).then(() => {
         // 체크박스 상태 초기화
-        initCheckboxStateAndSelectAll(true);
+        initCheckboxStateAndSelectAll(false);
       });
     });
   }
@@ -942,7 +945,7 @@ document.addEventListener('change', function(e) {
 
     // 초기 로드 시 검색 조건에 따라 검색 실행
     searchWithData(searchConditions).then(() => {
-      initCheckboxStateAndSelectAll();
+      initCheckboxStateAndSelectAll(false);
       updateSelectedCount();
     });
   }
@@ -1105,7 +1108,7 @@ document
     resetSearchConditions(); // 검색 조건 초기화 함수 호출
     searchWithData({}).then(() => {
       // 체크박스 상태 초기화
-      initCheckboxStateAndSelectAll(true);
+      initCheckboxStateAndSelectAll(false);
       // 선택된 항목 수 업데이트
       updateSelectedCount();
       // 삭제 버튼 상태 업데이트
@@ -1617,7 +1620,172 @@ export function filterDataByBookmark(bookmarkId, page = 1, searchConditions = {}
     }
   });
 }
+/////////////////////////////////////////////////////////////////////////////////////
+// 라벨 기본 이름을 추출
+function extractBaseLabel(label) {
+  return label.replace(/\s+\d+$/, ''); // 뒤에 붙은 번호는 제거하고 라벨명만 추출
+}
 
+// 비활성화된 시리즈의 라벨을 수집
+function getDisabledLabels(uplot) {
+  const disabled = new Set();
+  if (uplot && uplot.series) {
+    uplot.series.forEach((s, i) => {
+      if (s.label && s.show === false) {
+        disabled.add(extractBaseLabel(s.label));
+      }
+    });
+  }
+  return disabled;
+}
+
+// 비활성화 된 라벨 다시 비활성화
+function applyDisabledLabels(uplot, disabledLabels) {
+  if (!uplot || !uplot.series) return;
+  uplot.series.forEach((s, i) => {
+    if (s.label && disabledLabels.has(extractBaseLabel(s.label))) {
+      uplot.setSeries(i, { show: false });
+    }
+  });
+}
+
+// 선택한 두 시작점을 기준으로 데이터를 정렬해 모달에 비교 그래프 표시
+function showModalWithGraph(startPoints, endPoints, uplot) {
+  const modal = document.getElementById("dataModal");
+  const graphContainer = document.getElementById("modalGraph");
+  modal.style.display = "block";
+  graphContainer.innerHTML = "";
+
+  if (startPoints.length === 2 && (!endPoints || endPoints.length === 0)) {
+    const [pt1, pt2] = startPoints;
+
+    // 각 시작점이 어떤 차트에 속하는지 인덱스를 찾음
+    const seriesIdx1 = uplot.series.findIndex(s => s.label === pt1.label);
+    const seriesIdx2 = uplot.series.findIndex(s => s.label === pt2.label);
+
+    if (seriesIdx1 === -1 || seriesIdx2 === -1) {
+      console.error("Series label not found.");
+      return;
+    }
+
+    const xData = uplot.data[0];  // 공통 x축 데이터
+    const yData1 = uplot.data[seriesIdx1];
+    const yData2 = uplot.data[seriesIdx2];
+
+    const startIdx1 = xData.findIndex(x => x >= pt1.x);
+    const startIdx2 = xData.findIndex(x => x >= pt2.x);
+
+    // 최소 길이만큼만 잘라냄
+    const maxLen = Math.min(xData.length - startIdx1, xData.length - startIdx2);
+
+    const commonX = xData.slice(startIdx1, startIdx1 + maxLen);
+    const y1 = yData1.slice(startIdx1, startIdx1 + maxLen);
+    const y2 = yData2.slice(startIdx2, startIdx2 + maxLen);
+
+    // pt2의 y 차트를 pt1에 맞춰 y축 이동
+    const y2Shifted = y2.map(y => y + (pt1.y - pt2.y));
+
+    // 동적으로 y축 레이블 설정
+    const yAxisLabel = extractBaseLabel(pt1.label || "Voltage");
+    new uPlot({
+      title: "시작점 기준 비교 (공통 x축)",
+      width: 800,
+      height: 600,
+      series: [
+        { label: "Time" },
+        { label: pt1.label, stroke: "red", width: 2 },
+        { label: pt2.label, stroke: "blue", width: 2 },
+      ],
+      scales: { x: { time: false } },
+      axes: [
+        { label: "Time", scale: "x", values: (u, ticks) => ticks.map(v => v.toFixed(3)) },
+        { label: yAxisLabel },
+      ]
+    }, [commonX, y1, y2Shifted], graphContainer);
+  }
+  document.getElementById("closeModalBtn").onclick = () => {
+    modal.style.display = "none";
+    graphContainer.innerHTML = "";
+  };
+}
+
+function getClickPosition(e, uplot) {
+  const rect = uplot.root.querySelector(".u-over").getBoundingClientRect();
+  const xPos = e.clientX - rect.left;
+  const yPos = e.clientY - rect.top;
+  const xVal = uplot.posToVal(xPos, "x");
+  return { xVal, yPos };
+}
+
+// 마우스 클릭한 위치의 x값을 찾는 함수
+function findClosestXIdx(xVal, dataX) {
+  let closestIdx = 0;
+  let minDiff = Infinity;
+  for (let i = 0; i < dataX.length; i++) {
+    const diff = Math.abs(dataX[i] - xVal);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestIdx = i;
+    }
+  }
+  return closestIdx;
+}
+
+// 마우스 클릭한 위치 가장 가까운 시리즈(그래프)를 찾는 함수
+function findClosestSeries(uplot, closestIdx, yPos) {
+  let selectedSeries = null;
+  let closestYValDiff = Infinity;
+  for (let i = 1; i < uplot.data.length; i++) {
+    const seriesOpts = uplot.series[i];
+    if (!seriesOpts.show) continue;
+    const yVal = uplot.data[i][closestIdx];
+    if (yVal == null) continue;
+    const scaleKey = uplot.series[i].scale || "A";
+    const yPix = uplot.valToPos(yVal, scaleKey);
+    const yDiff = Math.abs(yPix - yPos);
+    if (yDiff < closestYValDiff) {
+      closestYValDiff = yDiff;
+      selectedSeries = i;
+    }
+  }
+  return selectedSeries;
+}
+
+const state = {
+  selecting: false,
+  startPoints: [],
+};
+
+document.getElementById("rangeSelectBtn").addEventListener("click", () => {
+  state.selecting = true;
+  state.startPoints = [];
+  alert("시작점 2개를 선택하세요.");
+});
+
+
+// Overlay 메인 클릭 이벤트 핸들러
+function overlayClick(e, uplot, state) {
+  if (!state.selecting) return;
+
+  const { xVal, yPos } = getClickPosition(e, uplot);
+  const closestIdx = findClosestXIdx(xVal, uplot.data[0]);
+  const selectedSeries = findClosestSeries(uplot, closestIdx, yPos);
+
+  if (selectedSeries !== null) {
+    const actualX = uplot.data[0][closestIdx];
+    const actualY = uplot.data[selectedSeries][closestIdx];
+    const label = uplot.series[selectedSeries].label;
+
+    const point = { x: actualX, y: actualY, label, idx: closestIdx };
+    state.startPoints.push(point);
+
+    if (state.startPoints.length === 2) {
+      state.selecting = false;
+      showModalWithGraph(state.startPoints, [], uplot);
+      state.startPoints = [];
+    }
+  }
+}
 
 // 북마크 아닌 전체 데이터에서 결과를 표시하는 함수
 export function displayResults(results, currentPage, totalRows, type) {
@@ -1714,11 +1882,6 @@ export function displayResults(results, currentPage, totalRows, type) {
               updateSelectedCount();
             } else {
               try {
-                await deleteSelectedFile(no);
-                if (typeof window.clear_graph === 'function') {
-                  window.clear_graph();
-                }
-      
                 const checkedBoxes = document.querySelectorAll(
                   'input[type="checkbox"][name="search-checkbox"]:checked'
                 );
@@ -1754,7 +1917,6 @@ export function displayResults(results, currentPage, totalRows, type) {
       
               if (graphElement) {
                 graphElement.setViewMode(viewMode);
-                
                 if (viewMode === "single") {
                   document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')
                     .forEach(cb => {
@@ -1778,15 +1940,40 @@ export function displayResults(results, currentPage, totalRows, type) {
                     return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
                            new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
                   });
+                
+                  // 기존에 비활성화된 시리즈 라벨을 저장
+                  const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
+                
                   graphElement.fullpaths = fullpaths;
                   graphElement.destroyPlot();
                   graphElement.init_DOM();
                   await graphElement.init_data();
-                } else if (viewMode === "overlay") {
+                
+                  // 새로 그린 그래프에 비활성화 상태를 복원
+                  requestAnimationFrame(() => {
+                    applyDisabledLabels(graphElement.uplot, disabledLabels);
+                  });
+                } 
+                else if (viewMode === "overlay") {
+                  const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
                   graphElement.fullpaths = fullpaths;
                   graphElement.destroyPlot();
                   graphElement.init_DOM();
                   await graphElement.init_data();
+                  requestAnimationFrame(() => {
+                    applyDisabledLabels(graphElement.uplot, disabledLabels);
+                  });
+                
+                  // overlay 클릭 이벤트 설정
+                  const uplot = graphElement.uplot;
+                  if (uplot && uplot.root) {
+                    const overlay = uplot.root.querySelector(".u-over");
+                    if (overlay) {
+                      overlay.addEventListener("click", (e) => overlayClick(e, uplot, state));
+                    } else {
+                      console.warn("uPlot 내부에 overlay 요소를 찾을 수 없습니다.");
+                    }
+                  }
                 }
               } else {
                 console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
@@ -1827,7 +2014,6 @@ export function displayResults(results, currentPage, totalRows, type) {
                     updateBigoInDatabase(no, newValue);
                 }
             });
-    
             this.textContent = '';
             this.appendChild(input);
             input.focus();
@@ -1836,7 +2022,6 @@ export function displayResults(results, currentPage, totalRows, type) {
       tbody.appendChild(tr);
     });
   }
-
 
   // 항목갯수 동적으로 변경
   const countSelectedDiv = document.getElementById("count-selected");
@@ -1855,8 +2040,6 @@ export function displayResults(results, currentPage, totalRows, type) {
   // 결과 표시 후 체크박스 상태 업데이트
   updateCheckboxesAfterSearch();
 }
-// console.log("displayResults 끝");
-
   
 /////////////////////////////////////////////////////////////////////////////
 // 에러코드 표에서 더블 클릭해서 드롭다운으로 수정 가능하게

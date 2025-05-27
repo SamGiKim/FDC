@@ -5880,9 +5880,9 @@ function optsOverlay(numSets) {
             { scale: "A", side: 1, size: 70, grid: { show: false } }
         ],
         scales: {
-            x: { time: false, distr: 2 },
-            V: { range: (u, min, max) => [min, max] },
-            A: { range: (u, min, max) => [min, max] }
+            x: { time: false, distr: 1 },
+            V: { range: (u, min, max) => [Math.min(min, max), Math.max(min, max)] },
+            A: { range: (u, min, max) => [Math.min(min, max), Math.max(min, max)] }
         },
         legend: {
             show: true,
@@ -5899,6 +5899,8 @@ function optsOverlay(numSets) {
 //     }
 //   }
   
+
+
 
 /* -------------------------------------------------------------------------- */
 /*                          CLASS FOR CUSTOM ELEMENT                          */
@@ -5967,7 +5969,6 @@ class PulseGraphInStack extends HTMLElement {
         `;
         this.appendChild(loadingIndicator);  
         this.custom_element = PulseGraph();
-        this.custom_element.style.overflowY = "auto";
         van.add(this, this.custom_element);
         console.log("opts().width:", opts().width);
         if (this.viewMode === 'overlay') {
@@ -6114,9 +6115,6 @@ class PulseGraphInStack extends HTMLElement {
         }
     }
 }
-
-
-
 
 // >>> 241128 hjkim - Bode 그래프 추가
 class BodeGraphInStack extends HTMLElement {
