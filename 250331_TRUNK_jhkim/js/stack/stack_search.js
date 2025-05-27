@@ -3056,7 +3056,6 @@ async function handleDateCellClick(event) {
   }
 }
 
-// 개별 날짜 td 클릭시 그래프 그리는 기능(DOM로드시 실행되도록 적어줄 것)
 // 날짜 셀 클릭 이벤트 핸들러 설정 함수
 function dateCellClickHandler(tableBody) {
   if (!tableBody) {
@@ -3232,28 +3231,6 @@ function getColorByMERR(errCode) {
       '31': '#00A300'    //정상복귀
   };
   return colorMap[errCode] || '#06D001'; // 매핑되지 않은 코드는 기본값으로 초록색 반환
-}
-
-function saveMaxValueToFile(maxValueString) {
-  console.log(`Original max value string: ${maxValueString}`); // 원본 문자열 로그
-  const cleanedValue = maxValueString.replace(/MaxValue\s*=\s*/, "");
-  console.log(`Cleaned max value string: ${cleanedValue}`); // 정제된 문자열 로그
-
-  const xhr = new XMLHttpRequest();
-  const url = "js/stack/saveMaxValue.php";
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xhr.onload = function () {
-    if (this.status === 200) {
-      console.log("Max value saved:", this.responseText);
-    } else {
-      console.error("Failed to save max value:", this.status);
-    }
-  };
-  xhr.onerror = function () {
-    console.error("Request error:", this.status);
-  };
-  xhr.send(`maxValue=${encodeURIComponent(cleanedValue)}`);
 }
 
 // 라벨 입력 필드에 대한 엔터 키 이벤트 리스너 추가(엔터 치면 수정사항 저장되도록)

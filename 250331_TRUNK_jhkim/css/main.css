@@ -2361,17 +2361,13 @@ main.stack {
   }
   .widget.diagnosis-log .table td:nth-child(1),
   .widget.diagnosis-log .table th:nth-child(1) {
-    width: 26px;
-  }
-  .widget.diagnosis-log .table td:nth-child(2),
-  .widget.diagnosis-log .table th:nth-child(2) {
-    width: calc(50% - 26px);
+    width: 50%;
     text-align: center;
     white-space: normal;
     text-overflow: ellipsis;
   }
-  .widget.diagnosis-log .table td:nth-child(3),
-  .widget.diagnosis-log .table th:nth-child(3) {
+  .widget.diagnosis-log .table td:nth-child(2),
+  .widget.diagnosis-log .table th:nth-child(2) {
     width: 50%;
     white-space: normal;
     text-overflow: ellipsis;
