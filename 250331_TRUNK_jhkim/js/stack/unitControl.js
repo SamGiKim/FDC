@@ -236,7 +236,7 @@ export class UnitControl {
 }
 
     // 전체 데이터를 console-section에 표시
-   this.updateConsoleSection(statusResult.data);
+    this.updateConsoleSection(statusResult.data);
 
     // STATUS 값을 HTML에 업데이트
     const status = data.STATUS;
