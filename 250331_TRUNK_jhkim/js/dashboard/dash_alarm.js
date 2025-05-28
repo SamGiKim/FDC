@@ -40,6 +40,8 @@ const AlarmManager = {
 
         const alarmCountSelect = document.getElementById('alarmCountSelect');
         alarmCountSelect.addEventListener('change', () => this.loadAlarmData());
+        const alarmTypeSelect = document.getElementById('alarmTypeSelect');
+        alarmTypeSelect.addEventListener('change', () => this.loadAlarmData());
     },
 
     toggleAllFilter: function() {
@@ -92,7 +94,9 @@ const AlarmManager = {
         try {
             const filters = this.currentFilters.join(',');
             const alarmCountSelect = document.getElementById('alarmCountSelect');
+            const alarmTypeSelect = document.getElementById('alarmTypeSelect');
             const limit = alarmCountSelect ? alarmCountSelect.value : 10;
+            const type = alarmTypeSelect ? alarmTypeSelect.value : 'BOP';
             
             // 현재 선택된 연료전지 정보 가져오기
             const selectedFuelcell = await getSelectedFuelcell();
@@ -108,6 +112,7 @@ const AlarmManager = {
             }
     
             const params = new URLSearchParams({
+                type: type,
                 filters: filters,
                 limit: limit.toString(),
                 fuelcellId: currentFuelcellData.fuelcell,
@@ -116,7 +121,6 @@ const AlarmManager = {
     
             const url = `js/dashboard/load_alarm.php?${params.toString()}`;
             console.log('Alarm URL:', url);
-    
             const response = await fetch(url);
             if (!response.ok) {
                 console.warn(`알람 데이터 로드 실패: ${response.status}`);

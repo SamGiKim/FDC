@@ -1510,7 +1510,7 @@
                 </div>
                 <div class="row">
                     <div class="col-xxl-6 order-2 order-xxl-1">
-                        <div class="widget alram-log">
+                        <div class="widget alram-log" id="alarm-container">
                             <div class="widget-head">
                                 <span data-i18n="dashboard.alarm_log"><!-- 알람로그 --></span>
                                 <div class="widget-head-gadget widget-head-gadget-alarm">
@@ -1527,6 +1527,11 @@
                                         <option value="20">20개</option>
                                         <option value="30">30개</option>
                                         <option value="40">40개</option>
+                                    </select>
+                                    <select id="alarmTypeSelect">
+                                        <option value="전체" selected>전체</option>
+                                        <option value="BOP">BOP</option>
+                                        <option value="EIS">EIS</option>
                                     </select>
                                     <!-- <span class="arrow-right-svg ic-font ic-font-m-t"></span> -->
                                 </div>
