@@ -21,7 +21,7 @@ async function loadAndDisplayDiagnosisData(page) {
     const selectedFuelcell = await getSelectedFuelcell();
     const currentFuelcellData = fuelcellConfig[selectedFuelcell];
     const limit = 1000; // 전체 불러온 뒤 페이지네이션 (혹은 page & limit 방식도 가능)
-    const type = 'BOP';
+    const type = 'EIS';
 
     const params = new URLSearchParams({
       type: type,
@@ -50,8 +50,7 @@ function displayData(page) {
 
   const pagedData = diagnosisData.slice(start, end);
 
-  pagedData.forEach((item, index) => {
-    const globalIndex = start + index;
+  pagedData.forEach((item) => {
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${formatDate(item.time)}</td>

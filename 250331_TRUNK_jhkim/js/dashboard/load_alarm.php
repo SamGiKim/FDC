@@ -20,10 +20,12 @@ try {
     $limit = isset($_GET['limit']) && $_GET['limit'] !== '전체' ? intval($_GET['limit']) : 0;
     $fuelcellId = isset($_GET['fuelcellId']) ? $_GET['fuelcellId'] : 'F002';
     $plant = isset($_GET['plant']) ? $_GET['plant'] : 'SE01';
+    $type = isset($_GET['type']) ? $_GET['type'] : 'BOP';
 
-    $sql = "SELECT id, powerplant_id, fuelcell_id, time, comment, status 
+    $sql = "SELECT id, powerplant_id, fuelcell_id, time, comment, status, type 
             FROM api_alarmlog 
-            WHERE powerplant_id = :plant 
+            WHERE type = :type
+            AND powerplant_id = :plant 
             AND fuelcell_id = :fuelcellId";
 
     if (!in_array('전항목', $filters)) {
@@ -43,6 +45,7 @@ try {
     // plant와 fuelcellId 모두 바인딩
     $stmt->bindParam(':plant', $plant, PDO::PARAM_STR);
     $stmt->bindParam(':fuelcellId', $fuelcellId, PDO::PARAM_STR);
+    $stmt->bindParam(':type', $type, PDO::PARAM_STR);
 
     // 필터 바인딩
     if (!in_array('전항목', $filters)) {

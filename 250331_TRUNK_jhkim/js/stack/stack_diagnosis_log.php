@@ -14,7 +14,7 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $type = $_GET['type'] ?? 'BOP';
+    $type = $_GET['type'] ?? 'EIS';
     $limit = isset($_GET['limit']) && $_GET['limit'] !== '전체' ? intval($_GET['limit']) : 0;
     $fuelcellId = $_GET['fuelcellId'] ?? '';
     $plant = $_GET['plant'] ?? '';
