@@ -93,7 +93,6 @@ const AlarmManager = {
             const filters = this.currentFilters.join(',');
             const alarmCountSelect = document.getElementById('alarmCountSelect');
             const limit = alarmCountSelect ? alarmCountSelect.value : 10;
-            const type = 'BOP';
             
             // 현재 선택된 연료전지 정보 가져오기
             const selectedFuelcell = await getSelectedFuelcell();
@@ -109,7 +108,6 @@ const AlarmManager = {
             }
     
             const params = new URLSearchParams({
-                type: type,
                 filters: filters,
                 limit: limit.toString(),
                 fuelcellId: currentFuelcellData.fuelcell,
