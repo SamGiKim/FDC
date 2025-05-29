@@ -30,7 +30,7 @@
   import FuelcellListManager from './js/index-front/fuelcell_list.js';
   window.FuelcellListManager = FuelcellListManager;
 </script>
-<script type="module" src="./js/index-front/event_list.js"></script><!--알람 로그-->
+<script type="module" src="./js/index-front/front_alarm.js"></script><!--알람 로그-->
 <script type="module" src="./js/index-front/status-filter.js"></script>
 <script type="module" src="./js/index-front/realtime_graph.js"></script><!--실시간 발전량 가동률-->
   <title>FuelCellDR. : 대시보드</title>
@@ -969,28 +969,30 @@
 
 
           <div class="col-xxl-12 col-12">
-            <div class="widget front-alram-log wh--1-5">
+            <div class="widget front-alram-log wh--1-5" id="alarm-container-front">
               <div class="widget-head">
-                <span data-i18n="dashboard.event_list">
-                    <!-- 알람 로그 -->
-                    <!-- Event List -->
-                </span>
+                <span data-i18n="dashboard.event_list"><!-- 알람 로그 --></span>
                 <div class="widget-head-gadget widget-head-gadget-alarm">
                   <button class="mini all-C">전항목</button>
-                  <div class="btn-wrapper" id="alarm-log-btn-wrapper">
+                  <div class="btn-wrapper">
                     <button class="mini normal-C">정상</button>
                     <button class="mini watchout-C">주의</button>
                     <button class="mini warning-C">경고</button>
                     <button class="mini critical-C">심각</button>
                     <button class="mini">정지</button>
                   </div>
-                  <select id="alarmCountSelect">
-                    <option value="전체" selected="selected">전체</option>
+                  <select id="alarmCountSelect-front">
+                    <option value="전체" selected>전체</option>
                     <option value="10">10개</option>
                     <option value="20">20개</option>
                     <option value="30">30개</option>
                     <option value="40">40개</option>
-                  </select>
+                </select>
+                  <select id="alarmTypeSelect-front">
+                    <option value="전체" selected>전체</option>
+                    <option value="BOP">BOP</option>
+                    <option value="EIS">EIS</option>
+                </select>
                   <!-- <span class="icon-arrow-right2"></span> -->
                 </div>
               </div>
@@ -1009,70 +1011,6 @@
                     </thead>
                     <!-- <tbody class="scrollmini" id="alarm-log"> -->
                       <tbody class="scrollmini overflow-y-scroll" id="index-front-alarm-log">
-                        <!-- <tr>
-                            <td><span class="date-div">2025-02-12</span>09:11:11</td>
-                            <td>성남그룹1</td>
-                            <td>성남1호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="normal-C">정상</td>
-                            <td><span class="float-end">22.5시간</span><button class="mini">미확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>10:21:09</td>
-                            <td>성남그룹1</td>
-                            <td>성남2호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="warning-C">경고</td>
-                            <td><span class="float-end">20.0시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>10:59:23</td>
-                            <td>성남그룹2</td>
-                            <td>성남3호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="watchout-C">주의</td>
-                            <td><span class="float-end">18.5시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>11:21:11</td>
-                            <td>성남그룹2</td>
-                            <td>성남4호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="normal-C">정상</td>
-                            <td><span class="float-end">15.0시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>11:41:11</td>
-                            <td>성남그룹3</td>
-                            <td>성남5호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="critical-C">심각</td>
-                            <td><span class="float-end">2.0시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>11:41:11</td>
-                            <td>성남그룹3</td>
-                            <td>성남6호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="normal-C">정상</td>
-                            <td><span class="float-end">3.50시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>11:41:11</td>
-                            <td>성남그룹4</td>
-                            <td>성남7호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="normal-C">정상</td>
-                            <td><span class="float-end">1.25시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr>
-                        <tr>
-                            <td><span class="date-div">2025-02-12</span>11:41:11</td>
-                            <td>성남그룹4</td>
-                            <td>성남8호</td>
-                            <td>스택 측정을 시작합니다</td>
-                            <td class="stop-C">정지</td>
-                            <td><span class="float-end">12.5시간</span><button class="mini" disabled="disabled">확인</button></td>
-                        </tr> -->
                     </tbody>
                   </table>
                 </div>
