@@ -25,6 +25,7 @@
   <script type="module" src="./js/stack/unitControl.js"></script> <!--유닛컨트롤-->
   <script type="module" src="./js/stack/search_updateEIS.js"></script> <!--스택 데이터 관리 업데이트 EIS 처리-->
   <script type="module" src="./js/stack/AVHA_state.js"></script> <!--전류/전압/수소/공기 현황-->
+  <script type="module" src="./js/stack/fuelcell_graph.js"></script> <!--연료 전지 진단-->
   <title>FuelCellDR. : 스택진단</title>
 </head>
 
@@ -693,49 +694,71 @@
               <div class="widget-body">
                 <div class="inner-content">
                   <div style="position: relative;">
-                    <div class="btn-wrapper" style="position: absolute; right:0; z-index: 1; padding: 4px">
-                      <button ontouchstart="zoom_in()" onclick="zoom_in()" class="btn-of ic-btn ic-zoom-in-1 w50px">
-                        <!-- <span class="icon-zoom-in"></span> -->
-                      </button>
-                      <button ontouchstart="zoom_out()" onclick="zoom_out()" class="btn-of ic-btn ic-zoom-out-1 w50px">
-                        <!-- <span class="icon-zoom-out"></span> -->
-                      </button>
-                      <select id="yearly">
-                        <option value="-1">-년 선택-</option>
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                      </select> <select id="monthly">
-                        <option value="-1">-월(11개)-</option>
-                        <option value="01/">01/</option>
-                        <option value="03/">03/</option>
-                        <option value="04/">04/</option>
-                        <option value="05">05</option>
-                        <option value="06">06</option>
-                        <option value="07">07</option>
-                        <option value="08">08</option>
-                        <option value="09">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                      </select> <select id="daily">
-                        <option value="-1">-일(10개)-</option>
-                        <option value="04/">04/</option>
-                        <option value="05/">05/</option>
-                        <option value="06/">06/</option>
-                        <option value="07/">07/</option>
-                        <option value="12/">12/</option>
-                        <option value="13/">13/</option>
-                        <option value="14/">14/</option>
-                        <option value="18/">18/</option>
-                        <option value="19/">19/</option>
-                        <option value="20/">20/</option>
-                      </select><select id="timely">
-                        <option value="-1">-시(4개)-</option>
-                        <option value="1_20231220.csv">1_20231220.csv</option>
-                        <option value="1_20231220_ma.csv">1_20231220_ma.csv</option>
-                        <option value="2_20231220.csv">2_20231220.csv</option>
-                        <option value="2_20231220_ma.csv" selected="">2_20231220_ma.csv</option>
-                      </select>
+                    <button class="btn-of" id="fuelcell-modal-btn">modal</button>
+                    <div id="fuelcell-modal" style="display:none; position:fixed; top:0; left:0; 
+                      width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10000;">
+                      <div style="position:relative; margin:10% auto; background:#fff; width:900px; height:600px; padding:20px;">
+                        <div id="modal-fuelcell-graph" style="width:100%; height:400px;"></div>
+                        <div style="position: absolute; right: 20px; bottom: 20px; display: flex; gap: 8px; align-items: flex-end;">
+                          <select id="yearly">
+                            <option value="-1">-년 선택-</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                          </select> 
+                          <select id="monthly">
+                            <option value="-1">-월(12개)-</option>
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                          </select> 
+                          <select id="daily">
+                            <option value="-1">-일(31개)-</option>
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                          </select>
+                          <button class="btn-of" id="fuelcell-closeModalBtn">닫기</button>
+                        </div>
+                        <div id="fuelcell-graph"></div>
+                      </div>
                     </div>
                   </div>
                   <div class="row">

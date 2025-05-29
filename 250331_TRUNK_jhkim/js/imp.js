@@ -113,12 +113,10 @@ if(typeof TITLE !== "undefined" && TITLE.includes("스택진단")) {
         g_el.hz_graph_result.remove();
         
         // >>> 캘린덱스를 스택, 암페어 필터로 전환이용
-        g_el.fullcell_graph_calendex.querySelector("button").remove();
-        g_el.fullcell_graph_calendex.querySelector("button").remove();
-        // console.log("imp.js / yearly : ", g_el.yearly);
-        // console.log("imp.js / monthly : ", g_el.monthly);
-        g_el.fullcell_graph_calendex.querySelector("#daily").remove();
-        g_el.fullcell_graph_calendex.querySelector("#timely").remove();
+        // g_el.fullcell_graph_calendex.querySelector("button").remove();
+        // g_el.fullcell_graph_calendex.querySelector("button").remove();
+        // g_el.fullcell_graph_calendex.querySelector("#daily").remove();
+        // g_el.fullcell_graph_calendex.querySelector("#timely").remove();
         // <<< 캘린덱스를 스택, 암페어 필터로 전환이용
         
         // 그래프 그릴 자리 마련
@@ -227,43 +225,16 @@ if(typeof TITLE !== "undefined" && TITLE.includes("스택진단")) {
 /* -------------------------------------------------------------------------- */
 /*                      워커 쓰레드와 데이터 송수신                           */
 /* -------------------------------------------------------------------------- */
-function _selectbox_wait(onoff        ) {
-    if(onoff == true) {
-        g_el.yearly.setAttribute("disabled",  true);
-        g_el.monthly.setAttribute("disabled", true);
-    } else {
-        g_el.yearly.removeAttribute("disabled");
-        g_el.monthly.removeAttribute("disabled");
-    }
-}
-var init_stack_change_handler_once = false;
-function init_stack_change_handler() {
-    if(init_stack_change_handler_once) return;
-    init_stack_change_handler_once = true;
-    g_el.yearly.addEventListener("change", (e) => {
-        const selected = e.target.value;
-        // 
-        _selectbox_wait(true);
-        const _url = `/ALL/data/impedance/${g_el.yearly.value}/${g_el.monthly.value}`.replaceAll("//", "/");
-        console.log("imp.js / _url : ", _url);
-        channel2.port2.postMessage({ msg: "HZ_DATAFETCH", response_msg: ["UPDATE_DEFAULT_UPLOTOPT", "DRAW_HZDATA"], 
-        url: _url});
-    });
-}
-var init_amp_eventhandler_once = false;
-function init_amp_eventhandler() {
-    if(init_amp_eventhandler_once) return;
-    init_amp_eventhandler_once = true;
-    g_el.monthly.addEventListener("change", (e) => {
-        const selected = e.target.value;
-        // 
-        _selectbox_wait(true);
-        const _url = `/ALL/data/impedance/${g_el.yearly.value}/${g_el.monthly.value}`.replaceAll("//", "/");
-        console.log("imp.js / _url : ", _url);
-        channel2.port2.postMessage({ msg: "HZ_DATAFETCH", response_msg: ["UPDATE_DEFAULT_UPLOTOPT", "DRAW_HZDATA"], 
-        url: _url});
-    });
-}
+// function _selectbox_wait(onoff        ) {
+//     if(onoff == true) {
+//         g_el.yearly.setAttribute("disabled",  true);
+//         g_el.monthly.setAttribute("disabled", true);
+//     } else {
+//         g_el.yearly.removeAttribute("disabled");
+//         g_el.monthly.removeAttribute("disabled");
+//     }
+// }
+
 // >>> 240321 hjkim - 스택 상태 그래프
 // >>> 240613 hjkim - Best Fit
 var get_best_fit_cnt = 0;
@@ -458,34 +429,6 @@ channel2.port2.onmessage = (e) => {
             xsxe_ysye__scope.set_ys(e.data.zxy_axis_min[2]);
             xsxe_ysye__scope.set_ye(e.data.zxy_axis_max[2]);
         break;
-        case "STACK_LIST":
-            var list = e.data.list;
-            var _html = "<select>";
-            var selected = "";
-            list.map(value => {
-                if(value.includes("stk2")) selected = "selected";
-                _html+= `<option value="${value}" ${selected}>${value}</option>`;
-            });
-            _html+= "</select>";
-            g_el.yearly.innerHTML = _html;
-            // 이벤트 핸들러 바인딩
-            setTimeout(init_stack_change_handler, 10);
-            channel2.port2.postMessage({ msg: "GET_LIST", response_msg: ["STACK_LIST", "AMP_LIST"],
-            url: `/ALL/data/impedance/${list[0]}`, word: "A"});
-        break;
-        case "AMP_LIST":
-            var list = e.data.list;
-            var _html = "<select>";
-            var selected = "";
-            list.map(value => {
-                if(value.includes("40A")) selected = "selected";
-                _html+= `<option value="${value}" ${selected}>${value}</option>`;
-            });
-            _html+= "</select>";
-            g_el.monthly.innerHTML = _html;
-            // 이벤트 핸들러 바인딩
-            setTimeout(init_amp_eventhandler, 10);
-        break;
         case "UPDATE_DEFAULT_UPLOTOPT":
             var uplotopt_series = e.data.uplotopt_series;
             for(var i = 0; i < uplotopt_series.length; i++) {
@@ -504,7 +447,7 @@ channel2.port2.onmessage = (e) => {
             const uplotdata = e.data.uplotdata;
             window.uplotdata = uplotdata;
             retry(`window.uplot_default_opt != null &&  window.uplotdata != null && window.uplot_placeholder != null`, 500, 10, () => {
-                _selectbox_wait(false);
+                // _selectbox_wait(false);
                 if(g_el.uplot == undefined) g_el.uplot = new uPlot(window.uplot_default_opt, window.uplotdata, window.uplot_placeholder)
             });
         break;
@@ -534,9 +477,6 @@ if(TITLE.includes("스택진단")) {
     }
     // <<< 250214 hjkim - stime을 파라미터로 달고 넘어 올 경우, /recent/ 여러개 그리기 생략
 
-    channel2.port2.postMessage({ msg: "GET_LIST", response_msg: ["STACK_LIST", "AMP_LIST"],
-        url: "/ALL/data/impedance/", word: "stk"});
-    _selectbox_wait(true);
     channel2.port2.postMessage({ msg: "HZ_DATAFETCH", response_msg: ["UPDATE_DEFAULT_UPLOTOPT", "DRAW_HZDATA"],
         url: "/ALL/data/impedance/stk2/40A/"});
 }

@@ -1787,6 +1787,11 @@ function overlayClick(e, uplot, state) {
   }
 }
 
+// 소수점 2자리까지 보여주기 위한 함수
+function formatNumber(val) {
+  return val != null ? parseFloat(val).toFixed(2) : ""; // null 처리 포함
+}
+
 // 북마크 아닌 전체 데이터에서 결과를 표시하는 함수
 export function displayResults(results, currentPage, totalRows, type) {
   
@@ -1830,11 +1835,11 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
           <td>${row.hzTO || ""}</td>
-          <td>${row.RISE != null ? row.RISE : ""}</td>
-          <td>${row.APEX != null ? row.APEX : ""}</td>
-          <td>${row.DIFF != null ? row.DIFF : ""}</td>
-          <td>${row.DEG != null ? row.DEG : ""}</td>
-          <td>${row.RATE != null ? row.RATE : ""}</td>
+          <td>${formatNumber(row.RISE)}</td>
+          <td>${formatNumber(row.APEX)}</td>
+          <td>${formatNumber(row.DIFF)}</td>
+          <td>${formatNumber(row.DEG)}</td>
+          <td>${formatNumber(row.RATE)}</td>
           <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
@@ -1843,11 +1848,11 @@ export function displayResults(results, currentPage, totalRows, type) {
           <td class="date-cell" data-no="${row.NO}" data-err="${row.MERR || ''}" style="cursor: pointer">${row.DATE || ""}</td>
           <td>${row.hzFROM || ""}</td>
           <td>${row.hzTO || ""}</td>
-          <td>${row.RISE != null ? row.RISE : ""}</td>
-          <td>${row.APEX != null ? row.APEX : ""}</td>
-          <td>${row.DIFF != null ? row.DIFF : ""}</td>
-          <td>${row.DEG != null ? row.DEG : ""}</td>
-          <td>${row.RATE != null ? row.RATE : ""}</td>
+          <td>${formatNumber(row.RISE)}</td>
+          <td>${formatNumber(row.APEX)}</td>
+          <td>${formatNumber(row.DIFF)}</td>
+          <td>${formatNumber(row.DEG)}</td>
+          <td>${formatNumber(row.RATE)}</td>
            <td class="merr-cell" title="${formatErrorCode(row.MERR) || ""}">${formatErrorCode(row.MERR) || ""}</td>
           <td class="bigo-cell" data-no="${row.NO}" title="${row.LABEL || ''}">${row.BIGO || ''}</td>
         `;
