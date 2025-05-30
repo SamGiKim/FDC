@@ -1787,6 +1787,143 @@ function overlayClick(e, uplot, state) {
   }
 }
 
+async function pulseDateCellClick(dateCell, type, state) {
+  const no = dateCell.getAttribute('data-no');
+  console.log('Clicked cell NO:', no);
+
+  if (type === 'PULSE' || type === 'NPULSE') {
+    const row = dateCell.closest('tr');
+    const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
+    const graphBtn = document.getElementById('graph-btn');
+
+    if (checkbox && graphBtn) {
+      const isCurrentlyChecked = checkbox.checked;
+      checkbox.checked = !isCurrentlyChecked;
+
+      if (!isCurrentlyChecked) {
+        updateSelectedCount();
+      } else {
+        try {
+          const response = await fetch(`js/stack/get_pulse_name.php?no=${no}&type=${type}`);
+          const data = await response.json();
+      
+          if (data.name) {
+            // 세션스토리지에서 선택 목록 불러오기
+            const savedStr = sessionStorage.getItem('selectedFullpaths');
+            let saved = savedStr ? JSON.parse(savedStr) : [];
+            // 선택 목록에서 현재 해제된 fullpath 제거
+            saved = saved.filter(path => path !== data.name);
+            sessionStorage.setItem('selectedFullpaths', JSON.stringify(saved));
+          }
+      
+          const checkedBoxes = document.querySelectorAll(
+            'input[type="checkbox"][name="search-checkbox"]:checked'
+          );
+          if (checkedBoxes.length > 0) {
+            graphBtn.click();
+          }
+          updateSelectedCount();
+        } catch (error) {
+          console.error('체크박스 해제 중 오류:', error);
+          checkbox.checked = true;
+        }
+      }      
+    }
+    try {
+      const selectedItems = Array.from(document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')).map(cb => {
+        return {
+          no: cb.getAttribute('data-no'),
+          type: cb.getAttribute('data-type')
+        };
+      });
+
+      const fullpaths = [];
+      for (const checkedItem of selectedItems) {
+        const response = await fetch(`js/stack/get_pulse_name.php?no=${checkedItem.no}&type=${checkedItem.type}`);
+        const data = await response.json();
+        if (data.name) fullpaths.push(data.name);
+      }
+
+      if (fullpaths.length > 0) {
+        const graphElement = document.querySelector("pulse-graph-in-stack");
+        const viewMode = document.querySelector('input[name="viewMode"]:checked')?.value || "single";
+        if (graphElement) {
+          graphElement.setViewMode(viewMode);
+          if (viewMode === "single") {
+            document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')
+              .forEach(cb => {
+                if (cb !== checkbox) cb.checked = false;
+              });
+            checkbox.checked = true;
+            updateSelectedCount();
+            const latestChecked = selectedItems[selectedItems.length - 1];
+            const response = await fetch(`js/stack/get_pulse_name.php?no=${latestChecked.no}&type=${latestChecked.type}`);
+            const data = await response.json();
+            if (data.name) {
+              graphElement.fullpaths = [data.name];
+              graphElement.destroyPlot();
+              graphElement.init_DOM();
+              await graphElement.init_data();
+            }
+          } else if (viewMode === "timeseries") {
+            // 기존 저장 불러오기
+            const savedStr = sessionStorage.getItem('selectedFullpaths');
+            const saved = savedStr ? JSON.parse(savedStr) : [];
+
+            // 합치기 및 정렬
+            const mergedFullpaths = [...new Set([...saved, ...fullpaths])];
+            mergedFullpaths.sort((a, b) => {
+              const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
+              return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
+                     new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
+            });
+            const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
+            graphElement.fullpaths = mergedFullpaths;
+            sessionStorage.setItem('selectedFullpaths', JSON.stringify(mergedFullpaths));
+            graphElement.destroyPlot();
+            graphElement.init_DOM();
+            await graphElement.init_data();
+            requestAnimationFrame(() => {
+              applyDisabledLabels(graphElement.uplot, disabledLabels);
+            });
+
+          } else if (viewMode === "overlay") {
+            const savedStr = sessionStorage.getItem('selectedFullpaths');
+            const saved = savedStr ? JSON.parse(savedStr) : [];
+            const mergedFullpaths = [...new Set([...saved, ...fullpaths])];
+            const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
+
+            graphElement.fullpaths = mergedFullpaths;
+            sessionStorage.setItem('selectedFullpaths', JSON.stringify(mergedFullpaths));
+            graphElement.destroyPlot();
+            graphElement.init_DOM();
+            await graphElement.init_data();
+            requestAnimationFrame(() => {
+              applyDisabledLabels(graphElement.uplot, disabledLabels);
+            });
+
+            const uplot = graphElement.uplot;
+            if (uplot && uplot.root) {
+              const overlay = uplot.root.querySelector(".u-over");
+              if (overlay) {
+                overlay.addEventListener("click", (e) => overlayClick(e, uplot, state));
+              } else {
+                console.warn("uPlot 내부에 overlay 요소를 찾을 수 없습니다.");
+              }
+            }
+          }
+        } else {
+          console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      console.warn('그래프 데이터를 불러오는 중 오류 발생');
+    }
+  }
+}
+
+
 // 소수점 2자리까지 보여주기 위한 함수
 function formatNumber(val) {
   return val != null ? parseFloat(val).toFixed(2) : ""; // null 처리 포함
@@ -1870,125 +2007,7 @@ export function displayResults(results, currentPage, totalRows, type) {
 
       // date-cell 클릭 이벤트 추가
       const dateCell = tr.querySelector('.date-cell');
-      dateCell.addEventListener('click', async () => {
-        const no = dateCell.getAttribute('data-no');
-        console.log('Clicked cell NO:', no);
-      
-        if (type === 'PULSE' || type === 'NPULSE') {
-          const row = dateCell.closest('tr');
-          const checkbox = row.querySelector('input[type="checkbox"][name="search-checkbox"]');
-          const graphBtn = document.getElementById('graph-btn');
-      
-          if (checkbox && graphBtn) {
-            const isCurrentlyChecked = checkbox.checked;
-            checkbox.checked = !isCurrentlyChecked;
-      
-            if (!isCurrentlyChecked) {
-              updateSelectedCount();
-            } else {
-              try {
-                const checkedBoxes = document.querySelectorAll(
-                  'input[type="checkbox"][name="search-checkbox"]:checked'
-                );
-                if (checkedBoxes.length > 0) {
-                  graphBtn.click();
-                }
-                updateSelectedCount();
-              } catch (error) {
-                console.error('체크박스 해제 중 오류:', error);
-                checkbox.checked = true;
-              }
-            }
-          }
-      
-          try {
-            const selectedItems = Array.from(document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')).map(cb => {
-              return {
-                no: cb.getAttribute('data-no'),
-                type: cb.getAttribute('data-type')
-              };
-            });
-      
-            const fullpaths = [];
-            for (const checkedItem of selectedItems) {
-              const response = await fetch(`js/stack/get_pulse_name.php?no=${checkedItem.no}&type=${checkedItem.type}`);
-              const data = await response.json();
-              if (data.name) fullpaths.push(data.name);
-            }
-      
-            if (fullpaths.length > 0) {
-              const graphElement = document.querySelector("pulse-graph-in-stack");
-              const viewMode = document.querySelector('input[name="viewMode"]:checked')?.value || "single";
-      
-              if (graphElement) {
-                graphElement.setViewMode(viewMode);
-                if (viewMode === "single") {
-                  document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')
-                    .forEach(cb => {
-                      if (cb !== checkbox) cb.checked = false;
-                    });
-                  checkbox.checked = true;
-                  updateSelectedCount();
-                  const latestChecked = selectedItems[selectedItems.length - 1];
-                  const response = await fetch(`js/stack/get_pulse_name.php?no=${latestChecked.no}&type=${latestChecked.type}`);
-                  const data = await response.json();
-                  if (data.name) {
-                    graphElement.fullpaths = [data.name];
-                    graphElement.destroyPlot();
-                    graphElement.init_DOM();
-                    await graphElement.init_data();
-                  }
-                } else if (viewMode === "timeseries") {
-                  // 시간순 정렬
-                  fullpaths.sort((a, b) => {
-                    const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
-                    return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
-                           new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
-                  });
-                
-                  // 기존에 비활성화된 시리즈 라벨을 저장
-                  const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
-                
-                  graphElement.fullpaths = fullpaths;
-                  graphElement.destroyPlot();
-                  graphElement.init_DOM();
-                  await graphElement.init_data();
-                
-                  // 새로 그린 그래프에 비활성화 상태를 복원
-                  requestAnimationFrame(() => {
-                    applyDisabledLabels(graphElement.uplot, disabledLabels);
-                  });
-                } else if (viewMode === "overlay") {
-                  const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
-                  graphElement.fullpaths = fullpaths;
-                  graphElement.destroyPlot();
-                  graphElement.init_DOM();
-                  await graphElement.init_data();
-                  requestAnimationFrame(() => {
-                    applyDisabledLabels(graphElement.uplot, disabledLabels);
-                  });
-                
-                  // overlay 클릭 이벤트 설정
-                  const uplot = graphElement.uplot;
-                  if (uplot && uplot.root) {
-                    const overlay = uplot.root.querySelector(".u-over");
-                    if (overlay) {
-                      overlay.addEventListener("click", (e) => overlayClick(e, uplot, state));
-                    } else {
-                      console.warn("uPlot 내부에 overlay 요소를 찾을 수 없습니다.");
-                    }
-                  }
-                }
-              } else {
-                console.error("pulse-graph-in-stack 요소를 찾을 수 없습니다.");
-              }
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            console.warn('그래프 데이터를 불러오는 중 오류 발생');
-          }
-        }
-      });      
+      dateCell.addEventListener('click', () => pulseDateCellClick(dateCell, type, state));
 
       // MERR 셀에 더블클릭 이벤트 추가 (SIN, PULSE 모두 적용)
       const merrCell = tr.querySelector('.merr-cell');
@@ -3030,7 +3049,6 @@ async function handleDateCellClick(event) {
             const errCode = dateCell.getAttribute('data-err')?.split('.')[0];
             color = getColorByMERR(errCode) || '#06D001';
           }
-
           graphBtn.setAttribute("data-color", color);
           graphBtn.setAttribute("data-no", dataNo);
           graphBtn.click();
@@ -3039,7 +3057,7 @@ async function handleDateCellClick(event) {
           if (typeof window.clear_graph === 'function') {
             window.clear_graph();
           }
-          
+
           const checkedBoxes = document.querySelectorAll(
             'input[type="checkbox"][name="search-checkbox"]:checked'
           );
@@ -3049,7 +3067,6 @@ async function handleDateCellClick(event) {
             graphBtn.click();
           }
         }
-
         updateSelectedCount();
       } catch (error) {
         console.error('Error during date cell click:', error);
@@ -3057,7 +3074,7 @@ async function handleDateCellClick(event) {
         updateSelectedCount();
       }
     }
-  }
+  } 
 }
 
 // 날짜 셀 클릭 이벤트 핸들러 설정 함수

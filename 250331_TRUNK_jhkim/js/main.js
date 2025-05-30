@@ -5919,6 +5919,14 @@ function optsOverlay(numSets) {
 //   }
   
 
+const selectedFullpaths = new Set();
+function onCheckboxChange(checkbox, fullpath) {
+  if (checkbox.checked) {
+    selectedFullpaths.add(fullpath);
+  } else {
+    selectedFullpaths.delete(fullpath);
+  }
+}
 
 
 /* -------------------------------------------------------------------------- */
@@ -6075,14 +6083,6 @@ class PulseGraphInStack extends HTMLElement {
         this.init_data();
     }
 
-    updateProgress() {
-        const progress = this.querySelector('#loading-indicator progress');
-        if (progress) {
-            const percent = (this.loadedFiles / this.totalFiles) * 100;
-            progress.value = percent;
-        }
-    }
-
     // 로딩 바 상태 업데이트
     updateProgress() {
         const progress = this.querySelector('#loading-indicator progress');
@@ -6153,11 +6153,16 @@ class PulseGraphInStack extends HTMLElement {
 }
 
 document.getElementById('clearBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('selectedFullpaths');
     const pulseGraphEl = document.querySelector('pulse-graph-in-stack');
     if (pulseGraphEl && typeof pulseGraphEl.clearGraph === 'function') {
         pulseGraphEl.clearGraph();
     }
+    document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked')
+        .forEach(cb => cb.checked = false);
+    updateSelectedCount();
 });
+
 
 // >>> 241128 hjkim - Bode 그래프 추가
 class BodeGraphInStack extends HTMLElement {
