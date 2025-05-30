@@ -192,16 +192,22 @@ function drawFuelCellGraph(parsedData) {
       },
     ],
     series: [
-      {},
-      { label: "DIFF",
-       stroke: '#0000FF',
-      }, 
-      { label: "DEG",
+      {}, 
+      {
+        label: "DIFF",
+        stroke: '#0000FF',
+        value: (u, v, si, di) => diff[di]?.toFixed(3) ?? "N/A",  
+      },
+      {
+        label: "DEG",
         stroke: '#008000',
-      },  
-      { label: "RATE",
-        stroke: '#FFA500'
-      }, 
+        value: (u, v, si, di) => deg[di]?.toFixed(3) ?? "N/A",
+      },
+      {
+        label: "RATE",
+        stroke: '#FFA500',
+        value: (u, v, si, di) => rate[di]?.toFixed(3) ?? "N/A",
+      },
     ],
   };
   container.innerHTML = "";

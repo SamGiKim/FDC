@@ -5777,16 +5777,16 @@ var opts = () => {
         ],
         axes: [
             {},
-            { scale: "V", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(5) + " V"), size: 70, },
-            { scale: "A", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(5) + " A"), side: 1, size: 70, grid: {show: false}, },
+            { scale: "V", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(4) + " V"), size: 70, },
+            { scale: "A", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(4) + " A"), side: 1, size: 70, grid: {show: false}, },
             // { scale: "V2", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(1) + "V(MA)"), },
             // { scale: "A2", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(2) + "A(MA)"), side: 1, grid: {show: false}, },
         ],
         scales: { 
             "x": { time: false, distr: 2, },
             //"V": { range: [0.200, 0.204], },
-            "V": { range: (u, min, max) => [ min, max ] },
-            "A": { range: (u, min, max) => [ min, max ] },
+            "V": { range: (u, min, max) => [Math.min(min, max), Math.max(min, max)] },
+            "A": { range: (u, min, max) => [Math.min(min, max), Math.max(min, max)] }
         },
         hooks: {
             drawSeries: [
@@ -5863,12 +5863,31 @@ function get_placeholder_width() {
 function optsOverlay(numSets) {
     const series = [{ label: "Time" }];
     for (let i = 0; i < numSets; i++) {
-        series.push({ label: `Voltage ${i+1}`, stroke: "#0000FF", scale: "V", width: 1, points: { show: false } });
-        series.push({ label: `Current ${i+1}`, stroke: "#008000", scale: "A", width: 1, points: { show: false } });
-        series.push({ label: `Voltage(MA) ${i+1}`, stroke: "#FFA500", scale: "V", width: 3, points: { show: false } });
-        series.push({ label: `Current(MA) ${i+1}`, stroke: "#C1E715", scale: "A", width: 3, points: { show: false } });
+        series.push({ label: `Voltage ${i+1}`,
+                      stroke: "#0000FF", 
+                      scale: "V",
+                      width: 1,
+                      points: { show: false },
+                      value: (u, val) => val != null ? val.toFixed(4) + " V" : null });
+        series.push({ label: `Current ${i+1}`, 
+                      stroke: "#008000", 
+                      scale: "A", 
+                      width: 1, 
+                      points: { show: false },
+                      value: (u, val) => val != null ? val.toFixed(4) + " A" : null });
+        series.push({ label: `Voltage(MA) ${i+1}`,
+                      stroke: "#FFA500",
+                      scale: "V",
+                      width: 3, 
+                      points: { show: false },
+                      value: (u, val) => val != null ? val.toFixed(4) + " V" : null });
+        series.push({ label: `Current(MA) ${i+1}`,
+                      stroke: "#C1E715", 
+                      scale: "A", 
+                      width: 3, 
+                      points: { show: false },
+                      value: (u, val) => val != null ? val.toFixed(4) + " A" : null });
     }
-
     return {
         title: "Voltage Change Detection",
         width: get_placeholder_width(),
@@ -5876,8 +5895,8 @@ function optsOverlay(numSets) {
         series: series,
         axes: [
             {},
-            { scale: "V", size: 70 },
-            { scale: "A", side: 1, size: 70, grid: { show: false } }
+            { scale: "V", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(4) + " V"), size: 70 },
+            { scale: "A", values: (self, ticks) => ticks.map(rawValue => rawValue.toFixed(4) + " A"), side: 1, size: 70, grid: { show: false } }
         ],
         scales: {
             x: { time: false, distr: 1 },
@@ -5929,7 +5948,9 @@ class PulseGraphInStack extends HTMLElement {
         if (oldVal !== undefined && name === "fullpath") {
             console.log(`Attribute ${name} has changed:`, oldVal, "→", newVal);
             this.destroyPlot();
-            this.fullpaths = [newVal];  
+            // 쉼표로 분리된 문자열을 배열로 변환
+            const paths = newVal.split(",").map(s => s.trim()).filter(s => s.length > 0);
+            this.fullpaths = paths;
             this.init_DOM();
             this.init_data();
         }
@@ -5940,12 +5961,13 @@ class PulseGraphInStack extends HTMLElement {
         console.log("connectedCallback @ PulseGraphInStack");
         const fullpathAttr = this.getAttribute("fullpath");
         if (fullpathAttr) {
-            this.fullpaths = [fullpathAttr];
+            const paths = fullpathAttr.split(",").map(s => s.trim()).filter(s => s.length > 0);
+            this.fullpaths = paths;
         }
         this.init_DOM();
         this.init_data();
     }
-
+    
     // 기존 그래프 객체 제거 (중복 생성 방지)
     destroyPlot() {
         if (this.uplot) {
@@ -6044,6 +6066,13 @@ class PulseGraphInStack extends HTMLElement {
             this.uplot.setData(merged);
         } 
         this.setLoading(false);  
+    }
+
+    setFullpaths(paths) {
+        this.fullpaths = paths;
+        this.destroyPlot();
+        this.init_DOM();
+        this.init_data();
     }
 
     updateProgress() {
