@@ -15,15 +15,66 @@ document.addEventListener("DOMContentLoaded", () => {
 
   closeModalBtn.addEventListener("click", () => {
     modal.style.display = "none";
-    document.getElementById('yearly').value = "-1";
-    document.getElementById('monthly').value = "-1";
     document.getElementById('daily').value = "-1";
     graphContainer.innerHTML = "";
   });
 
+  // 연도와 월에 따라 해당 월의 마지막 날짜(일 수)를 반환하는 함수
+  const getDaysInMonth = (year, month) => {
+    // 2월일 경우, 윤년 계산
+    if (month === "02") {
+      return ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) ? 29 : 28;
+    }
+    const daysInMonth = {
+      "01": 31, "03": 31, "04": 30, "05": 31, "06": 30,
+      "07": 31, "08": 31, "09": 30, "10": 31, "11": 30, "12": 31
+    };
+    return daysInMonth[month] || 0;
+  };
+
+  const yearlySelect = document.getElementById("yearly");
+  const monthlySelect = document.getElementById("monthly");
+  const dailySelect = document.getElementById("daily");
+
+  // 월의 일 수에 따라 일 select 옵션을 업데이트하는 함수
+  const updateDays = () => {
+    const year = parseInt(yearlySelect.value);
+    const month = monthlySelect.value;
+
+    if (!isNaN(year) && month !== "-1") {
+      const days = getDaysInMonth(year, month);
+      dailySelect.innerHTML = `<option value="-1">-일-</option>`;
+
+      // <option> 요소 생성 및 추가
+      for (let i = 1; i <= days; i++) {
+        const day = i.toString().padStart(2, '0'); // 숫자를 두 자리 문자열로 변환 (1 → "01")
+        const option = document.createElement("option");
+        option.value = day;
+        option.textContent = day;
+        dailySelect.appendChild(option);
+      }
+    }
+  };
+
+  // 오늘 날짜 기준으로 연도/월 값을 가져와 해당 값을 select에 자동 설정
+  const today = new Date();
+  const currentYear = today.getFullYear().toString();
+  const currentMonth = (today.getMonth() + 1).toString().padStart(2, '0'); // 월: 0~11 → 1~12로 보정 후 "01", "02" 형태로
+
+  yearlySelect.value = currentYear;
+  monthlySelect.value = currentMonth;
+  updateDays();
+
+
   // 연, 월, 일 선택값이 변경될 때마다 CSV를 다시 불러와 그래프를 갱신하는 함수 호출
-  ["yearly", "monthly", "daily"].forEach(id => {
-    document.getElementById(id).addEventListener("change", updateCSVAndDrawGraph);
+  ["yearly", "monthly"].forEach(id => {
+    document.getElementById(id).addEventListener("change", () => {
+      updateDays();
+      updateCSVAndDrawGraph();
+    });
+  });
+  document.getElementById("daily").addEventListener("change", () => {
+    updateCSVAndDrawGraph(); 
   });
 });
 
