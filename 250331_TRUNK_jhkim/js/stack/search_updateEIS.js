@@ -30,10 +30,10 @@ export async function fetchRedisDataAndUpdate() {
     } catch (error) {
         console.error('Redis 데이터를 불러오는 데 실패했습니다.', error);
     }
-  }
+}
   
   // MySQL에서 가장 최근의 NO 값을 가진 데이터 가져오기
-  async function fetchLatestDataFromMySQL() {
+async function fetchLatestDataFromMySQL() {
     const selectedFuelcell = getSelectedFuelcell();
     try {
         const response = await fetch(`js/stack/get_latest_data.php?fuelcell=${selectedFuelcell}`); // 연료전지 ID 전달
@@ -57,7 +57,7 @@ export async function fetchRedisDataAndUpdate() {
     } catch (error) {
         console.error('MySQL 데이터를 불러오는 데 실패했습니다.', error);
     }
-  }
+}
 
   
 // 전체 체크박스 해제 및 마지막 데이터 체크

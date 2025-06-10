@@ -149,147 +149,145 @@ export class UnitControl {
         throw new Error("데이터가 없습니다.");
       }
       
-    // JSON 문자열을 객체로 파싱
-    const data = JSON.parse(statusResult.data);
-    const dacValue = (data.DAC.toLowerCase() === 'none' || !data.DAC) ? '-' : data.DAC;
+      // JSON 문자열을 객체로 파싱
+      const data = JSON.parse(statusResult.data);
+      const dacValue = (data.DAC.toLowerCase() === 'none' || !data.DAC) ? '-' : data.DAC;
 
-    // 파일 업로드 성공 메시지 확인
-    if (data.RESP) {
-      const messages = data.RESP.split('\n')
-        .filter(msg => msg.trim())
-        .map(msg => {
-          try {
-            return JSON.parse(msg);
-          } catch (e) {
-            return null;
-          }
-        })
-        .filter(msg => msg && msg.message === "File uploaded successfully");
+      // 파일 업로드 성공 메시지 확인
+      if (data.RESP) {
+        const messages = data.RESP.split('\n')
+          .filter(msg => msg.trim())
+          .map(msg => {
+            try {
+              return JSON.parse(msg);
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter(msg => msg && msg.message === "File uploaded successfully");
 
-      if (messages.length > 0) {
-        const latestMessage = messages[messages.length - 1];
-        
-        // 새로운 타임스탬프인 경우에만 업데이트
-        if (!this.lastUploadTimestamp || latestMessage.timestamp > this.lastUploadTimestamp) {
-          console.log('New upload detected:', latestMessage.timestamp);
-          this.lastUploadTimestamp = latestMessage.timestamp;
+        if (messages.length > 0) {
+          const latestMessage = messages[messages.length - 1];
           
-          const event = new CustomEvent('fileUploadSuccess');
-          document.dispatchEvent(event);
+          // 새로운 타임스탬프인 경우에만 업데이트
+          if (!this.lastUploadTimestamp || latestMessage.timestamp > this.lastUploadTimestamp) {
+            console.log('New upload detected:', latestMessage.timestamp);
+            this.lastUploadTimestamp = latestMessage.timestamp;
+            
+            const event = new CustomEvent('fileUploadSuccess');
+            document.dispatchEvent(event);
+          }
         }
       }
-    }
 
-    // PROGRESS의 STEP 값 업데이트 추가
-    if (data.PROGRESS) {
-      console.log('PROGRESS data:', data.PROGRESS); // PROGRESS 데이터 전체 확인
-      const stepElement = document.getElementById('progree-step');
-      console.log('Step Element:', stepElement); // element가 제대로 찾아지는지 확인
-      if (stepElement) {
-          stepElement.innerHTML = `${data.PROGRESS.STEP}<sup>step</sup>`;
-          console.log('Updated step value:', stepElement.innerHTML); // 업데이트된 값 확인
+      // PROGRESS의 STEP 값 업데이트 추가
+      if (data.PROGRESS) {
+        console.log('PROGRESS data:', data.PROGRESS); // PROGRESS 데이터 전체 확인
+        const stepElement = document.getElementById('progree-step');
+        console.log('Step Element:', stepElement); // element가 제대로 찾아지는지 확인
+        if (stepElement) {
+            stepElement.innerHTML = `${data.PROGRESS.STEP}<sup>step</sup>`;
+            console.log('Updated step value:', stepElement.innerHTML); // 업데이트된 값 확인
+        }
       }
-    }
 
-    // PROGRESS의 UNIT 값 업데이트 추가
-    if (data.PROGRESS) {
-      const unitValue = data.PROGRESS.UNIT || '0';  // 값이 없으면 '0' 
+      // PROGRESS의 UNIT 값 업데이트 추가
+      if (data.PROGRESS) {
+        const unitValue = data.PROGRESS.UNIT || '0';  // 값이 없으면 '0' 
 
-    // progress bar width 업데이트
-    const progressBar = document.getElementById('progress-unit-bar');
-    if (progressBar) {
-        progressBar.style.width = `${unitValue}%`;  // 동일한 값 사용
-        progressBar.setAttribute('aria-valuenow', unitValue);
-    }
+        // progress bar width 업데이트
+        const progressBar = document.getElementById('progress-unit-bar');
+        if (progressBar) {
+            progressBar.style.width = `${unitValue}%`;  // 동일한 값 사용
+            progressBar.setAttribute('aria-valuenow', unitValue);
+        }
 
-    // progress-unit 텍스트 업데이트
-    const unitElement = document.getElementById('progress-unit');
-    if (unitElement) {
-        unitElement.innerHTML = `${unitValue}<sup>%</sup>`;  // 동일한 값 사용
+        // progress-unit 텍스트 업데이트
+        const unitElement = document.getElementById('progress-unit');
+        if (unitElement) {
+            unitElement.innerHTML = `${unitValue}<sup>%</sup>`;  // 동일한 값 사용
+        }
+      } 
+
+      if (data.PROGRESS) {
+        // UNIT 업데이트 (기존 코드)
+        const unitValue = data.PROGRESS.UNIT || '0';
+        const progressBar = document.getElementById('progress-total-bar');
+        if (progressBar) {
+            progressBar.style.width = `${unitValue}%`;
+            progressBar.setAttribute('aria-valuenow', unitValue);
+        }
+        const unitElement = document.getElementById('progress-unit');
+        if (unitElement) {
+            unitElement.innerHTML = `${unitValue}<sup>%</sup>`;
+        }
+
+        // TOTAL 업데이트
+        const totalValue = data.PROGRESS.TOTAL || '0';
+        const totalBar = document.querySelector('.progress-bar.bg-success');
+        if (totalBar) {
+            totalBar.style.width = `${totalValue}%`;
+            totalBar.setAttribute('aria-valuenow', totalValue);
+        }
+        const totalElement = document.getElementById('progress-total');
+        if (totalElement) {
+            totalElement.innerHTML = `${totalValue}<sup>%</sup>`;
+        }
+      }
+
+      // 전체 데이터를 console-section에 표시
+      this.updateConsoleSection(statusResult.data);
+
+      // STATUS 값을 HTML에 업데이트
+      const status = data.STATUS;
+      status[4] = dacValue;
+      console.log("status :",status);
+      
+      // Redis의 frequency 값(status[1])에 따라 cmd 옵션 제어
+      const startButton = document.getElementById('start');
+      if (startButton && startButton.startButtonHandler) {
+          // 현재 선택된 명령어 저장
+          const currentCmd = startButton.startButtonHandler.cmdSelect.value;
+
+        if (status[1] && status[1].trim() !== '') {
+          startButton.startButtonHandler.isRunning = true;
+        } else {
+          startButton.startButtonHandler.isRunning = false;
+        }
+
+        startButton.startButtonHandler.updateCmdOptions(startButton.startButtonHandler.allCommands);
+
+        // 저장했던 명령어로 복원 (실행 중이 아닐 때만)
+        if (!startButton.startButtonHandler.isRunning) {
+          startButton.startButtonHandler.cmdSelect.value = currentCmd;
+        }
+      }
+
+      // 항상 업데이트를 수행하도록 변경
+      document.getElementById('fdu-status').innerText = status[0] || '-';
+      document.getElementById('dac-range').innerText = `${status[4] || '-'} `;
+      document.getElementById('current-frequency').innerText = status[1] || '-';
+      document.getElementById('measurement-interval').innerText = status[2] || '-';
+      document.getElementById('remaining-time').innerText = `${status[3] || '-'} `; // 'sec' 단위 추가
+
+      // frequency div 업데이트
+      const frequencyElement = document.getElementById('frequency');
+      const currentFrequency = status[1] || '-';
+      frequencyElement.innerHTML = `${currentFrequency}<sup>Hz</sup>`;
+  
+      console.log('Updated elements:', {
+        'fdu-status': document.getElementById('fdu-status').innerText,
+        'current-frequency': document.getElementById('current-frequency').innerText,
+        'frequency': frequencyElement.innerHTML,
+        'measurement-interval': document.getElementById('measurement-interval').innerText,
+        'remaining-time': document.getElementById('remaining-time').innerText
+      });
+    } catch (error) {
+    //  console.error("Redis 데이터를 불러오는 데 실패했습니다.", error);
+      this.resetDisplayData();
+      this.consoleSection.innerHTML = `<pre>통신이 끊겼습니다.</pre>`;
     }
   }
-
-  if (data.PROGRESS) {
-    // UNIT 업데이트 (기존 코드)
-    const unitValue = data.PROGRESS.UNIT || '0';
-    const progressBar = document.getElementById('progress-total-bar');
-    if (progressBar) {
-        progressBar.style.width = `${unitValue}%`;
-        progressBar.setAttribute('aria-valuenow', unitValue);
-    }
-    const unitElement = document.getElementById('progress-unit');
-    if (unitElement) {
-        unitElement.innerHTML = `${unitValue}<sup>%</sup>`;
-    }
-
-    // TOTAL 업데이트
-    const totalValue = data.PROGRESS.TOTAL || '0';
-    const totalBar = document.querySelector('.progress-bar.bg-success');
-    if (totalBar) {
-        totalBar.style.width = `${totalValue}%`;
-        totalBar.setAttribute('aria-valuenow', totalValue);
-    }
-    const totalElement = document.getElementById('progress-total');
-    if (totalElement) {
-        totalElement.innerHTML = `${totalValue}<sup>%</sup>`;
-    }
-}
-
-    // 전체 데이터를 console-section에 표시
-    this.updateConsoleSection(statusResult.data);
-
-    // STATUS 값을 HTML에 업데이트
-    const status = data.STATUS;
-    status[4] = dacValue;
-    console.log("status :",status);
-     
-    // Redis의 frequency 값(status[1])에 따라 cmd 옵션 제어
-    const startButton = document.getElementById('start');
-    if (startButton && startButton.startButtonHandler) {
-        // 현재 선택된 명령어 저장
-        const currentCmd = startButton.startButtonHandler.cmdSelect.value;
-
-      if (status[1] && status[1].trim() !== '') {
-        startButton.startButtonHandler.isRunning = true;
-      } else {
-        startButton.startButtonHandler.isRunning = false;
-      }
-
-      startButton.startButtonHandler.updateCmdOptions(startButton.startButtonHandler.allCommands);
-
-      // 저장했던 명령어로 복원 (실행 중이 아닐 때만)
-      if (!startButton.startButtonHandler.isRunning) {
-        startButton.startButtonHandler.cmdSelect.value = currentCmd;
-    }
-    }
-
-     // 항상 업데이트를 수행하도록 변경
-     document.getElementById('fdu-status').innerText = status[0] || '-';
-     document.getElementById('dac-range').innerText = `${status[4] || '-'} `;
-     document.getElementById('current-frequency').innerText = status[1] || '-';
-     document.getElementById('measurement-interval').innerText = status[2] || '-';
-     document.getElementById('remaining-time').innerText = `${status[3] || '-'} `; // 'sec' 단위 추가
-
-     // frequency div 업데이트
-     const frequencyElement = document.getElementById('frequency');
-     const currentFrequency = status[1] || '-';
-     frequencyElement.innerHTML = `${currentFrequency}<sup>Hz</sup>`;
- 
-     console.log('Updated elements:', {
-       'fdu-status': document.getElementById('fdu-status').innerText,
-       'current-frequency': document.getElementById('current-frequency').innerText,
-       'frequency': frequencyElement.innerHTML,
-       'measurement-interval': document.getElementById('measurement-interval').innerText,
-       'remaining-time': document.getElementById('remaining-time').innerText
-     });
- 
-   } catch (error) {
-    //  console.error("Redis 데이터를 불러오는 데 실패했습니다.", error);
-     this.resetDisplayData();
-     this.consoleSection.innerHTML = `<pre>통신이 끊겼습니다.</pre>`;
-   }
- }
- 
 
   updateConsoleSection(data) {
     if (this.consoleSection) {
@@ -311,13 +309,13 @@ export class UnitControl {
     }, 2000); // 2초마다 갱신
   }
 
-listenForFuelcellChanges(){
-  document.addEventListener("fuelcellChanged", () => {
-    this.updateRedisKey();
-    this.resetDisplayData();
-    this.loadAndDisplayRedisData();
-  })
-}
+  listenForFuelcellChanges(){
+    document.addEventListener("fuelcellChanged", () => {
+      this.updateRedisKey();
+      this.resetDisplayData();
+      this.loadAndDisplayRedisData();
+    })
+  }
 }
 
 
@@ -476,7 +474,6 @@ export class StartButtonHandler {
       return;
     }
 
-    const config = getCurrentConfig();
     let val1 = this.val1Input ? this.val1Input.value : '';
     let val2 = this.val2Input ? this.val2Input.value : '';
     let val3 = this.val3Input ? this.val3Input.value : '';
@@ -484,15 +481,15 @@ export class StartButtonHandler {
     let merr = this.merrInput ? this.merrInput.value : '';
 	
 	// >>> 250331 hjkim - 유닛컨트롤 버그
-	const urlParams = new URLSearchParams(window.location.search);
+	  const urlParams = new URLSearchParams(window.location.search);
     const plant = urlParams.get('plant');
     const group = urlParams.get('group');
     const fuelcell = urlParams.get('fuelcell');
 	// <<< 250331 hjkim - 유닛컨트롤 버그
   
     const data = {
-      "powerplant_id" : config.powerplant_id,
-      "group_id" : config.group_id,
+      "powerplant_id" : plant,
+      "group_id" : group,
 	  // >>> 250331 hjkim - 유닛컨트롤 버그
       "fuelcell_id" : fuelcell,
 	  // <<< 250331 hjkim - 유닛컨트롤 버그

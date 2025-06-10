@@ -16,13 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-async function loadAndDisplayDiagnosisData(page) {
+export async function loadAndDisplayDiagnosisData(page) {
   try {
     const selectedFuelcell = await getSelectedFuelcell();
     const currentFuelcellData = fuelcellConfig[selectedFuelcell];
     const limit = 1000; // 전체 불러온 뒤 페이지네이션 (혹은 page & limit 방식도 가능)
     const type = 'EIS';
-
     const params = new URLSearchParams({
       type: type,
       limit: limit.toString(),
@@ -34,7 +33,6 @@ async function loadAndDisplayDiagnosisData(page) {
     if (!response.ok) throw new Error('데이터 요청 실패');
 
     diagnosisData = await response.json();
-
     displayData(page);
     displayPagination(diagnosisData.length, page);
   } catch (error) {
@@ -47,7 +45,6 @@ function displayData(page) {
   const end = Math.min(start + ITEMS_PER_PAGE, diagnosisData.length);
   const tableBody = document.querySelector('#diagnosis-log-table');
   tableBody.innerHTML = '';
-
   const pagedData = diagnosisData.slice(start, end);
 
   pagedData.forEach((item) => {
@@ -64,7 +61,6 @@ function displayPagination(totalItems, currentPage) {
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
   const paginationContainer = document.getElementById('diagnosis-log-pagination');
   paginationContainer.innerHTML = '';
-
   const maxPageVisible = 5;
   let startPage = Math.max(currentPage - Math.floor(maxPageVisible / 2), 1);
   let endPage = Math.min(startPage + maxPageVisible - 1, totalPages);
@@ -111,7 +107,6 @@ function createPageItem(page, text, isEnabled) {
   a.addEventListener('click', function (e) {
     e.preventDefault();
     if (!isEnabled) return;
-
     currentPage = page;
     displayData(currentPage);
     displayPagination(diagnosisData.length, currentPage);

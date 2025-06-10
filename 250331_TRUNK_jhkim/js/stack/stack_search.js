@@ -3,6 +3,7 @@
 import { getCurrentConfig } from '../config/fuelcellSelector.js'; 
 import { fetchRedisDataAndUpdate } from './search_updateEIS.js'; 
 import { errorCodeMapping } from '../bop/bopSensorLabelingData.js';
+import { loadAndDisplayDiagnosisData } from './stack_diagnosis_log.js';
 
 export let currentPage = 1;
 let itemsPerPage = 100; // 기본값
@@ -1535,7 +1536,9 @@ export function searchWithData(conditions, page = 1, searchType=null, perPage = 
           // 데이터 처리 로직
           displayResults(data.data, page, data.totalRows, typeToUse);
           displayPagination(data.totalRows, page);
-          
+          // 진단 로그 추가
+          loadAndDisplayDiagnosisData(1); 
+
           // 검색이 완료된 후 체크박스 선택
           updateCheckboxesAfterSearch();
           resolve(); // 성공적으로 완료되면 resolve
@@ -1614,6 +1617,8 @@ export function filterDataByBookmark(bookmarkId, page = 1, searchConditions = {}
           // 데이터 처리 로직
           displayResults(data.data, page, data.totalRows, type);
           displayPagination(data.totalRows, page, bookmarkId);
+          // 진단 로그 추가
+          loadAndDisplayDiagnosisData(1);
           
           // 검색이 완료된 후 체크박스 선택
           updateCheckboxesAfterSearch();
