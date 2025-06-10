@@ -15,8 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   closeModalBtn.addEventListener("click", () => {
     modal.style.display = "none";
-    document.getElementById('daily').value = "-1";
-    graphContainer.innerHTML = "";
   });
 
   // 연도와 월에 따라 해당 월의 마지막 날짜(일 수)를 반환하는 함수
