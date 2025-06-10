@@ -266,6 +266,26 @@ document.addEventListener('fuelcellChanged', async function(e) {
   }
 });
 
+document.querySelector('#group-select').addEventListener('change', async (e) => {
+  try {
+    const newGroup = e.target.value;
+    // URL 파라미터도 group으로 갱신
+    const url = new URL(window.location.href);
+    url.searchParams.set('group', newGroup);
+    window.history.replaceState({}, '', url);
+
+    // 필요한 경우 plant, fuelcell도 같이 처리
+
+    // 북마크 탭 다시 로드
+    await getBookmarkTabs();
+
+    // 필요하다면, 다른 데이터 갱신 함수도 호출
+  } catch (err) {
+    console.error('그룹 변경 처리 오류:', err);
+  }
+});
+
+
 export async function initializeSearch() {
   await initializeDateSelection();  // 날짜 선택 초기화
   setDefaultDates(); // setDefaultDates 호출하여 날짜 설정
@@ -2481,192 +2501,130 @@ export function goToPage(pageNumber, bookmarkId = null) {
 /////////////////////////////////////////////////////////////////////////////////////////////
 // 북마크 탭관리
 // 서버에서 북마크 목록을 가져와서 목록 표시(왼쪽 상단 +인 '탭 관리' 버튼)
-function getTabList() {
+async function getTabList() {
   try {
     console.log('북마크 목록 가져오기 시작');
-    
-    // URL 파라미터에서 값 가져오기
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlPlant = urlParams.get('plant');
-    const urlFuelcell = urlParams.get('fuelcell');
-    
-    // 현재 설정 가져오기
-    const currentConfig = getCurrentConfig();
-    
-    // 유효한 값 확인
-    const powerplant_id = (urlPlant && urlPlant !== 'undefined') ? urlPlant : 
-                        (currentConfig && currentConfig.powerplant_id) ? currentConfig.powerplant_id : 'SE01';
-    const fuelcell_id = (urlFuelcell && urlFuelcell !== 'undefined') ? urlFuelcell : 
-                      (currentConfig && currentConfig.fuelcell_id) ? currentConfig.fuelcell_id : 'F001';
-    
+
+    const currentConfig = await getCurrentConfig();
+    const { powerplant_id, fuelcell_id, group_id } = currentConfig;
+
     console.log('북마크 목록 가져오기 - 발전소 ID:', powerplant_id);
+    console.log('북마크 목록 가져오기 - 그룹 ID:', group_id);
     console.log('북마크 목록 가져오기 - 연료전지 ID:', fuelcell_id);
-    
-    // 북마크 테이블 참조
+
     const tabListTable = document.querySelector('.table.tab-list tbody');
     if (!tabListTable) {
       console.error('북마크 목록 테이블을 찾을 수 없습니다.');
       return;
     }
-    
-    // 모든 북마크 가져오기 (파라미터 없이 호출)
-    fetch('js/stack/get_bookmark.php')
-      .then(response => response.json())
-      .then(bookmarks => {
-        console.log('북마크 목록 응답:', bookmarks);
-        
-        if (bookmarks.length === 0) {
-          console.log('북마크가 없습니다.');
-          tabListTable.innerHTML = '<tr><td colspan="2">등록된 북마크가 없습니다.</td></tr>';
-          return;
-        }
-        
-        // 테이블 내용 생성
-        let tableHtml = '';
-        bookmarks.forEach(bookmark => {
-          console.log('북마크 목록에 추가:', bookmark.id, bookmark.name);
-          
-          tableHtml += `
-            <tr data-bookmark-id="${bookmark.id}" data-bookmark-name="${bookmark.name}">
-              <td><input type="checkbox" name="tab-list-checkbox" id="checkbox-${bookmark.id}" ></td>
-              <td>
-                <div class="db-edit" style="display: none;">
-                  <input type="text" value="${bookmark.name}">
-                </div>
-                <a href="#"><span>${bookmark.name}</span></a>
-              </td>
-            </tr>
-          `;
-        });
-        
-        tabListTable.innerHTML = tableHtml;
-        
-        // 북마크 항목 클릭 이벤트 추가
-        tabListTable.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const row = this.closest('tr');
-            const bookmarkId = row.getAttribute('data-bookmark-id');
-            console.log('북마크 목록에서 클릭:', bookmarkId);
-            filterDataByBookmark(bookmarkId);
-          });
-        });
-      })
-      .catch(error => {
-        console.error('북마크 목록 가져오기 오류:', error);
-        tabListTable.innerHTML = '<tr><td colspan="2">북마크 목록을 불러오는 중 오류가 발생했습니다.</td></tr>';
+
+    const url = `js/stack/get_bookmark.php?plant=${powerplant_id}&fuelcell=${fuelcell_id}&group=${group_id}`;
+
+    const response = await fetch(url);
+    const bookmarks = await response.json();
+
+    console.log('북마크 목록 응답:', bookmarks);
+
+    if (bookmarks.length === 0) {
+      tabListTable.innerHTML = '<tr><td colspan="2">등록된 북마크가 없습니다.</td></tr>';
+      return;
+    }
+
+    let tableHtml = '';
+    bookmarks.forEach(bookmark => {
+      tableHtml += `
+        <tr data-bookmark-id="${bookmark.id}" data-bookmark-name="${bookmark.name}">
+          <td><input type="checkbox" name="tab-list-checkbox" id="checkbox-${bookmark.id}" ></td>
+          <td>
+            <div class="db-edit" style="display: none;">
+              <input type="text" value="${bookmark.name}">
+            </div>
+            <a href="#"><span>${bookmark.name}</span></a>
+          </td>
+        </tr>
+      `;
+    });
+
+    tabListTable.innerHTML = tableHtml;
+
+    tabListTable.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const row = this.closest('tr');
+        const bookmarkId = row.getAttribute('data-bookmark-id');
+        filterDataByBookmark(bookmarkId);
       });
+    });
   } catch (error) {
     console.error('getTabList 함수 실행 중 오류:', error);
   }
 }
+window.getTabList = getTabList;
 
-// 상단 북마크 탭 불러오는 함수(북마크 탭 관련 초기화)
-function getBookmarkTabs() {
+async function getBookmarkTabs() {
   try {
     console.log('북마크 탭 가져오기 시작');
-    
-    // 현재 설정 가져오기
-    const currentConfig = getCurrentConfig();
-    const { powerplant_id, fuelcell_id } = currentConfig;
-    
-    console.log('북마크 탭 가져오기 - 발전소 ID:', powerplant_id);
-    console.log('북마크 탭 가져오기 - 연료전지 ID:', fuelcell_id);
-    
-    // 북마크 목록 가져오기 - 모든 북마크 가져오기
-    fetch('js/stack/get_bookmark.php')
-      .then(response => {
-        if (!response.ok) {
-          return response.text().then(text => {
-            if (text.includes("<html")) {
-              console.error("Server returned HTML content instead of JSON.");
-              throw new Error("Server returned HTML content instead of JSON.");
-            }
-            console.error(`Network response was not ok: ${response.status} ${response.statusText}`);
-            console.error(`Response text: ${text}`);
-            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
-          });
-        }
-        return response.json().catch(err => {
-          console.error("Failed to parse JSON:", err);
-          throw new Error("Failed to parse JSON");
-        });
-      })
-      .then(data => {
-        console.log("Loaded bookmark data:", data);
-        var bookmarkList = document.getElementById("bookmark-tab").querySelector("ul");
-        bookmarkList.innerHTML = ""; // 기존 목록 초기화
 
-        // "전체항목" 탭 추가 (한 번만 추가)
-        var allItemsTab = document.createElement("li");
-        allItemsTab.classList.add("tab-item");
-        allItemsTab.innerHTML = `<a class="all-item-tab">전체항목</a>`;
-        bookmarkList.appendChild(allItemsTab);
+    const currentConfig = await getCurrentConfig();
+    const { powerplant_id, fuelcell_id, group_id } = currentConfig;
 
-        // 전체항목' 탭에 active 클래스 추가
-        allItemsTab.querySelector("a").classList.add("active");
+    console.log('북마크 탭 - 발전소 ID:', powerplant_id);
+    console.log('북마크 탭 - 그룹 ID:', group_id);
+    console.log('북마크 탭 - 연료전지 ID:', fuelcell_id);
 
-        // '전체항목' 탭 클릭 이벤트 리스너 추가
-        allItemsTab.querySelector("a").addEventListener("click", function () {
-          searchWithData(currentSearchConditions);
+    const url = `js/stack/get_bookmark.php?plant=${powerplant_id}&fuelcell=${fuelcell_id}&group=${group_id}`;
+    const response = await fetch(url);
 
-          // bold 스타일을 가진 클래스 추가
-          document.getElementById("stack-data-mng-head").classList.add("bold");
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`네트워크 오류: ${response.status} - ${text}`);
+    }
 
-          // 다른 tab-item 요소에서 active 클래스 제거
-          document.querySelectorAll(".tab-item a").forEach(tab => {
-            tab.classList.remove("active");
-          });
+    const data = await response.json();
+    console.log("불러온 북마크 데이터:", data);
 
-          // 현재 클릭된 탭에 active 클래스 추가
-          this.classList.add("active");
-        });
+    const bookmarkList = document.getElementById("bookmark-tab").querySelector("ul");
+    bookmarkList.innerHTML = ""; // 초기화
 
-        // 불러온 데이터 추가 (모든 북마크)
-        data.forEach(bookmark => {
-          var newTabItem = document.createElement("li");
-          newTabItem.classList.add("tab-item");
-          newTabItem.innerHTML = `<a data-bookmark-id="${bookmark.id}" class="bookmark-tab">${bookmark.name}</a>`;
-          bookmarkList.appendChild(newTabItem);
-          
-          // 북마크 탭 클릭 이벤트 추가
-          newTabItem.querySelector('a').addEventListener('click', function() {
-            const bookmarkId = this.getAttribute('data-bookmark-id');
-            console.log('북마크 탭 클릭:', bookmarkId);
-            filterDataByBookmark(bookmarkId);
-            
-            // 다른 tab-item 요소에서 active 클래스 제거
-            document.querySelectorAll(".tab-item a").forEach(tab => {
-              tab.classList.remove("active");
-            });
-            
-            // 현재 클릭된 탭에 active 클래스 추가
-            this.classList.add("active");
-          });
-        });
+    const allItemsTab = document.createElement("li");
+    allItemsTab.classList.add("tab-item");
+    allItemsTab.innerHTML = `<a class="all-item-tab active">전체항목</a>`;
+    bookmarkList.appendChild(allItemsTab);
 
-        // 중요: 플러스 버튼을 #stack-data-mng-head에 추가
-        const stackDataMngHead = document.getElementById('stack-data-mng-head');
-        if (stackDataMngHead) {
-          // 기존 플러스 버튼이 있다면 제거
-          const existingPlusButton = stackDataMngHead.querySelector('.bmk-list-mng-plus-btn');
-          if (existingPlusButton) {
-            existingPlusButton.remove();
-          }
-          
-          // 새 플러스 버튼 추가
-          const plusButton = document.createElement("div");
-          plusButton.classList.add("bmk-list-mng-plus-btn");
-          plusButton.innerHTML = '<a class="plus" title="항목관리" onclick="openModal(\'manage-tab-modal\', \'manage\')">+</a>';
-          stackDataMngHead.appendChild(plusButton);
-        }
-      })
-      .catch(error => {
-        console.error("Fetch error:", error);
-        document.getElementById("bookmark-tab").innerHTML = `<p>북마크를 불러오는 데 문제가 발생했습니다. 다시 시도해 주세요.</p>`;
+    allItemsTab.querySelector("a").addEventListener("click", function () {
+      searchWithData(currentSearchConditions);
+      document.getElementById("stack-data-mng-head").classList.add("bold");
+      document.querySelectorAll(".tab-item a").forEach(tab => tab.classList.remove("active"));
+      this.classList.add("active");
+    });
+
+    data.forEach(bookmark => {
+      const newTabItem = document.createElement("li");
+      newTabItem.classList.add("tab-item");
+      newTabItem.innerHTML = `<a data-bookmark-id="${bookmark.id}" class="bookmark-tab">${bookmark.name}</a>`;
+      bookmarkList.appendChild(newTabItem);
+
+      newTabItem.querySelector("a").addEventListener("click", function () {
+        const bookmarkId = this.getAttribute("data-bookmark-id");
+        filterDataByBookmark(bookmarkId);
+        document.querySelectorAll(".tab-item a").forEach(tab => tab.classList.remove("active"));
+        this.classList.add("active");
       });
+    });
+
+    const stackDataMngHead = document.getElementById("stack-data-mng-head");
+    if (stackDataMngHead) {
+      const existingPlusButton = stackDataMngHead.querySelector(".bmk-list-mng-plus-btn");
+      if (existingPlusButton) existingPlusButton.remove();
+
+      const plusButton = document.createElement("div");
+      plusButton.classList.add("bmk-list-mng-plus-btn");
+      plusButton.innerHTML = `<a class="plus" title="항목관리" onclick="openModal('manage-tab-modal', 'manage')">+</a>`;
+      stackDataMngHead.appendChild(plusButton);
+    }
   } catch (error) {
-    console.error('getBookmarkTabs 함수 실행 중 오류:', error);
+    console.error("getBookmarkTabs 함수 오류:", error);
+    document.getElementById("bookmark-tab").innerHTML = `<p>북마크를 불러오는 데 문제가 발생했습니다.</p>`;
   }
 }
 
@@ -2688,8 +2646,8 @@ function handleTabClick(event) {
   if (target.parentElement.classList.contains("bmk-list-mng-plus-btn") || 
   target.classList.contains("plus")) {
   console.log('북마크 관리 플러스 버튼 클릭');
-  e.stopPropagation(); // 이벤트 버블링 중지
-  e.preventDefault(); // 기본 이벤트 중지
+  event.stopPropagation(); // 이벤트 버블링 중지
+  event.preventDefault(); // 기본 이벤트 중지
   openModal('manage-tab-modal', 'manage'); // 모달 열기, 두 번째 파라미터 추가
   return; // 데이터 조회 로직 실행 안함
   }

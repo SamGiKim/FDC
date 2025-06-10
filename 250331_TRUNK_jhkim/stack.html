@@ -1567,31 +1567,33 @@
                   modal.removeAttribute("data-active-tab");
                 }
               }
-
               // openModal 함수 수정
               function openModal(modalId, mode) {
-              const modal = document.getElementById(modalId);
-              if (modal && modal instanceof HTMLDialogElement) {
-                // 모달 내용 조정
-                const addTabRow = modal.querySelector('.add-tab-row');
-                if (addTabRow) {
-                  if (mode === 'manage') {
-                    addTabRow.style.display = 'block';
-                  } else if (mode === 'add') {
-                    addTabRow.style.display = 'none';
+                const modal = document.getElementById(modalId);
+                if (modal && modal instanceof HTMLDialogElement) {
+                  // 모달 내용 조정
+                  const addTabRow = modal.querySelector('.add-tab-row');
+                  const deleteBtn = modal.querySelector('.delete-bmk');
+                  if (addTabRow && deleteBtn) {
+                    if (mode === 'manage') {
+                      addTabRow.style.display = 'block';
+                      deleteBtn.style.display = 'block';
+                      getTabList();
+                    } else if (mode === 'add') {
+                      addTabRow.style.display = 'none';
+                      deleteBtn.style.display = 'none';
+                    }
                   }
+                  modal.showModal();
+                  modal.classList.add("toggle-dialog");
+                  const firstInput = modal.querySelector('input, select, button');
+                  if (firstInput) {
+                    firstInput.focus();
+                  }
+                } else {
+                  console.error(`${modalId} 모달을 찾을 수 없거나 <dialog> 요소가 아닙니다.`);
                 }
-
-                modal.showModal();
-                modal.classList.add("toggle-dialog");
-                const firstInput = modal.querySelector('input, select, button');
-                if (firstInput) {
-                  firstInput.focus();
-                }
-              } else {
-                console.error(`${modalId} 모달을 찾을 수 없거나 <dialog> 요소가 아닙니다.`);
               }
-            }
 
               // closeModal 함수 수정
               const closeModal = (modalId) => {
