@@ -1881,8 +1881,9 @@ async function pulseDateCellClick(dateCell, type, state) {
               });
             checkbox.checked = true;
             updateSelectedCount();
-            const latestChecked = selectedItems[selectedItems.length - 1];
-            const response = await fetch(`js/stack/get_pulse_name.php?no=${latestChecked.no}&type=${latestChecked.type}`);
+            const response = await fetch(
+              `js/stack/get_pulse_name.php?no=${checkbox.dataset.no}&type=${checkbox.dataset.type}`
+            );
             const data = await response.json();
             if (data.name) {
               graphElement.fullpaths = [data.name];
@@ -1890,6 +1891,7 @@ async function pulseDateCellClick(dateCell, type, state) {
               graphElement.init_DOM();
               await graphElement.init_data();
             }
+            selectedItems = [];
           } else if (viewMode === "timeseries") {
             // 기존 저장 불러오기
             const savedStr = sessionStorage.getItem('selectedFullpaths');
@@ -3312,7 +3314,7 @@ function addBookmark(bookmarkName) {
         
         // 북마크 리스트 새로고침
         getBookmarkTabs();
-        
+        getTabList();
         // 선택된 체크박스 데이터를 북마크에 등록
         const checkedBoxes = document.querySelectorAll('input[name="data-checkbox"]:checked');
         if (checkedBoxes.length > 0) {
@@ -3439,10 +3441,6 @@ function handleBookmarkLinkClick(event) {
 }
 
 function setupBookmarkModal() {
-  document.querySelector("#manage-tab-modal .modal-title").textContent =
-    "데이터 등록";
-  document.querySelector("#manage-tab-modal .add-tab-row").style.display =
-    "none";
   const dbEditElements = document.querySelectorAll(
     "#manage-tab-modal .db-edit"
   );
@@ -3451,8 +3449,6 @@ function setupBookmarkModal() {
     '#manage-tab-modal input[name="tab-list-checkbox"]'
   );
   tabListCheckboxes.forEach((checkbox) => (checkbox.style.display = "none"));
-  document.querySelector("#manage-tab-modal .delete-bmk").style.display =
-    "none";
 
   const bookmarkLinks = document.querySelectorAll("#manage-tab-modal a");
   bookmarkLinks.forEach((link) => {
