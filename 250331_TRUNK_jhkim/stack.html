@@ -1554,14 +1554,17 @@
                   // 모달 내용 조정
                   const addTabRow = modal.querySelector('.add-tab-row');
                   const deleteBtn = modal.querySelector('.delete-bmk');
+                  const modalTitle = modal.querySelector('.modal-title');
                   if (addTabRow && deleteBtn) {
                     if (mode === 'manage') {
                       addTabRow.style.display = 'block';
                       deleteBtn.style.display = 'block';
+                      modalTitle.textContent = '탭 관리';
                       getTabList();
                     } else if (mode === 'add') {
                       addTabRow.style.display = 'none';
                       deleteBtn.style.display = 'none';
+                      modalTitle.textContent = '데이터 등록';
                     }
                   }
                   modal.showModal();
