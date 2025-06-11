@@ -3479,39 +3479,6 @@ function saveMultipleBookmarkData(bookmarkData) {
     });
 }
 
-
-// 모든 아이템 탭을 활성화하는 함수
-function activateAllItemsTab() {
-  const allItemsTab = document.querySelector(".all-item-tab");
-  if (allItemsTab) {
-    document
-      .querySelectorAll(".tab-item a")
-      .forEach((tab) => tab.classList.remove("active"));
-    allItemsTab.classList.add("active");
-  }
-}
-
-// 탭 선택을 설정하는 함수
-function setupTabSelection(checkboxes) {
-  document.querySelectorAll(".tab-item a").forEach((tab) => {
-    tab.addEventListener(
-      "click",
-      function () {
-        if (isCopyCompleted) return; // 이미 복사가 완료된 경우 추가 동작 방지
-
-        const bookmarkId = this.getAttribute("data-bookmark-id");
-        if (!bookmarkId) {
-          alert("북마크를 선택하지 않았습니다. 다시 시도해주세요.");
-          return;
-        }
-
-        registerBookmarkData(this, checkboxes);
-      },
-      { once: true }
-    );
-  });
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // [데이터 업로드]
 // 파일 업로드 관련 함수
