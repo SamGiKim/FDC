@@ -2550,6 +2550,10 @@ function all_clear_graph() {
     // _input_arr[4].value = xsxe_ysye__scope.ye;
     // <<< 250214 hjkim - xsxeysye 자동갱신
 
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
     var el = document.querySelector(".impedence_graph").parentElement;
     el.innerHTML = "";
     ImpedanceChart.IImpedanceChart_init(el, el.clientWidth, el.clientHeight);
