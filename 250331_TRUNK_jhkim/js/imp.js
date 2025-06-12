@@ -2532,13 +2532,16 @@ function all_clear_graph() {
     // >>> 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
     window.series_cnt = 0;
     // <<< 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
+	
 	// >>> 250313 hjkim - 레이어 1 추가: xy축 레이블용
 	window.is_draw_xtick_label = false;
 	window.is_draw_ytick_label = false;
 	// <<< 250313 hjkim - 레이어 1 추가: xy축 레이블용
+
     // >>> 250214 hjkim - xsxeysye 초기화
     init_xsxeysye();
     // <<< 250214 hjkim - xsxeysye 초기화
+
     // >>> 250214 hjkim - xsxeysye 자동갱신
     // let _input_arr = document.querySelectorAll(".widget.stack-state-graph .float-end .graph input");
     // _input_arr[1].value = xsxe_ysye__scope.xs;
@@ -2546,10 +2549,7 @@ function all_clear_graph() {
     // _input_arr[3].value = xsxe_ysye__scope.ys;
     // _input_arr[4].value = xsxe_ysye__scope.ye;
     // <<< 250214 hjkim - xsxeysye 자동갱신
-    const checkboxes = document.querySelectorAll('input[type="checkbox"][name="search-checkbox"]:checked');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
-    });
+
     var el = document.querySelector(".impedence_graph").parentElement;
     el.innerHTML = "";
     ImpedanceChart.IImpedanceChart_init(el, el.clientWidth, el.clientHeight);

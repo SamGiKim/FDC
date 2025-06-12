@@ -2894,7 +2894,6 @@ export async function copySelectedFiles() {
   }
 
   const type = document.querySelector('#sin-pulse-select')?.value || 'SIN';
-  const selectedColor = document.getElementById('graph-color-selector')?.value;
 
   if (type === 'SIN' || type === 'CALIB') {
     try {
@@ -2902,14 +2901,18 @@ export async function copySelectedFiles() {
         const row = cb.closest('tr');
         const dateCell = row.querySelector('.date-cell');
         const no = cb.getAttribute("data-no");
+
         let color;
-        
-        if(selectedColor && selectedColor !== '' && selectedColor !== '#ffffff'){
-          color = selectedColor;
+        const fileName = dateCell.getAttribute('data-filename');
+        if (fileName) {
+          color = getColorFromFileName(fileName);
         } else {
           const errCode = dateCell.getAttribute('data-err')?.split('.')[0];
           color = getColorByMERR(errCode) || '#06D001';
         }
+
+        console.log(`Processing NO: ${no}, Color: ${color}`);
+
         return copyFilesForGraph(
           no, color, new Date().toISOString(),
           currentConfig.fuelcell_id, currentConfig.powerplant_id
@@ -2997,6 +3000,7 @@ async function handleDateCellClick(event) {
         const dateCell = row.querySelector('.date-cell');
         const dataNo = dateCell.getAttribute('data-no');
         checkbox.checked = !isCurrentlyChecked;
+
         if (!isCurrentlyChecked) {
           if (typeof window.clear_graph === 'function') {
             window.clear_graph();
