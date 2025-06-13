@@ -49,9 +49,19 @@ function displayData(page) {
 
   pagedData.forEach((item) => {
     const row = document.createElement('tr');
+    const comment = item.comment || item.content || '-';
+
+    let color = 'black';
+    if (typeof comment === 'string') {
+      if (comment.includes('CO')) {
+        color = 'red';
+      } else if (comment.includes('EIS')) {
+        color = 'green';
+      }
+    }
     row.innerHTML = `
       <td>${formatDate(item.time)}</td>
-      <td>${item.comment || item.content || '-'}</td>
+      <td style="color: ${color};">${comment}</td>
     `;
     tableBody.appendChild(row);
   });
