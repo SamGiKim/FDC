@@ -23,7 +23,8 @@ export const errorCodeMapping = {
   16: '수소 부족',
   30: '가동준비', 
   31: '정상복귀',
-  32: 'CO피독'        
+  32: 'CO의심',
+  33: 'CO피독'        
 };
 
 // 모든 함수를 BopSensorLabeling 객체 내에 그룹화시킴
