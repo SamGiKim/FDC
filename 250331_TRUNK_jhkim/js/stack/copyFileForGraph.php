@@ -80,11 +80,22 @@ try {
         mkdir($sessionDir, 0755, true);
     }
 
-    $fileNameWithColor = $fileName . "{" . $color . "}";
-    $destinationPath = $sessionDir . '/' . $fileNameWithColor;
+    $hasCopied = false; 
+    // 디렉토리 내 파일 목록을 가져와서 검사
+    foreach (scandir($sessionDir) as $existingFile) {
+        if (strpos($existingFile, $fileName . '{') === 0) {
+            $hasCopied = true;
+            break;
+        }
+    }
 
-    if (!copy($actualPath, $destinationPath)) {
-        throw new Exception("파일 복사 실패: {$actualPath} -> {$destinationPath}");
+    if (!$hasCopied) {
+        $fileNameWithColor = $fileName . "{" . $color . "}";
+        $destinationPath = $sessionDir . '/' . $fileNameWithColor;
+
+        if (!copy($actualPath, $destinationPath)) {
+            throw new Exception("파일 복사 실패: {$actualPath} -> {$destinationPath}");
+        }
     }
 
     // imp 데이터 파일 읽기

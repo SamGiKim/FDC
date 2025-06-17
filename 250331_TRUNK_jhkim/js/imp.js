@@ -1230,7 +1230,7 @@ function Run_ImpedanceChart(ImpedanceChart) {
     
         let min = min_max[0];
         let max = min_max[1];
-        const kan = 51;
+        const kan = 61;
         let arr = Array.from({ length: kan + 5}, (_, i) => min + (i * (max - min)) / (kan - 1));
     
         arr.forEach((val, i) => {
@@ -2488,6 +2488,8 @@ if(TITLE.includes("스택진단")) {
 
 // 파일까지 전부 삭제
 function all_clear_graph() {
+    const colorInput = document.getElementById('graph-color-selector');
+    colorInput.value = '#ffffff';
     window.clearSelectedDirectory();
     // >>> 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
     window.series_cnt = 0;
