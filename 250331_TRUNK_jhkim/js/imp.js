@@ -1006,9 +1006,9 @@ function Run_ImpedanceChart(ImpedanceChart) {
                 
                 // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
                 if(BEST_FIT == "Y_FIT") {
-                    draw_xtick_label2(ctx_layer1, [0, opt.yaxis_max/XY_RATIO], AXIS_RIGHT);
+                    draw_xtick_label2(ctx_layer1, [0, opt.yaxis_max/XY_RATIO], window.fn_mohm2px_x);
                 } else {
-                    draw_xtick_label2(ctx_layer1, [0, opt.xaxis_max], AXIS_RIGHT);
+                    draw_xtick_label2(ctx_layer1, [0, opt.xaxis_max], window.fn_mohm2px_x);
                 }
                 // draw_xtick_label(ctx_layer1, window.fn_px2ohm_x, AXIS_RIGHT);
                 // draw_xtick_label(ctx, window.fn_px2ohm_x, fn_mohm2px_x(window.g_micro_ohm.max_x));
@@ -1023,9 +1023,9 @@ function Run_ImpedanceChart(ImpedanceChart) {
                 
                 // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
                 if(BEST_FIT == "Y_FIT") {
-                    draw_ytick_label2(ctx_layer1, [0, opt.yaxis_max]);
+                    draw_ytick_label2(ctx_layer1, [0, opt.yaxis_max], window.fn_mohm2px_y);
                 } else {
-                    draw_ytick_label2(ctx_layer1, [0, opt.xaxis_max/XY_RATIO]);
+                    draw_ytick_label2(ctx_layer1, [0, opt.xaxis_max/XY_RATIO], window.fn_mohm2px_y);
                 }
                 // draw_ytick_label2(ctx_layer1, window.fn_px2ohm_y);
                 // draw_ytick_label(ctx_layer1, window.fn_px2ohm_y);
@@ -1159,6 +1159,7 @@ function Run_ImpedanceChart(ImpedanceChart) {
             return c;
         }
     }
+
     function get_ctx(canvas) {
         try {
             var ctx = canvas.getContext("2d");
@@ -1220,39 +1221,42 @@ function Run_ImpedanceChart(ImpedanceChart) {
         }
     }
     // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
-    function draw_xtick_label2(ctx, min_max, RIGHT_END) {
-        var TICKS = 27 * 2;
-        var TICK_SPACING = AXIS_WIDTH / TICKS;
-
-        const MIDDLE_OF_X_PX = 345;
-        const WIDTH_OF_WINDOW = 80
+    function draw_xtick_label2(ctx, min_max, x_conv) {
+        const TICKS = 27 * 2;
         ctx.save();
-        var SIZE = 13;
+        const SIZE = 13;
         ctx.font = SIZE + "px sans-serif";
         ctx.textAlign = "center";
-
+    
         let min = min_max[0];
         let max = min_max[1];
-        let kan = 51;
-        let arr = Array.from({length: kan}, (_, i) => min + (i * (max - min)) / (kan - 1));
-        var x_px = AXIS_MARGIN.l-5;
-        arr.map((d, i) => {
-            if(i % 2 == 0) {
-                let tick_value = d;
+        const kan = 51;
+        let arr = Array.from({ length: kan }, (_, i) => min + (i * (max - min)) / (kan - 1));
+    
+        arr.forEach((val, i) => {
+            if (i % 2 === 0) {
+                let tick_value = val;
+                const x_px = Math.round(x_conv(tick_value)) + AXIS_ORIGIN.x;  // 변환함수 적용 후 오리진 보정
+    
                 ctx.save();
-                ctx.translate(x_px, AXIS_ORIGIN.y+15);
+                ctx.translate(x_px, AXIS_ORIGIN.y + 15);
                 ctx.rotate(Math.PI / 2);
-                // ctx.fillText(tick_value, x_px, AXIS_ORIGIN.y+15);
-                if(tick_value > 1000) {
+    
+                if (tick_value > 1000) {
                     tick_value = Math.round(tick_value / 1000) + "K";
-                } else tick_value = Math.round(tick_value);
+                } else {
+                    tick_value = Math.round(tick_value);
+                }
+    
                 ctx.fillText(tick_value, 0, 0);
                 ctx.restore();
             }
-                x_px += TICK_SPACING;
         });
+    
         ctx.restore();
     }
+    
+    
     // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
     // >>>>>>> 230620 hjkim - x축 틱 레이블
     function draw_xtick_label(ctx, px2data, RIGHT_END) {
@@ -1322,41 +1326,37 @@ function Run_ImpedanceChart(ImpedanceChart) {
     // <<<<<<< 230620 hjkim - x축 틱 레이블
     
     // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
-    function draw_ytick_label2(ctx, min_max) {
+    function draw_ytick_label2(ctx, min_max, y_conv) {
         const TICKS = 35;
-        const TICK_SPACING = AXIS_HEIGHT / TICKS;
-
-        const MIDDLE_OF_Y_PX = 345;
-        const WIDTH_OF_WINDOW = 80
         ctx.save();
-        var SIZE = 13;
+        const SIZE = 13;
         ctx.font = SIZE + "px sans-serif";
         ctx.textAlign = "center";
-
+    
         let min = min_max[0];
         let max = min_max[1];
-        let kan = 36;
-        let arr = Array.from({length: kan}, (_, i) => min + (i * (max - min)) / (kan - 1));
-        var TOP_END = AXIS_TOP;
-        var y_px = AXIS_HEIGHT+AXIS_TOP;
-        arr.map((d, i) => {
-            if(i % 2 == 0) {
-                let tick_value = Math.round(d);
-                let round_up = Math.round((tick_value/100)*100);
-                    if(y_px < MIDDLE_OF_Y_PX - WIDTH_OF_WINDOW || y_px > MIDDLE_OF_Y_PX + WIDTH_OF_WINDOW) {
-                        if(tick_value > 1000) {
-                            tick_value = Math.round(tick_value / 1000) + 'K';
-                        }
-                        ctx.fillText(tick_value, AXIS_ORIGIN.x-20, y_px+5);
+        const kan = 36;
+        let arr = Array.from({ length: kan }, (_, i) => min + (i * (max - min)) / (kan - 1));
+    
+        arr.forEach((val, i) => {
+            if (i % 2 === 0) {
+                let tick_value = Math.round(val);
+                const y_px = AXIS_ORIGIN.y - Math.round(y_conv(tick_value));  // y축은 오리진에서 위쪽으로 빼줌
+    
+                const MIDDLE_OF_Y_PX = 345;
+                const WIDTH_OF_WINDOW = 80;
+                if (y_px < MIDDLE_OF_Y_PX - WIDTH_OF_WINDOW || y_px > MIDDLE_OF_Y_PX + WIDTH_OF_WINDOW) {
+                    if (tick_value > 1000) {
+                        tick_value = Math.round(tick_value / 1000) + "K";
                     }
+                    ctx.fillText(tick_value, AXIS_ORIGIN.x - 20, y_px + 5);
+                }
             }
-            y_px -= TICK_SPACING;
         });
-        
-        // var last_tick_value = y_px;
-        // ctx.fillText(Math.round(last_tick_value), AXIS_ORIGIN.x-20, TOP_END);
+    
         ctx.restore();
     }
+    
     // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
     // >>>>>>> 230623 hjkim - y축 틱 레이블
     function draw_ytick_label(ctx, px2data) {
