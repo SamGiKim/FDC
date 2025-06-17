@@ -546,7 +546,7 @@ function updateEisOptions(selectedType) {
   // >>> 250327 hjkim - Added NPULSE >>> 250403 jhkim - Added CALIB
   if (selectedType === 'PULSE' || selectedType === 'NPULSE') {
     eisSelector.innerHTML = ` <option value="2" >Bode plot</option>
-      <option value="3" selected>PULSE</option>
+      <option value="3" selected>CPI</option>
     `;
     pulseCheckBox.style.display = 'flex';
   } else if (selectedType === 'SIN' || selectedType === 'CALIB'){
