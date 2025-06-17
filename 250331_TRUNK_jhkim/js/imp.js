@@ -1231,70 +1231,33 @@ function Run_ImpedanceChart(ImpedanceChart) {
         let min = min_max[0];
         let max = min_max[1];
         const kan = 51;
-        let arr = Array.from({ length: kan }, (_, i) => min + (i * (max - min)) / (kan - 1));
+        let arr = Array.from({ length: kan + 5}, (_, i) => min + (i * (max - min)) / (kan - 1));
     
         arr.forEach((val, i) => {
             if (i % 2 === 0) {
                 let tick_value = val;
                 const x_px = Math.round(x_conv(tick_value)) + AXIS_ORIGIN.x;  // 변환함수 적용 후 오리진 보정
-    
                 ctx.save();
                 ctx.translate(x_px, AXIS_ORIGIN.y + 15);
                 ctx.rotate(Math.PI / 2);
-    
+
                 if (tick_value > 1000) {
                     tick_value = Math.round(tick_value / 1000) + "K";
                 } else {
                     tick_value = Math.round(tick_value);
                 }
-    
                 ctx.fillText(tick_value, 0, 0);
                 ctx.restore();
             }
         });
-    
         ctx.restore();
     }
-    
-    
     // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
+
     // >>>>>>> 230620 hjkim - x축 틱 레이블
     function draw_xtick_label(ctx, px2data, RIGHT_END) {
         var TICKS = 27 * 2;
         var TICK_SPACING = AXIS_WIDTH / TICKS;
-
-        const MIDDLE_OF_X_PX = 345;
-        const WIDTH_OF_WINDOW = 80
-        ctx.save();
-        var SIZE = 13;
-        ctx.font = SIZE + "px sans-serif";
-        ctx.textAlign = "center";
-        // for(var x_px = AXIS_ORIGIN.x; x_px < RIGHT_END-50; x_px += 50) {
-        for(var x_px = AXIS_ORIGIN.x-5; x_px < RIGHT_END; x_px += TICK_SPACING) {
-            var tick_value = Math.round(px2data(x_px));
-            let round_up = Math.round((tick_value/100)*100);
-            if((tick_value - round_up) < 100) {
-                //if(x_px < MIDDLE_OF_X_PX - WIDTH_OF_WINDOW || x_px > MIDDLE_OF_X_PX + WIDTH_OF_WINDOW) {
-                ctx.save();
-                ctx.translate(x_px, AXIS_ORIGIN.y+15);
-                ctx.rotate(Math.PI / 2);
-                // ctx.fillText(tick_value, x_px, AXIS_ORIGIN.y+15);
-                ctx.fillText(tick_value, 0, 0);
-                ctx.restore();
-                //}
-            }
-        }
-        // var last_tick_value = px2data(RIGHT_END);
-        // ctx.save();
-        // ctx.translate(RIGHT_END, AXIS_ORIGIN.y+15);
-        // ctx.fillText(Math.round(last_tick_value), 0, 0);
-        // ctx.restore();
-        ctx.restore();
-    }
-    function draw_xtick_label(ctx, px2data, RIGHT_END) {
-        var TICKS = 27 * 2;
-        var TICK_SPACING = AXIS_WIDTH / TICKS;
-
         const MIDDLE_OF_X_PX = 345;
         const WIDTH_OF_WINDOW = 80
         ctx.save();
@@ -1335,16 +1298,16 @@ function Run_ImpedanceChart(ImpedanceChart) {
     
         let min = min_max[0];
         let max = min_max[1];
-        const kan = 36;
-        let arr = Array.from({ length: kan }, (_, i) => min + (i * (max - min)) / (kan - 1));
+        const kan = 41;
+        let arr = Array.from({ length: kan + 5}, (_, i) => min + (i * (max - min)) / (kan - 1));
     
         arr.forEach((val, i) => {
             if (i % 2 === 0) {
                 let tick_value = Math.round(val);
                 const y_px = AXIS_ORIGIN.y - Math.round(y_conv(tick_value));  // y축은 오리진에서 위쪽으로 빼줌
-    
                 const MIDDLE_OF_Y_PX = 345;
                 const WIDTH_OF_WINDOW = 80;
+
                 if (y_px < MIDDLE_OF_Y_PX - WIDTH_OF_WINDOW || y_px > MIDDLE_OF_Y_PX + WIDTH_OF_WINDOW) {
                     if (tick_value > 1000) {
                         tick_value = Math.round(tick_value / 1000) + "K";
@@ -1353,16 +1316,14 @@ function Run_ImpedanceChart(ImpedanceChart) {
                 }
             }
         });
-    
         ctx.restore();
     }
-    
     // <<< 250321 hjkim - x,y 축 최대값 올림값 산출
+
     // >>>>>>> 230623 hjkim - y축 틱 레이블
     function draw_ytick_label(ctx, px2data) {
         const TICKS = 35;
         const TICK_SPACING = AXIS_HEIGHT / TICKS;
-
         const MIDDLE_OF_Y_PX = 345;
         const WIDTH_OF_WINDOW = 80
         ctx.save();
@@ -1379,7 +1340,6 @@ function Run_ImpedanceChart(ImpedanceChart) {
                     ctx.fillText(tick_value, AXIS_ORIGIN.x-20, y_px+5);
                 }
             }
-            
         }
         var last_tick_value = Math.abs(px2data(TOP_END));
         ctx.fillText(Math.round(last_tick_value), AXIS_ORIGIN.x-20, TOP_END);
