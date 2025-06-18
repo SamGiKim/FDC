@@ -1184,19 +1184,17 @@ function Run_ImpedanceChart(ImpedanceChart) {
         for (var i = 0; i < data.length; i += 1) {
             var x = data[i][1];
             var y_1 = data[i][2];
-            var x_px = x_conv(x);
-            var y_px = y_conv(y_1);
+
             if(isNaN(x) || isNaN(y_1)) {
                 console.log("draw_scatter(x,y):", x, y);
                 console.log("draw_scatter(x_px,y_px):", x_px, y_px);
             }
-            x_px = Math.round(AXIS_ORIGIN.x + x_px);
-            y_px = Math.round(AXIS_ORIGIN.y - y_px);
+            const x_px = Math.round(x_conv(x) + AXIS_ORIGIN.x);
+            const y_px = Math.round(AXIS_ORIGIN.y - y_conv(y_1));
             // STK  STYLE
             ctx.strokeStyle = color;
-            var radius = 5;
             ctx.beginPath();
-            ctx.arc(x_px, y_px, radius, 0, Math.PI * 2);
+            ctx.arc(x_px, y_px, 5, 0, Math.PI * 2);
             ctx.stroke();
             // >>> 250217 hjkim - 처음과 끝점 검은점으로 표시 출력
             if(i == 0 || i == data.length-1) { 
@@ -1209,7 +1207,7 @@ function Run_ImpedanceChart(ImpedanceChart) {
             // <<< 250217 hjkim - 처음과 끝점 검은점으로 표시 출력
             // >>>>>>> 230620 hjkim - DEBUG
             if(i == 0 || i == data.length-1) { // 처음과 끝에 출력
-                ctx.font = "13 px sans-serif";
+                ctx.font = "13px sans-serif";
                 ctx.textAlign = "center";
                 var value = `(${Math.round(x)}, ${Math.round(y_1)})`;
                 // >>> 250217 hjkim - 스택진단 그래프에서 레이블이 겹치는 현상 수정
@@ -1222,7 +1220,6 @@ function Run_ImpedanceChart(ImpedanceChart) {
     }
     // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
     function draw_xtick_label2(ctx, min_max, x_conv) {
-        const TICKS = 27 * 2;
         ctx.save();
         const SIZE = 13;
         ctx.font = SIZE + "px sans-serif";
@@ -1235,18 +1232,12 @@ function Run_ImpedanceChart(ImpedanceChart) {
     
         arr.forEach((val, i) => {
             if (i % 2 === 0) {
-                let tick_value = val;
-                const x_px = Math.round(x_conv(tick_value)) + AXIS_ORIGIN.x;  // 변환함수 적용 후 오리진 보정
+                const x_px = Math.round(x_conv(val) + AXIS_ORIGIN.x);
+                let label = val > 1000 ? Math.round(val/1000) + "K" : Math.round(val);
                 ctx.save();
                 ctx.translate(x_px, AXIS_ORIGIN.y + 15);
                 ctx.rotate(Math.PI / 2);
-
-                if (tick_value > 1000) {
-                    tick_value = Math.round(tick_value / 1000) + "K";
-                } else {
-                    tick_value = Math.round(tick_value);
-                }
-                ctx.fillText(tick_value, 0, 0);
+                ctx.fillText(label, 0, 0);
                 ctx.restore();
             }
         });
@@ -1290,7 +1281,6 @@ function Run_ImpedanceChart(ImpedanceChart) {
     
     // >>> 250321 hjkim - x,y 축 최대값 올림값 산출
     function draw_ytick_label2(ctx, min_max, y_conv) {
-        const TICKS = 35;
         ctx.save();
         const SIZE = 13;
         ctx.font = SIZE + "px sans-serif";
@@ -1304,15 +1294,13 @@ function Run_ImpedanceChart(ImpedanceChart) {
         arr.forEach((val, i) => {
             if (i % 2 === 0) {
                 let tick_value = Math.round(val);
-                const y_px = AXIS_ORIGIN.y - Math.round(y_conv(tick_value));  // y축은 오리진에서 위쪽으로 빼줌
+                const y_px = Math.round(AXIS_ORIGIN.y - y_conv(tick_value));  // y축은 오리진에서 위쪽으로 빼줌
                 const MIDDLE_OF_Y_PX = 345;
                 const WIDTH_OF_WINDOW = 80;
 
                 if (y_px < MIDDLE_OF_Y_PX - WIDTH_OF_WINDOW || y_px > MIDDLE_OF_Y_PX + WIDTH_OF_WINDOW) {
-                    if (tick_value > 1000) {
-                        tick_value = Math.round(tick_value / 1000) + "K";
-                    }
-                    ctx.fillText(tick_value, AXIS_ORIGIN.x - 20, y_px + 5);
+                    let label = tick_value > 1000 ? Math.round(tick_value / 1000) + "K" : Math.round(tick_value);
+                    ctx.fillText(label, AXIS_ORIGIN.x - 20, y_px + 5);
                 }
             }
         });
