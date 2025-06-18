@@ -1233,7 +1233,7 @@ function Run_ImpedanceChart(ImpedanceChart) {
         arr.forEach((val, i) => {
             if (i % 2 === 0) {
                 const x_px = Math.round(x_conv(val) + AXIS_ORIGIN.x);
-                let label = val > 1000 ? Math.round(val/1000) + "K" : Math.round(val);
+                let label = Math.round(val);
                 ctx.save();
                 ctx.translate(x_px, AXIS_ORIGIN.y + 15);
                 ctx.rotate(Math.PI / 2);
@@ -1299,7 +1299,7 @@ function Run_ImpedanceChart(ImpedanceChart) {
                 const WIDTH_OF_WINDOW = 80;
 
                 if (y_px < MIDDLE_OF_Y_PX - WIDTH_OF_WINDOW || y_px > MIDDLE_OF_Y_PX + WIDTH_OF_WINDOW) {
-                    let label = tick_value > 1000 ? Math.round(tick_value / 1000) + "K" : Math.round(tick_value);
+                    let label = Math.round(tick_value);
                     ctx.fillText(label, AXIS_ORIGIN.x - 20, y_px + 5);
                 }
             }
