@@ -5795,15 +5795,12 @@ var opts = () => {
                 (u, si) => {
                     let ctx = u.ctx;
                     ctx.save();
-                    // 
                     let s  = u.series[si];
                     let xd = u.data[0];
                     let yd = u.data[si];
                     // console.log(s, xd, yd);
-                    // 
                     let [i0, i1] = s.idxs;
                     // console.log(i0, i1);
-                    // 
                     let x0 = u.valToPos(xd[i0], 'x', true);
                     let y0 = u.valToPos(yd[i0], 'y', true);
                     let x1 = u.valToPos(xd[i1], 'x', true);
@@ -5811,21 +5808,16 @@ var opts = () => {
                     console.log(xd[i0], yd[i0], xd[i1], yd[i1]);
                     if(isFinite(y0) == false) y0 = 65535;
                     if(isFinite(y1) == false) y1 = 65535;
-                    // 
                     const offset = (s.width % 2) / 2;
                     // console.log(offset);
-                    // 
                     ctx.translate(offset, offset);
-                    // 
                     ctx.beginPath();
                     ctx.strokeStyle = s._stroke;
                     ctx.setLineDash([5, 5]);
                     ctx.moveTo(x0, y0);
                     ctx.lineTo(x1, y1);
                     ctx.stroke();
-                    // 
                     ctx.translate(-offset, -offset);
-                    // 
                     ctx.restore();
                 }
             ]
@@ -5839,6 +5831,7 @@ var opts = () => {
 function parse_pulse_handler(json) {
     const raw = json.raw;
     const ma = json.ma;
+    const meta = json.meta;
 
     const time = raw.time.map(t => t * 1e-6);
     const voltage = raw.voltage;
@@ -5846,13 +5839,53 @@ function parse_pulse_handler(json) {
     const ma_voltage = ma.voltage;
     const ma_current = ma.current;
 
-    return [
-        time,
-        voltage,
-        current,
-        ma_voltage,
-        ma_current
-    ];
+    const extractPoint = p => p ? [p[0] * 1e-6] : []; // x 좌표
+    const extractValue = p => p ? [p[1]] : [];        // y 좌표
+
+    const meta_ma_ps_x = extractPoint(meta.MA.PS);
+    const meta_ma_ps_y = extractValue(meta.MA.PS);
+    const meta_ma_pm_x = extractPoint(meta.MA.PM);
+    const meta_ma_pm_y = extractValue(meta.MA.PM);
+    const meta_ma_pe_x = extractPoint(meta.MA.PE);
+    const meta_ma_pe_y = extractValue(meta.MA.PE);
+    const meta_ma_p1_x = extractPoint(meta.MA.P1);
+    const meta_ma_p1_y = extractValue(meta.MA.P1);
+    const meta_ma_p3_x = extractPoint(meta.MA.P3);
+    const meta_ma_p3_y = extractValue(meta.MA.P3);
+    const meta_ma_p4_x = extractPoint(meta.MA.P4);
+    const meta_ma_p4_y = extractValue(meta.MA.P4);
+
+    const meta_gs_p3_x = extractPoint(meta.GS.P3);
+    const meta_gs_p3_y = extractValue(meta.GS.P3);
+    const meta_gs_pm_x = extractPoint(meta.GS.PM);
+    const meta_gs_pm_y = extractValue(meta.GS.PM);
+    const meta_gs_pq_x = extractPoint(meta.GS.PQ);
+    const meta_gs_pq_y = extractValue(meta.GS.PQ);
+
+    return {
+        data: [
+            time,
+            voltage,
+            current,
+            ma_voltage,
+            ma_current
+        ],
+        metaPoints: {
+            MA: {
+                P1: [meta_ma_p1_x, meta_ma_p1_y],
+                P3: [meta_ma_p3_x, meta_ma_p3_y],
+                P4: [meta_ma_p4_x, meta_ma_p4_y],
+                PS: [meta_ma_ps_x, meta_ma_ps_y],
+                PE: [meta_ma_pe_x, meta_ma_pe_y],
+                PM: [meta_ma_pm_x, meta_ma_pm_y],
+            },
+            GS: {
+                P3: [meta_gs_p3_x, meta_gs_p3_y],
+                PM: [meta_gs_pm_x, meta_gs_pm_y],
+                PQ: [meta_gs_pq_x, meta_gs_pq_y],
+            }
+        }
+    };
 }
 
 
@@ -6030,7 +6063,7 @@ class PulseGraphInStack extends HTMLElement {
                 const json = await res.json();
                 const parsed = parse_pulse_handler(json);
         
-                this.uplot.setData(parsed);
+                this.uplot.setData(parsed.data);
             } catch (e) {
                 console.error(`Failed to load or parse ${this.fullpaths[0]}`, e);
             } finally {
@@ -6046,7 +6079,7 @@ class PulseGraphInStack extends HTMLElement {
                     if (!res.ok) throw new Error(`Fetch failed: ${path}`);
                     const json = await res.json();
                     const parsed = parse_pulse_handler(json);
-                    allData.push(parsed);
+                    allData.push(parsed.data);
                 } catch (e) {
                     console.error(`Failed to load or parse ${path}`, e);
                 } finally {
@@ -6064,7 +6097,7 @@ class PulseGraphInStack extends HTMLElement {
                     if (!res.ok) throw new Error(`Fetch failed: ${path}`);
                     const json = await res.json();
                     const parsed = parse_pulse_handler(json);
-                    allData.push(parsed);
+                    allData.push(parsed.data);
                 } catch (e) {
                     console.error(`Failed to load or parse ${path}`, e);
                 } finally {
