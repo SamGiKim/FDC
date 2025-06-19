@@ -262,6 +262,11 @@ sup {
   mask-image: var(--stack-1);
   -webkit-mask-image: var(--stack-1);
 }
+.aitraining-svg {
+  background-color: var(--normal-1-color);
+  mask-image: var(--aitraining-1);
+  -webkit-mask-image: var(--aitraining-1);
+}
 .arrow-right-svg {
   background-color: var(--normal-1-color);
   mask-image: var(--arrow-1);

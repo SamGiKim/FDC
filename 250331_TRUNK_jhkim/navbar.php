@@ -41,12 +41,12 @@
                         <span class="sub-page" data-i18n="nav.admin">Admin</span>
                     </a>
                 </li> -->
-                <!--<li>
+                <li>
                     <a href="aitraining.html">
                         <span class="aitraining-svg ic-font ic-font-2-4rem"></span>
                         <span class="sub-page" data-i18n="nav.ai_training">AI Training</span>
                     </a>
-                </li>-->
+                </li>
                 <!-- <li>
                     <a href="analyze.html">
                         <span class="icon-machine-manage"></span>
