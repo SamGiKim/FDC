@@ -859,15 +859,10 @@ if (bookmarkTabContainer) {
         .querySelectorAll(".tab-item a")
         .forEach((tab) => tab.classList.remove("active"));
       target.classList.add("active");
-
       const bookmarkId = target.getAttribute("data-bookmark-id");
       if (bookmarkId) {
         currentPageContext = 'bookmark';
         currentBookmarkId = bookmarkId;
-        filterDataByBookmark(bookmarkId).then(() => {
-        // 북마크 데이터 로드 후 체크박스 초기화
-        initCheckboxStateAndSelectAll(false); // 체크박스 선택 해제
-        });
       }
     }
   });
@@ -2644,20 +2639,24 @@ document
 function handleTabClick(event) {
   const target = event.target.closest("a");
   if (target) {
+    if (target.classList.contains('active')) {
+      return;
+    }
+
     document
       .querySelectorAll(".tab-item a")
       .forEach((tab) => tab.classList.remove("active"));
     target.classList.add("active");
 
     // 항목관리 하는 + 버튼 클릭 확인
-  if (target.parentElement.classList.contains("bmk-list-mng-plus-btn") || 
-  target.classList.contains("plus")) {
-  console.log('북마크 관리 플러스 버튼 클릭');
-  event.stopPropagation(); // 이벤트 버블링 중지
-  event.preventDefault(); // 기본 이벤트 중지
-  openModal('manage-tab-modal', 'manage'); // 모달 열기, 두 번째 파라미터 추가
-  return; // 데이터 조회 로직 실행 안함
-  }
+    if (target.parentElement.classList.contains("bmk-list-mng-plus-btn") || 
+    target.classList.contains("plus")) {
+    console.log('북마크 관리 플러스 버튼 클릭');
+    event.stopPropagation(); // 이벤트 버블링 중지
+    event.preventDefault(); // 기본 이벤트 중지
+    openModal('manage-tab-modal', 'manage'); // 모달 열기, 두 번째 파라미터 추가
+    return; // 데이터 조회 로직 실행 안함
+    }
 
     // 전체항목 탭을 클릭했는지 확인
     if (target.classList.contains("all-item-tab")) {
