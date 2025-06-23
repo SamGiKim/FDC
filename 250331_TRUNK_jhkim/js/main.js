@@ -421,8 +421,7 @@ var TimeSeriesPlot = {};
         if(g_el.legend_btn == null) { console.error("legend_btn 가 없습니다."); return; }
         if (g_el.legend_btn.innerText == "범례숨김") {
             g_el.legend_btn.innerText = "범례보임";
-        }
-        else {
+        } else {
             g_el.legend_btn.innerText = "범례숨김";
         }
         if(g_el.custom_legend == null) { console.error("custom_legend 가 없습니다."); return; }
@@ -433,11 +432,10 @@ var TimeSeriesPlot = {};
             g_el.graph_main.className += " expand";
             if(g_el.graph_controller == null) { console.error("graph_controller가 없습니다."); return; }
             g_el.graph_controller.className += " shrink";
-        }
-        else {
+        } else {
             if(g_el.custom_legend == null) { console.error("custom_legend 가 없습니다."); return; }
             g_el.custom_legend.setAttribute("style", "");
-            //
+
             if(g_el.graph_main == null) { console.error("graph_main 이 없습니다."); return; }
             g_el.graph_main.className = _replaceAll(g_el.graph_main.className, " expand", "");
             
@@ -610,8 +608,7 @@ var TimeSeriesPlot = {};
     function toggle_highlight_line(serie) {
         if (series.lines.lineWidth < 2) {
             series.lines.lineWidth *= 3;
-        }
-        else {
+        } else {
             series.lines.lineWidth = 1.5;
         }
         g_graph_inst.draw();
@@ -819,18 +816,15 @@ var TimeSeriesPlot = {};
                     TIME_QUEUE.push(setTimeout(packet2, DELAY.DOUBLE));
                     TIME_QUEUE.push(setTimeout(packet3, DELAY.TIMEOUT));
                     TIME_QUEUE.push(setTimeout(drop_packet, DELAY.DROP));
-                }
-                else if (CLICK_CNT == 2) {
+                } else if (CLICK_CNT == 2) {
                     if ((new Date().getTime() - FIRST_CLICK) <= DELAY.DOUBLE) {
                         // console.log("double click", TIME_QUEUE);
                         clearTimeout(TIME_QUEUE[0]); // SINGLE CLICK 취소
-                    }
-                    else {
+                    } else {
                         // console.log("loose double click", TIME_QUEUE);
                         clear_time_queue();
                     }
-                }
-                else {
+                } else {
                     // console.log("triple click", CLICK_CNT, TIME_QUEUE);
                     clearTimeout(TIME_QUEUE[0]); // SINGLE CLICK 취소
                     clearTimeout(TIME_QUEUE[1]); // DOUBLE CLICK 취소
@@ -986,9 +980,7 @@ var TimeSeriesPlot = {};
                 || (d.label.indexOf("Current") == 0)
                 // <<< 240307 hjkim - 주요 변수 추가
             )); // 범례 센서 리스트
-        }
-        // >>> 240112 hjkim - SW센서 / BOP 진단결과
-        else {
+        } else {
             g_graph_data  = DataPreprocessing.json_to_flotdata(json);
         }
         return g_graph_data;
@@ -1179,8 +1171,7 @@ var TimeSeriesPlot = {};
         if (g_toggle_marking) {
             g_toggle_marking = false;
             clear_mark_opt();
-        }
-        else {
+        } else {
             g_toggle_marking = true;
             init_mark_opt(g_graph_inst.getOptions(), g_graph_data, g_event_data);
         }
@@ -1204,25 +1195,22 @@ var TimeSeriesPlot = {};
                 var tag_pos        = 0;
                 // >>>>>>> 이벤트 유형 분류
                 try {
-                if (event[i].Type.includes('N')) { // N_ : 정상
-                    r.push({ color: COLOR_GREEN_OPACITY, xaxis: { from: event[i].sTime, to: event[i].eTime } }); // 레이블 마커 색칠
-                    tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
-                    r.push({ color: COLOR_GREEN, xaxis: { from: tag_pos, to: tag_pos - 1, tag: event[i].Memo } }); // 레이블 태그명
-                }
-                else if (event[i].Type.includes('C')) { // C_ : 온도
-                    tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
-                    r.push({ color: COLOR_GREY, xaxis: { from: tag_pos, to: tag_pos, tag: event[i].Memo } }); // 레이블 태그명
-                }
-                else if (event[i].Type.includes('IM')) { // IM : 임피던스 측정
-                    r.push({ color: COLOR_YELLOW_OPACITY, xaxis: { from: event[i].sTime, to: event[i].eTime } }); // 레이블 마커 색칠
-                    tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
-                    r.push({ color: COLOR_BLACK, xaxis: { from: tag_pos, to: tag_pos - 1, tag: event[i].Memo } }); // 레이블 태그명
-                }
-                else { // FT : 실패 등등..
-                    r.push({ color: COLOR_GREY_OPACITY, xaxis: { from: event[i].sTime, to: event[i].eTime } }); // 레이블 마커 색칠
-                    tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
-                    r.push({ color: COLOR_RED_OPACITY, xaxis: { from: tag_pos, to: tag_pos - 1, tag: event[i].Memo } }); // 레이블 태그명
-                }
+                    if (event[i].Type.includes('N')) { // N_ : 정상
+                        r.push({ color: COLOR_GREEN_OPACITY, xaxis: { from: event[i].sTime, to: event[i].eTime } }); // 레이블 마커 색칠
+                        tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
+                        r.push({ color: COLOR_GREEN, xaxis: { from: tag_pos, to: tag_pos - 1, tag: event[i].Memo } }); // 레이블 태그명
+                    } else if (event[i].Type.includes('C')) { // C_ : 온도
+                        tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
+                        r.push({ color: COLOR_GREY, xaxis: { from: tag_pos, to: tag_pos, tag: event[i].Memo } }); // 레이블 태그명
+                    } else if (event[i].Type.includes('IM')) { // IM : 임피던스 측정
+                        r.push({ color: COLOR_YELLOW_OPACITY, xaxis: { from: event[i].sTime, to: event[i].eTime } }); // 레이블 마커 색칠
+                        tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
+                        r.push({ color: COLOR_BLACK, xaxis: { from: tag_pos, to: tag_pos - 1, tag: event[i].Memo } }); // 레이블 태그명
+                    } else { // FT : 실패 등등..
+                        r.push({ color: COLOR_GREY_OPACITY, xaxis: { from: event[i].sTime, to: event[i].eTime } }); // 레이블 마커 색칠
+                        tag_pos = (event[i].eTime - event[i].sTime) / 2 + event[i].sTime;
+                        r.push({ color: COLOR_RED_OPACITY, xaxis: { from: tag_pos, to: tag_pos - 1, tag: event[i].Memo } }); // 레이블 태그명
+                    }
                 } catch(err) { console.log(err); }
             }
             return r;
@@ -1308,8 +1296,7 @@ var TimeSeriesPlot = {};
                     html += "<b><u>" + data[i].label + ":" + (ypos);
                     // 데이터 값
                     html += "</u></b>" + "<br>";
-                }
-                else {
+                } else {
                     html += "<div style='width:4px;height:0;border:5px solid ";
                     html += data[i].color + ";overflow:hidden;display:inline-block;'></div> ";
                     // 레이블 명 : 데이터 값
@@ -1539,8 +1526,7 @@ var TimeSeriesPlot = {};
             let _color = color_palette[i];
             if (_includes(k, "kPa")) {
                 series = { label: k, data: [], color: _color, yaxis: 2 };
-            }
-            else {
+            } else {
                 series = { label: k, data: [], color: _color };
             }
             for (var j = 0; j < arr.length; j += 1) {
@@ -1552,8 +1538,7 @@ var TimeSeriesPlot = {};
                     series.data.push([t, arr[j][k]]);
                     // $FlowFixMe
                     this.prev_t = t;
-                }
-                else series.data.push([arr[j]["Time"], arr[j][k]]);
+                } else series.data.push([arr[j]["Time"], arr[j][k]]);
             }
             flotdata.push(series);
         }
@@ -1929,12 +1914,10 @@ function access(uri, cb) {
             if (xhr.readyState === 4) {
                 if (xhr.status === 200) {
                     return cb(true, uri, xhr.responseText);
-                }
-                else {
+                } else {
                     return cb(false, uri);
                 }
-            }
-            else {}
+            } else {}
         };
         xhr.onerror = function () {
             return cb(false, uri);
@@ -2022,8 +2005,7 @@ function refresh_legend(e) {
                             target.style.textDecoration = "line-through";
                             target.style.color = "grey";
                             target.setAttribute(DATA_LEGEND_CHECKED, "false");
-                        }
-                        else {
+                        } else {
                             // target.style = "text-decoration:none;";
                             target.style.textDecoration = "none";
                             target.setAttribute(DATA_LEGEND_CHECKED, "true");
@@ -3446,8 +3428,7 @@ channel1.port2.onmessage = (e) => {
 
                         break;
                 }
-            }
-            else if(e.data.status.indexOf("FAIL") == 0) {
+            } else if(e.data.status.indexOf("FAIL") == 0) {
                 switch(e.data.status) {
                     case "FAIL_ADD":
                         // alert("레이블링 추가에 실패했습니다."); mjkoo 주석
@@ -3493,8 +3474,7 @@ channel1.port2.onmessage = (e) => {
                         // <<< 240724 hjkim - BOP 정상학습 데이터 갱신
                         break;
                 }
-            }
-            else if(e.data.status.indexOf("FAIL") == 0) {
+            } else if(e.data.status.indexOf("FAIL") == 0) {
                 switch(e.data.status) {
                     case "FAIL_ADD":
                         // alert("레이블링 추가에 실패했습니다.");
@@ -4862,8 +4842,7 @@ if(is_title("AI 학습")) {
                     html += "<b><u>" + data[i].label + ":" + (ypos);
                     // 데이터 값
                     html += "</u></b>" + "<br>";
-                }
-                else {
+                } else {
                     html += "<div style='width:4px;height:0;border:5px solid ";
                     html += data[i].color + ";overflow:hidden;display:inline-block;'></div> ";
                     // 레이블 명 : 데이터 값
@@ -5114,8 +5093,7 @@ if(is_title("AI 학습")) {
                     html += "<b><u>" + data[i].label + ":" + (ypos);
                     // 데이터 값
                     html += "</u></b>" + "<br>";
-                }
-                else {
+                } else {
                     html += "<div style='width:4px;height:0;border:5px solid ";
                     html += data[i].color + ";overflow:hidden;display:inline-block;'></div> ";
                     // 레이블 명 : 데이터 값
