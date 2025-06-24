@@ -430,7 +430,7 @@ setSensorLabelingModalData: async function(mode) {
   if(mode === 'add'){
     const startTime = document.getElementById('start_t').value;
     const endTime = document.getElementById('end_t').value;
-    const { powerplant_id, group_id, fuelcell_id, name } = getCurrentConfig();
+    const { powerplant_id, group_id, fuelcell_id, name } = await getCurrentConfig();
       
     // 선택된 날짜 가져오기
     const selectedDate = document.querySelector('.selected-box .date-div').textContent.trim();
@@ -446,8 +446,8 @@ setSensorLabelingModalData: async function(mode) {
     
     // 필드 초기화
     document.getElementById('bop-error-codes').value = '';
-    document.getElementById('test-temperature').value = '';
-    document.getElementById('humidity').value = '';
+    document.getElementById('test-temperature').value = 0;
+    document.getElementById('humidity').value = 0;
     document.getElementById('history').value = '';
   }else if(mode === 'detail'){
     // 상세보기 모드일때에는 db에서 가져온 데이터 사용
@@ -609,7 +609,7 @@ updateSensorLabelingData() {
     
     const startTime = document.getElementById('start_t').value;
     const endTime = document.getElementById('end_t').value;
-    const { powerplant_id, group_id, fuelcell_id } = getCurrentConfig();
+    const { powerplant_id, group_id, fuelcell_id } = await getCurrentConfig();
     const errorCode = document.getElementById('bop-error-codes').value;
 
     console.log('Selected errorCode:', errorCode); // 디버깅용 로그
@@ -638,9 +638,9 @@ updateSensorLabelingData() {
     const newData = {
       s_date: fullStartTime,
       e_date: fullEndTime,
-      powerplant_id,
-      group_id,
-      fuelcell_id,
+      powerplant_id: powerplant_id,
+      group_id: group_id,
+      fuelcell_id: fuelcell_id,
       err_code: errorCodeInt,
       err_name: err_name,
       humidity: humidity,
@@ -666,8 +666,8 @@ updateSensorLabelingData() {
       modalSW('#sensor-labeling-modal', 'close');
       // 입력 필드 초기화
       document.getElementById('bop-error-codes').value = '';
-      document.getElementById('test-temperature').value = '';
-      document.getElementById('humidity').value = '';
+      document.getElementById('test-temperature').value = 0;
+      document.getElementById('humidity').value = 0;
       document.getElementById('history').value = '';
       // 테이블 데이터 새로고침
       this.fetchSensorLabelingData();
