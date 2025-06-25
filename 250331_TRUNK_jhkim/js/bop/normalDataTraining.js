@@ -117,7 +117,7 @@ function handleButtonClick() {
   // 서버로 전송되는 데이터 로깅
   console.log('서버로 전송되는 데이터:', JSON.stringify(requestData, null, 2));
 
-  sendPostRequest('http://112.216.161.114:8082/api/nm_training/', requestData)
+  sendPostRequest('http://192.168.100.111:8082/api/nm_training/', requestData)
     .then(result => {
       alert('데이터가 성공적으로 전송되었습니다.');
       // 서버 응답을 JSON 문자열로 변환하여 출력

@@ -230,7 +230,7 @@ function getContentCell(item) {
 
 ///////////////////////////////////////////////////////////////////////////
 // 시간 추가
-export function addTimePeriod() {
+export async function addTimePeriod() {
   const startTime = document.getElementById('start_t').value;
   const endTime = document.getElementById('end_t').value;
   
@@ -243,7 +243,7 @@ export function addTimePeriod() {
   // getCurrentConfig와 URL 매개변수 둘 다 시도
   let config;
   try {
-    config = getCurrentConfig();
+    config = await getCurrentConfig();
   } catch (error) {
     console.error('getCurrentConfig 오류:', error);
     config = {};
@@ -404,7 +404,7 @@ function deleteSelectedRows() {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// 정상데이터생성(http://112.216.161.114:8082/api/nm_merge/ 여기로 보냄)
+// 정상데이터생성(http://192.168.100.111:8082/api/nm_merge/ 여기로 보냄)
 async function createNormalData() {
   const fileNameInput = document.getElementById('file-name-input');
   const fileName = fileNameInput.value.trim();
@@ -422,7 +422,7 @@ async function createNormalData() {
   // getCurrentConfig와 URL 매개변수 둘 다 시도
   let config;
   try {
-    config = getCurrentConfig();
+    config = await getCurrentConfig();
   } catch (error) {
     console.error('getCurrentConfig 오류:', error);
     config = {};
@@ -507,7 +507,7 @@ async function createNormalData() {
   console.log('서버로 전송되는 데이터:', JSON.stringify(data, null, 2));
 
   try {
-      const response = await fetch('http://112.216.161.114:8082/api/nm_merge/', {
+      const response = await fetch('http://192.168.100.111:8082/api/nm_merge/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json; charset=UTF-8', 
@@ -590,7 +590,7 @@ async function checkFileExists(fileName, powerplantId, fuelcellId) {
 ///////////////////////////////////////////////////////////////////////////
 // [LST추가] 버튼 누르면 #normal-data-modal 에 띄어주고
 // get_normal_data_file_list.php 통해서 리스트 보여줌
-function bringNormalDataFileList() {
+async function bringNormalDataFileList() {
   // URL에서 매개변수 가져오기
   const urlParams = new URLSearchParams(window.location.search);
   const urlPlant = urlParams.get('plant');
@@ -600,7 +600,7 @@ function bringNormalDataFileList() {
   // getCurrentConfig와 URL 매개변수 둘 다 시도
   let config;
   try {
-    config = getCurrentConfig();
+    config = await getCurrentConfig();
   } catch (error) {
     console.error('getCurrentConfig 오류:', error);
     config = {};
@@ -673,7 +673,7 @@ function bringNormalDataFileList() {
 }
 
 // [파일추가] 모달에서 [확인] 버튼 클릭 시, api_normaldata 테이블로 데이터 추가
-function addSelectedFiles() {
+async function addSelectedFiles() {
   const fileList = document.getElementById('list-of-filenames');
   const selectedFiles = Array.from(fileList.querySelectorAll('input[type="checkbox"]:checked'))
     .map(checkbox => checkbox.getAttribute('data-filename'));
@@ -692,7 +692,7 @@ function addSelectedFiles() {
   // getCurrentConfig와 URL 매개변수 둘 다 시도
   let config;
   try {
-    config = getCurrentConfig();
+    config = await getCurrentConfig();
   } catch (error) {
     console.error('getCurrentConfig 오류:', error);
     config = {};
@@ -838,7 +838,7 @@ function bringNormalDataFileListForAppend() {
 }
 
 // appendSelectedFiles 함수
-function appendSelectedFiles() {
+async function appendSelectedFiles() {
   const fileList = document.getElementById('list-of-filenames');
   const selectedFiles = Array.from(fileList.querySelectorAll('input[type="checkbox"]:checked'))
     .map(checkbox => checkbox.getAttribute('data-filename'));
@@ -862,7 +862,7 @@ function appendSelectedFiles() {
       };
     });
 
-  const { powerplant_id, group_id, fuelcell_id } = getCurrentConfig();
+  const { powerplant_id, group_id, fuelcell_id } = await getCurrentConfig();
   
   const data = {
     powerplant_id,

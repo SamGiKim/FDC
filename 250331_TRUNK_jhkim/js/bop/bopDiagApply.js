@@ -369,7 +369,7 @@ export class DiagModelSelector {
         // console.log('Sending data to API with:', requestData);
 
         try {
-            const response = await fetch('http://112.216.161.114:8082/api/dg_retry/', {
+            const response = await fetch('http://192.168.100.111:8082/api/dg_retry/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

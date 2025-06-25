@@ -2189,6 +2189,10 @@ function toggle_on_legend(element) {
 *   .
 */   
     
+setInterval(() => {
+    SoftSensor.refresh_softsensor_graph();
+}, 5000);
+
 // >>> 240105 hjkim =======================소프트 센서 / BOP 진단결과 ==========================
 var SoftSensor = {
     // >>> 240226 hjkim - Redirect to stack.html
@@ -2277,6 +2281,41 @@ var SoftSensor = {
             });
             // <<< 240625 hjkim - add graph marking
         }
+        setInterval(get_event_data, 3000);
+    },
+
+    refresh_softsensor_graph: () => {
+        const year = parseInt(g_el.yearly.value);
+        const month = parseInt(g_el.monthly.value);
+        const day = parseInt(g_el.daily.value);
+        const stack = STACK_NAME();
+
+        fetch(window.g_event_url(year, month, day, stack))
+            .then(d => d.text())
+            .then(data => {
+                if (data.startsWith("0,") || data.startsWith("1,")) {
+                    let data1 = window.data_classify(data, 1);
+                    if (data1.length !== 0) {
+                        data1 = "sTime,eTime,Type,Amp,Memo\n" + data1;
+                        data1 = TimeSeriesPlot.DataPreprocessing.parse_xsv(data1, ",");
+                        const _stime = data1[0].sTime;
+                        const _etime = data1[data1.length - 1].eTime;
+                        const _html = data1.reduce((acc, d) => acc + SoftSensor.run_sth_for_stack2(d, _etime - _stime, _stime), "");
+                        SoftSensor.done_sth_for_stack(_html);
+                    }
+
+                    data = window.data_classify(data, 0);
+                    data = "sTime,eTime,Type,Amp,Memo\n" + data;
+                }
+                return data;
+            })
+            .then(txt => TimeSeriesPlot.DataPreprocessing.parse_xsv(txt, ","))
+            .then(event_json => {
+                const _opt = TimeSeriesPlot.init_mark_opt(g_graph_soft.getOptions(), g_graph_soft.getData(), event_json);
+                g_graph_soft.setData(g_graph_soft.getData());
+                g_graph_soft.setupGrid();
+                g_graph_soft.draw();
+            });
     },
     // <<< 240117 hjkim - SW센서 그래프
     
@@ -4385,7 +4424,7 @@ if(is_title("AI 학습")) {
                 let _path = `${STACK_NAME()}/BOP/MODEL/${MODEL_NAME()}/AIParam_v2.json`;
                 var R = confirm(`${STACK_NAME()}의 ${MODEL_NAME()}을 변경하시겠습니까?`);
                 if(R) {
-                    fetch(`http://112.216.161.114:8082/api/ai_config/`, {
+                    fetch(`http://192.168.100.111:8082/api/ai_config/`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

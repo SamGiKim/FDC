@@ -327,7 +327,7 @@ async function sendVerificationData() {
     console.log(`전송할 검증 데이터:`, JSON.stringify(verificationData, null, 2));
 
     try {
-        const response = await fetch('http://112.216.161.114:8082/api/ai_verification/', {
+        const response = await fetch('http://192.168.100.111:8082/api/ai_verification/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

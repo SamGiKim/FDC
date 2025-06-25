@@ -510,7 +510,7 @@ export class StartButtonHandler {
     if (data.cmd === 'calibration') {
       data.cmd = 'cal';  
     }
-    fetch('http://112.216.161.114:8082/api/set_cmd/', {
+    fetch('http://192.168.100.111:8082/api/set_cmd/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -3504,7 +3504,7 @@ function handleFileUpload(e) {
    }
  
    // API 호출
-   fetch('http://112.216.161.114:8082/eis/', {
+   fetch('http://192.168.100.111:8082/eis/', {
      method: 'POST',
      body: apiFormData
    })
