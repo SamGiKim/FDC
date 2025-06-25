@@ -3483,52 +3483,52 @@ function handleFileUpload(e) {
   const now = new Date();
   const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
-   // FormData 객체 새로 구성
-   const apiFormData = new FormData();
-   apiFormData.append('powerplant_id', powerplant_id);
-   apiFormData.append('group_id', group_id);
-   apiFormData.append('fuelcell_id', fuelcell_id);
-   apiFormData.append('SIN', formData.get('measurement_type') === 'SIN' ? '1' : '0');
-   apiFormData.append('VT', formData.get('voltage_type').replace('V', ''));
-   apiFormData.append('KW', formData.get('power_type').replace('KW', ''));
-   apiFormData.append('FROM', formData.get('FROM'));
-   apiFormData.append('TO', formData.get('TO'));
-   apiFormData.append('MERR', formData.get('MERR'));
-   apiFormData.append('BIGO', formData.get('BIGO'));
-   apiFormData.append('E_DATE', formattedDate);
-   
-   // 파일 추가
-   const fileInput = document.querySelector('#upfile');
-   if (fileInput.files[0]) {
-     apiFormData.append('upfile', fileInput.files[0]);
-   }
+  // FormData 객체 새로 구성
+  const apiFormData = new FormData();
+  apiFormData.append('powerplant_id', powerplant_id);
+  apiFormData.append('group_id', group_id);
+  apiFormData.append('fuelcell_id', fuelcell_id);
+  apiFormData.append('SIN', formData.get('measurement_type') === 'SIN' ? '1' : '0');
+  apiFormData.append('VT', formData.get('voltage_type').replace('V', ''));
+  apiFormData.append('KW', formData.get('power_type').replace('KW', ''));
+  apiFormData.append('FROM', formData.get('FROM'));
+  apiFormData.append('TO', formData.get('TO'));
+  apiFormData.append('MERR', formData.get('MERR'));
+  apiFormData.append('BIGO', formData.get('BIGO'));
+  apiFormData.append('E_DATE', formattedDate);
+  
+  // 파일 추가
+  const fileInput = document.querySelector('#upfile');
+  if (fileInput.files[0]) {
+    apiFormData.append('upfile', fileInput.files[0]);
+  }
  
-   // API 호출
-   fetch('http://192.168.100.111:8082/eis/', {
-     method: 'POST',
-     body: apiFormData
-   })
-   .then(response => {
-     if (!response.ok) {
-       throw new Error(`HTTP error! status: ${response.status}`);
-     }
-     return response.text();
-   })
-   .then(text => {
-     console.log('Server response:', text);
-     if (text.includes("upload finish")) {
-       alert('업로드가 완료되었습니다.');
-       closeModal('data-upload-modal');
-       searchWithData({});
-     } else {
-       alert('업로드 실패: ' + text);
-     }
-   })
-   .catch(error => {
-     console.error('Error:', error);
-     alert('업로드 중 오류가 발생했습니다: ' + error.message);
-   });
- }
+  // API 호출
+  fetch('http://192.168.100.111:8082/eis/', {
+    method: 'POST',
+    body: apiFormData
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.text();
+  })
+  .then(text => {
+    console.log('Server response:', text);
+    if (text.includes("upload finish")) {
+      alert('업로드가 완료되었습니다.');
+      closeModal('data-upload-modal');
+      searchWithData({});
+    } else {
+      alert('업로드 실패: ' + text);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('업로드 중 오류가 발생했습니다: ' + error.message);
+  });
+}
 
 // .dat파일 파싱
 function parseDatFile(txt) {
