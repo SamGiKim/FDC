@@ -71,11 +71,16 @@ const BopSensorLabeling = {
     }
 
     if (elements.searchButton) {
-        elements.searchButton.addEventListener('click', () => {
-            this.pagination.currentPage = 1;
-            this.fetchSensorLabelingData({isSearch: true});
-        });
-    }
+      elements.searchButton.addEventListener('click', () => {
+          const errorCode = document.getElementById('bop-error-codes-search').value;
+          if (!errorCode) {
+              alert('에러 코드를 선택해주세요.');
+              return;
+          }
+          this.pagination.currentPage = 1;
+          this.fetchSensorLabelingData({ isSearch: true, err_code: errorCode });
+      });
+  }
 
     if (elements.resetButton) {
         elements.resetButton.addEventListener('click', () => {
@@ -84,6 +89,7 @@ const BopSensorLabeling = {
             this.fetchSensorLabelingData();
         });
     }
+    this.lastSearchParams = {};
 },
   // 이벤트 리스터 초기화 함수 끝
   
@@ -235,14 +241,14 @@ const BopSensorLabeling = {
           link.addEventListener('click', (e) => {
               e.preventDefault();
               const pageNum = parseInt(e.target.dataset.page);
-              
-              // 유효한 페이지 번호인지 확인
+      
               if (!isNaN(pageNum) && pageNum > 0 && pageNum <= totalPages) {
                   this.pagination.currentPage = pageNum;
-                  this.fetchSensorLabelingData();
+                  this.fetchSensorLabelingData(this.lastSearchParams || {});
               }
           });
       });
+    
   
       // 디버깅용 로그
       console.log('페이지네이션 업데이트:', {
@@ -257,34 +263,39 @@ const BopSensorLabeling = {
   
    
     // 페이지네이션 이벤트 리스너
-    initPaginationEventListners: function(){
+    initPaginationEventListners: function() {
       const paginationElement = document.getElementById('bop-labeling-data-pagination');
-      if(!paginationElement) return;
+      if (!paginationElement) return;
   
-      this.pagination.addEventListener('click', (e) => {
-        e.preventDefault();
-        const pageLink = e.target.closest('.page-link');
-        if(!pageLink) return;
+      paginationElement.addEventListener('click', (e) => {
+          e.preventDefault();
+          const pageLink = e.target.closest('.page-link');
+          if (!pageLink) return;
   
-        const page = pageLink.dataset.page;
-        if(page ==='prev'){
-          this.pagination.currentPage = Math.max(1, this.pagination.currentPage -1);
-        }else if(page==='next'){
-          this.pagination.currentPage = Math.min(this.pagination.totalPages, this.pagination.currentPage+1);
-        }else{
-          this.pagination.currentPage = parseInt(page);
-        }
+          const page = pageLink.dataset.page;
+          if (page === 'prev') {
+              this.pagination.currentPage = Math.max(1, this.pagination.currentPage - 1);
+          } else if (page === 'next') {
+              this.pagination.currentPage = Math.min(this.pagination.totalPages, this.pagination.currentPage + 1);
+          } else {
+              this.pagination.currentPage = parseInt(page);
+          }
   
-        this.fetchSensorLabelingData();
-      })
-    },
+          // 마지막 검색 조건 유지해서 다시 요청
+          this.fetchSensorLabelingData(this.lastSearchParams || {});
+      });
+  },
+  
 
     
 
   // 데이터 조회 및 검색(필터) 기능 통합 함수
   fetchSensorLabelingData: async function(searchParams = {}) {
+    // 마지막 검색 조건 저장
+    this.lastSearchParams = searchParams;
+
     const { powerplant_id, fuelcell_id } = await getCurrentConfig();
-    
+
     let params = {
         powerplant_id,
         fuelcell_id,
@@ -292,7 +303,7 @@ const BopSensorLabeling = {
         itemsPerPage: this.pagination.itemsPerPage
     };
 
-    // 검색 버튼을 통한 요청일 경우에만 에러 코드 체크
+    // 검색 조건이 있을 경우 적용
     if (searchParams.isSearch) {
         const errorCode = document.getElementById('bop-error-codes-search').value;
         if (!errorCode) {
@@ -302,7 +313,6 @@ const BopSensorLabeling = {
         params.err_code = errorCode;
     }
 
-    // 디버깅을 위한 로그
     console.log('요청 파라미터:', params);
 
     fetch('js/bop/get_sensor_labeling_data.php', {
@@ -313,29 +323,26 @@ const BopSensorLabeling = {
         body: JSON.stringify(params)
     })
     .then(response => {
-        // 응답 상태 확인
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
-     // fetchSensorLabelingData 함수 내에서 성공 시 처리 부분 수정
-  .then(data => {
-    console.log('서버 응답:', data);
-    
-    if (data.success) {
-        this.pagination.totalItems = data.total;
-        this.pagination.currentPage = data.currentPage;
-        this.pagination.itemsPerPage = data.itemsPerPage;
-        
-        this.displaySensorLabelingData(data.data);
-        this.updatePagination(); // 페이지네이션 UI 업데이트
-    } else {
-        throw new Error(data.message || '서버에서 오류가 발생했습니다.');
-    }
-})
+    .then(data => {
+        console.log('서버 응답:', data);
+
+        if (data.success) {
+            this.pagination.totalItems = data.total;
+            this.pagination.currentPage = data.currentPage;
+            this.pagination.itemsPerPage = data.itemsPerPage;
+
+            this.displaySensorLabelingData(data.data);
+            this.updatePagination(); // 페이지네이션 UI 업데이트
+        } else {
+            throw new Error(data.message || '서버에서 오류가 발생했습니다.');
+        }
+    })
     .catch(error => {
-        // console.error('상세 에러 정보:', error);
         console.warn(`데이터 조회 중 오류가 발생했습니다: ${error.message}`);
     });
 },

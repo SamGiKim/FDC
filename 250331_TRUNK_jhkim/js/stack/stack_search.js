@@ -1892,13 +1892,8 @@ async function pulseDateCellClick(dateCell, type, state) {
             const savedStr = sessionStorage.getItem('selectedFullpaths');
             const saved = savedStr ? JSON.parse(savedStr) : [];
 
-            // 합치기 및 정렬
+            // 합치기
             const mergedFullpaths = [...new Set([...saved, ...fullpaths])];
-            mergedFullpaths.sort((a, b) => {
-              const extract = str => str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/)?.[1] || "";
-              return new Date(extract(a).replace(/-/g, ':').replace(':', '-', 2)) - 
-                     new Date(extract(b).replace(/-/g, ':').replace(':', '-', 2));
-            });
             const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
             graphElement.fullpaths = mergedFullpaths;
             sessionStorage.setItem('selectedFullpaths', JSON.stringify(mergedFullpaths));
