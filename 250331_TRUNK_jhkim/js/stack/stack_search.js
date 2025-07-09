@@ -1888,12 +1888,17 @@ async function pulseDateCellClick(dateCell, type, state) {
             }
             selectedItems = [];
           } else if (viewMode === "timeseries") {
-            // 기존 저장 불러오기
             const savedStr = sessionStorage.getItem('selectedFullpaths');
             const saved = savedStr ? JSON.parse(savedStr) : [];
-
-            // 합치기
+            // 합치기 및 날짜 기준 정렬
             const mergedFullpaths = [...new Set([...saved, ...fullpaths])];
+            const toDate = (str) => {
+              const match = str.match(/d(\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})/);
+              if (!match) return new Date(0); // 유효하지 않은 경우 가장 오래된 시간으로 처리
+              const [y, m, d, h, min, s] = match[1].split('-');
+              return new Date(`${y}-${m}-${d}T${h}:${min}:${s}`);
+            };
+            mergedFullpaths.sort((a, b) => toDate(a) - toDate(b)); // 최신 데이터가 오른쪽
             const disabledLabels = graphElement.uplot ? getDisabledLabels(graphElement.uplot) : new Set();
             graphElement.fullpaths = mergedFullpaths;
             sessionStorage.setItem('selectedFullpaths', JSON.stringify(mergedFullpaths));
@@ -1903,7 +1908,6 @@ async function pulseDateCellClick(dateCell, type, state) {
             requestAnimationFrame(() => {
               applyDisabledLabels(graphElement.uplot, disabledLabels);
             });
-
           } else if (viewMode === "overlay") {
             const savedStr = sessionStorage.getItem('selectedFullpaths');
             const saved = savedStr ? JSON.parse(savedStr) : [];
@@ -1918,7 +1922,6 @@ async function pulseDateCellClick(dateCell, type, state) {
             requestAnimationFrame(() => {
               applyDisabledLabels(graphElement.uplot, disabledLabels);
             });
-
             const uplot = graphElement.uplot;
             if (uplot && uplot.root) {
               const overlay = uplot.root.querySelector(".u-over");

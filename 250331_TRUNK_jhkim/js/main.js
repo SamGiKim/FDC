@@ -80,6 +80,7 @@ var g_graph_inst, g_graph_soft;
 const DATA_LEGEND_CHECKED = "data_legend_checked";
 const DATA_LEGEND_LABEL = "data_legend_label";
 const STACK_NAME_SELECTOR = "#fuelcell-select";
+let savedZoomRange = null;
 
 // >>> 240306 hjkim - calendex refactoring
 var g_yearly_list = [2023, 2024];
@@ -2189,9 +2190,9 @@ function toggle_on_legend(element) {
 *   .
 */   
     
-setInterval(() => {
-    SoftSensor.refresh_softsensor_graph();
-}, 5000);
+// setInterval(() => {
+//     SoftSensor.refresh_softsensor_graph();
+// }, 5000);
 
 // >>> 240105 hjkim =======================소프트 센서 / BOP 진단결과 ==========================
 var SoftSensor = {
@@ -2281,7 +2282,7 @@ var SoftSensor = {
             });
             // <<< 240625 hjkim - add graph marking
         }
-        setInterval(get_event_data, 3000);
+        // setInterval(get_event_data, 3000);
     },
 
     refresh_softsensor_graph: () => {
@@ -2851,11 +2852,11 @@ function adaptor_make_legend() {
     }
     function legend_hard_select_all() {
         hard_legend_select_all(); 
-        all_graph("on", g_graph_hard); 
+        all_graph("on", g_graph_inst); 
     }
     function legend_hard_deselect_all() {
         hard_legend_deselect_all();
-        all_graph("off", g_graph_hard); 
+        all_graph("off", g_graph_inst); 
     }
     check_all2.addEventListener("click", legend_soft_select_all);
     except_all2.addEventListener("click", legend_soft_deselect_all);
@@ -3060,25 +3061,34 @@ function __group_chk_valid(el) {
 }
 
 function all_graph(onoff = "on", _graph_type = g_graph_inst) {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData();
     if(onoff == "on") d.map(d => {d.lines.show = true;} );
     else d.map(d => {d.lines.show = false;} );
+    _graph_type.setupGrid();
     _graph_type.draw();
 }
 
 function toggle_x_system_graph(num = 0, _label_system = hard_system, _graph_type = g_graph_inst) {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l => __line_show(d, l)); });
     _graph_type.draw();
 }
 
 function set_x_system_graph(num = 0, _label_system = hard_system, _graph_type = g_graph_inst, _type = true) {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l => __set_line_show(d, l, _type)); });
     _graph_type.draw();
 }
 
 function toggle_nth_graph(num = 0, _label = hard_label, _graph_type = g_graph_inst) {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label[num];
     d.map(d => {
         __line_show(d, l);
@@ -3087,18 +3097,24 @@ function toggle_nth_graph(num = 0, _label = hard_label, _graph_type = g_graph_in
 }
 
 function toggle_x_system_bold(num  = 0, _label_system = hard_system, _graph_type = g_graph_inst) {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l =>  __line_bold(d, l)); });
     _graph_type.draw();
 }
 
 function set_x_system_bold(num  = 0, _label_system = hard_system, _graph_type = g_graph_inst, _type = "bold") {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l => __set_line_bold(d, l, _type)); });
     _graph_type.draw();
 }
 
 function toggle_nth_bold(num = 0, _label = hard_label, _graph_type = g_graph_inst) {
+    // 줌 상태 복원
+    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label[num];
     d.map(d => __line_bold(d, l));
     _graph_type.draw();
@@ -3989,48 +4005,95 @@ function apply_calendex_state() {
 
 // <<< 240403 hjkim - FDC 캘린덱스 쿠키로 저장
 
-// >>> 240703 hjkim - y축 줌아웃
+// 줌 상태 저장
+function saveZoomState(graphType) {
+    if (graphType === "BOP진단") {
+        // g_graph_soft의 y축 상태 저장
+        const softGraphZoomState = {
+            yMin: g_graph_soft.getOptions().yaxes[0].min,
+            yMax: g_graph_soft.getOptions().yaxes[0].max
+        };
+        sessionStorage.setItem("softGraphZoomState", JSON.stringify(softGraphZoomState));
+    } else if (graphType === "대시보드") {
+        // g_graph_inst의 y축 상태 저장
+        const instGraphZoomState = {
+            yMin: g_graph_inst.getYAxes()[0].options.min,
+            yMax: g_graph_inst.getYAxes()[0].options.max
+        };
+        sessionStorage.setItem("instGraphZoomState", JSON.stringify(instGraphZoomState));
+    }
+}
+
+// 줌 상태 복원
+function restoreZoomState(graphType) {
+    if (graphType === "BOP진단") {
+        const savedState = sessionStorage.getItem("softGraphZoomState");
+        if (savedState) {
+            const zoomState = JSON.parse(savedState);
+            const opt = g_graph_soft.getOptions();
+            opt.yaxes[0].min = zoomState.yMin;
+            opt.yaxes[0].max = zoomState.yMax;
+            $.plot(document.querySelector(".sw_sensor_graph"), g_graph_soft.getData(), opt);
+        }
+    } else if (graphType === "대시보드") {
+        const savedState = sessionStorage.getItem("instGraphZoomState");
+        if (savedState) {
+            const zoomState = JSON.parse(savedState);
+            g_graph_inst.getYAxes().map(function (axis) {
+                axis.options.min = zoomState.yMin;
+                axis.options.max = zoomState.yMax;
+            });
+            g_graph_inst.setupGrid();
+            g_graph_inst.draw();
+        }
+    }
+}
+
+// 줌 아웃
 function zoom_out() {
-    console.log("zoom_out():L3611 / TITLE : ", TITLE);
-    if(is_title("대시보드")) {
-        g_graph_inst.getXAxes().map(function (axis, idx) {
+    if (is_title("대시보드")) {
+        g_graph_inst.getYAxes().map(function (axis) {
             var opts = axis.options;
-            delete opts.min;
-            delete opts.max;
+            opts.max *= 2;  // y축 아웃
+            opts.min *= 2;  // y축 아웃
         });
+        saveZoomState("대시보드");  // 줌 상태 저장
         g_graph_inst.setupGrid();
         g_graph_inst.draw();
         g_graph_inst.clearSelection();
     }
-    if(is_title("BOP진단")) {
+    if (is_title("BOP진단")) {
         var opt = g_graph_soft.getOptions(); 
-        opt.yaxes[0].max*=2; 
-        opt.yaxes[0].min*=2; 
+        opt.yaxes[0].max *= 2;  // y축 아웃
+        opt.yaxes[0].min *= 2;  // y축 아웃
+        saveZoomState("BOP진단");  // 줌 상태 저장
         $.plot(document.querySelector(".sw_sensor_graph"), g_graph_soft.getData(), opt); 
     }
-} 
+}
+
+// 줌 인
 function zoom_in() { 
-    console.log("zoom_in():L3618 / TITLE : ", TITLE);
-    if(is_title("대시보드")) {
-        var sel = g_graph_inst.getSelection();
-        if(sel == null) alert("그래프 범위를 선택하세요.");
-        g_graph_inst.getXAxes().map(function (axis, idx) {
+    if (is_title("대시보드")) {
+        const sel = g_graph_inst.getSelection();
+        if (sel == null) alert("그래프 범위를 선택하세요.");
+        g_graph_inst.getYAxes().map(function (axis) {
             var opts = axis.options;
-            opts.min = sel.xaxis.from;
-            opts.max = sel.xaxis.to;
+            opts.min /= 2;  // y축 인
+            opts.max /= 2;    // y축 인
         });
+        saveZoomState("대시보드");  // 줌 상태 저장
         g_graph_inst.setupGrid();
         g_graph_inst.draw();
         g_graph_inst.clearSelection();
     }
-    if(is_title("BOP진단")) {
-        var opt = g_graph_soft.getOptions(); 
-        opt.yaxes[0].max/=2; 
-        opt.yaxes[0].min/=2; 
+    if (is_title("BOP진단")) {
+        var opt = g_graph_soft.getOptions();
+        opt.yaxes[0].min /= 2;  // y축 인
+        opt.yaxes[0].max /= 2;    // y축 인
+        saveZoomState("BOP진단");  // 줌 상태 저장
         $.plot(document.querySelector(".sw_sensor_graph"), g_graph_soft.getData(), opt); 
     }
-} 
-// <<< 240703 hjkim - y축 줌아웃
+}
 
 function init_dashboard_onload() {
     worker.postMessage({ msg: "INIT_CHANNEL1", url: BASE_DATA_URI()}, [channel1.port1]);
