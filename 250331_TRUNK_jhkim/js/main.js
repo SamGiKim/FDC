@@ -2101,7 +2101,7 @@ function get_sensor(s, c) {
         // 5,0~12: 열관리계
         //["Voltage", "Current", "T_w_h_out", "T_w_h_in", "T_DI_h_out", "T_DI_S_out", "T_DI_S_in", "T_w_t_out", //에기연 열 변수
         //"MFM3", "MFM2", "DI_Pump(%)", "Water_Pump(%)" , "DI" , "Water"], //에기연 열 변수
-        ["T_w_h_out", "T_DI_S_in", "T_A_S_out", "DI_Pump(%)", "MFM2(DI", "DI(%)", "Water"],
+        ["T_w_h_out", "T_DI_S_in", "T_A_S_out", "DI_Pump(%)", "MFM2(DI)", "DI(%)", "Water"],
         // 6,0
         //["Voltage", "Currnt"],
         ["Voltage", "Current", "P_A_S_in", "P_A_m_out", "Air", "T_A_S_out", "T_A_S_in", "T_A_vent", "T_w_h_out", "T_DI_S_in", "DI_Pump(%)", "MFM2(DI", "DI(%)", "Water", "P_A_S_in"],
@@ -2189,10 +2189,6 @@ function toggle_on_legend(element) {
 *       JSON으로 변환한 것이다.
 *   .
 */   
-    
-// setInterval(() => {
-//     SoftSensor.refresh_softsensor_graph();
-// }, 5000);
 
 // >>> 240105 hjkim =======================소프트 센서 / BOP 진단결과 ==========================
 var SoftSensor = {
@@ -2781,17 +2777,13 @@ var SoftSensor = {
 // >>> 240122 hjkim - 범례 초기화 작업
 const hard_system = [
     // >>> 240307 hjkim - 주요 변수 추가
-    //["P_A_m_out", "P_A_B_in", "Air", "MFM3"],
-    ["T_A_B_in", "P_A_B_in", "MFM3", "Air", "P_A_m_out", "T_A_m_out"],
-    //["T_A_S_in", "T_A_S_out", "T_A_vent"],
-    ["T_A_S_in", "T_A_S_out", "T_A_vent", "P_A_S_in", "P_A_S_out"],
+    ["T_A_B_in(116)", "P_A_B_in(105)", "MFM3(Air)", "Air(%)", "P_A_m_out(102)", "T_A_m_out(110)"],
+    ["T_A_S_in(113)", "T_A_S_out(109)", "T_A_vent(115)", "P_A_S_in(101)", "P_A_S_out(104)"],
     // <<< 240307 hjkim - 주요 변수 추가
     // >>> 240306 hjkim - 주요 변수 추가
-    //["DI", "Water", "T_w_h_in"],
-    //["DI", "Water", "T_w_h_in", "T_w_h_out"],
-    ["T_w_t_in", "T_w_t_out", "P_w_p_in", "P_w_p_out", "MFM1", "Water", "T_w_h_out", "T_w_h_in", "P_w_h_out", "T_DI_h_out",
-    "T_DI_S_out", "DI_Conductivity", "P_DI_p_out", "DI", "P_DI_p_out", "MFM2", "T_DI_S_in"],
-    ["T_F_S_in", "T_F_S_out", "P_F_S_in", "MFC1", "MFC2", "Current", "Voltage"],
+    ["T_w_t_in(101)", "T_w_t_ou(102)", "P_w_p_in(1)", "P_w_p_out(2)", "MFM1(Water)", "Water(%)", "T_w_h_out(103)", "T_w_h_in(104)", "P_w_h_out(6)", "T_DI_h_out(107)",
+    "T_DI_S_out(108)", "DI_Conductivity", "P_DI_p_out(4)", "DI(%)", "P_DI_p_out(5)", "MFM2(DI)", "T_DI_S_in(114)"],
+    ["T_F_S_in(112)", "T_F_S_out(111)", "P_F_S_in(103)", "MFC1(H2)", "MFC2(N2)", "Current", "Voltage"],
     // <<< 240306 hjkim - 주요 변수 추가
 ];
 // >>> 240910 hjkim - 범례 토글 버그 수정
@@ -3040,8 +3032,8 @@ function adaptor_make_legend() {
 }  
 
 function __style_bold(el) { return el.style.fontWeight = (el.style.fontWeight == "bold") ? "normal" : "bold"; }
-function __line_show(d, l) { if(d.label.indexOf(l) == 0) { d.lines.show = !d.lines.show; } }
-function __set_line_show(d, l, t) { if(d.label.indexOf(l) == 0) { d.lines.show = t; } }
+function __line_show(d, l) { if(d.label === l) { d.lines.show = !d.lines.show; } }
+function __set_line_show(d, l, t) { if(d.label === l) { d.lines.show = t; } }
 function __line_bold(d, l) { 
     if(d.label.indexOf(l) != 0) return;
     if (d.lines.lineWidth < 2) { d.lines.lineWidth *= 3; } else { d.lines.lineWidth = 1.5; }
@@ -3071,24 +3063,18 @@ function all_graph(onoff = "on", _graph_type = g_graph_inst) {
 }
 
 function toggle_x_system_graph(num = 0, _label_system = hard_system, _graph_type = g_graph_inst) {
-    // 줌 상태 복원
-    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l => __line_show(d, l)); });
     _graph_type.draw();
 }
 
 function set_x_system_graph(num = 0, _label_system = hard_system, _graph_type = g_graph_inst, _type = true) {
-    // 줌 상태 복원
-    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l => __set_line_show(d, l, _type)); });
     _graph_type.draw();
 }
 
 function toggle_nth_graph(num = 0, _label = hard_label, _graph_type = g_graph_inst) {
-    // 줌 상태 복원
-    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label[num];
     d.map(d => {
         __line_show(d, l);
@@ -3097,24 +3083,18 @@ function toggle_nth_graph(num = 0, _label = hard_label, _graph_type = g_graph_in
 }
 
 function toggle_x_system_bold(num  = 0, _label_system = hard_system, _graph_type = g_graph_inst) {
-    // 줌 상태 복원
-    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l =>  __line_bold(d, l)); });
     _graph_type.draw();
 }
 
 function set_x_system_bold(num  = 0, _label_system = hard_system, _graph_type = g_graph_inst, _type = "bold") {
-    // 줌 상태 복원
-    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label_system[num];
     d.map(d => { l.map(l => __set_line_bold(d, l, _type)); });
     _graph_type.draw();
 }
 
 function toggle_nth_bold(num = 0, _label = hard_label, _graph_type = g_graph_inst) {
-    // 줌 상태 복원
-    restoreZoomState("BOP진단");
     const d = _graph_type.getData(), l = _label[num];
     d.map(d => __line_bold(d, l));
     _graph_type.draw();
