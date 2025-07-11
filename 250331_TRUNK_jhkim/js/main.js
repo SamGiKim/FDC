@@ -698,34 +698,6 @@ var TimeSeriesPlot = {};
         get_data( window.g_data_url, window.g_event_url(_ymd[0], _ymd[1], _ymd[2], STACK_NAME()) );
         // <<< 241010 hjkim - 이벤트 경로 수정
     }
-    function zoom_in() {
-        console.warn("Warning: zoom_in():L688 is deprecated.", TITLE);
-        var sel = g_graph_inst.getSelection();
-        // $.each(plot.getXAxes(), function(_, axis) {
-        //     var opts = axis.options;
-        //     opts.min = ranges.xaxis.from;
-        //     opts.max = ranges.xaxis.to;
-        // });
-        g_graph_inst.getXAxes().map(function (axis, idx) {
-            var opts = axis.options;
-            opts.min = sel.xaxis.from;
-            opts.max = sel.xaxis.to;
-        });
-        g_graph_inst.setupGrid();
-        g_graph_inst.draw();
-        g_graph_inst.clearSelection();
-    }
-    function zoom_out() {
-        console.warn("Warning: zoom_out():L705 is deprecated.", TITLE);
-        g_graph_inst.getXAxes().map(function (axis, idx) {
-            var opts = axis.options;
-            delete opts.min;
-            delete opts.max;
-        });
-        g_graph_inst.setupGrid();
-        g_graph_inst.draw();
-        g_graph_inst.clearSelection();
-    }
     /* -------------------------------------------------------------------------- */
     /*                                  FUNCTION SET                              */
     /* -------------------------------------------------------------------------- */
@@ -1336,7 +1308,7 @@ var TimeSeriesPlot = {};
                 axisLabel: "℃", labelWidth: 30, autoscalMargin: 0.02
             },
             yaxes: [{
-                position: "left", axisLabel: "℃", show: true, min: -5, max: 100,
+                position: "left", axisLabel: "℃", show: true, min: -50, max: 150,
                 tickFormatter: function (v        , axis        ) { return (v * 1).toFixed(axis.tickDecimals) + "℃"; }
             }, {
                 position: "right", axisLabel: "kPa", min: -10, max: 120,
@@ -4001,6 +3973,12 @@ function saveZoomState(graphType) {
             yMax: g_graph_inst.getYAxes()[0].options.max
         };
         sessionStorage.setItem("instGraphZoomState", JSON.stringify(instGraphZoomState));
+    } else if (graphType === 'HW 센서') {
+        const hwGraphZoomState = {
+            yMin: g_graph_inst.getOptions().yaxes[0].min,
+            yMax: g_graph_inst.getOptions().yaxes[0].max
+        };
+        sessionStorage.setItem("hwGraphZoomState", JSON.stringify(hwGraphZoomState));
     }
 }
 
@@ -4026,10 +4004,20 @@ function restoreZoomState(graphType) {
             g_graph_inst.setupGrid();
             g_graph_inst.draw();
         }
+    } else if (graphType === 'HW 센서') {
+        const savedState = sessionStorage.getItem("hwGraphZoomState");
+        if (savedState) {
+            const zoomState = JSON.parse(savedState);
+            const opt = g_graph_soft.getOptions();
+            opt.yaxes[0].min = zoomState.yMin;
+            opt.yaxes[0].max = zoomState.yMax;
+            g_graph_inst.setupGrid();
+            g_graph_inst.draw();
+        }
     }
 }
 
-// 줌 아웃
+// 소프트 센서, 대시보드 시스템 구조도 줌 아웃
 function zoom_out() {
     if (is_title("대시보드")) {
         g_graph_inst.getYAxes().map(function (axis) {
@@ -4051,8 +4039,8 @@ function zoom_out() {
     }
 }
 
-// 줌 인
-function zoom_in() { 
+// 소프트 센서, 대시보드 시스템 구조도 줌 인
+function zoom_in() {
     if (is_title("대시보드")) {
         const sel = g_graph_inst.getSelection();
         if (sel == null) alert("그래프 범위를 선택하세요.");
@@ -4072,6 +4060,30 @@ function zoom_in() {
         opt.yaxes[0].max /= 2;    // y축 인
         saveZoomState("BOP진단");  // 줌 상태 저장
         $.plot(document.querySelector(".sw_sensor_graph"), g_graph_soft.getData(), opt); 
+    }
+}
+
+// HW 센서 줌 아웃
+function hw_sensor_zoom_out() {
+    if (is_title("BOP진단")) {
+        var opt = g_graph_inst.getOptions();
+        opt.yaxes[0].min *= 2;
+        opt.yaxes[0].max *= 2;
+        saveZoomState("HW 센서");  // 줌 상태 저장
+        g_graph_inst.setupGrid();
+        g_graph_inst.draw();
+    }
+}
+
+// HW 센서 줌 인
+function hw_sensor_zoom_in() {
+    if (is_title("BOP진단")) {
+        var opt = g_graph_inst.getOptions();
+        opt.yaxes[0].min /= 2;
+        opt.yaxes[0].max /= 2;
+        saveZoomState("HW 센서");  // 줌 상태 저장
+        g_graph_inst.setupGrid();
+        g_graph_inst.draw();
     }
 }
 
